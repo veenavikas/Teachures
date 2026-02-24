@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Courses | Teachures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .page-hero {
+            padding: 5rem 0 3rem;
+            text-align: center;
+        }
+
+        .page-hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            letter-spacing: 2px;
+        }
+
+        .search-bar {
+            max-width: 600px;
+            margin: 2rem auto 0;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.9rem 1.25rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .search-bar input:focus {
+            border-color: #F5C518;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+
+        .filter-chip {
+            padding: 0.5rem 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: none;
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            background: #F5C518;
+            color: #000;
+            border-color: #F5C518;
+            font-weight: 600;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem 0 5rem;
+        }
+
+        .course-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(245, 197, 24, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .course-thumb {
+            height: 180px;
+            background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-thumb svg {
+            width: 48px;
+            height: 48px;
+            color: rgba(245, 197, 24, 0.2);
+        }
+
+        .course-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .badge-free {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-paid {
+            background: rgba(245, 197, 24, 0.1);
+            color: #F5C518;
+            border: 1px solid rgba(245, 197, 24, 0.2);
+        }
+
+        .course-body {
+            padding: 1.5rem;
+        }
+
+        .course-cat {
+            font-size: 0.75rem;
+            color: #F5C518;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .course-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .course-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #F5C518;
+        }
+
+        .btn-enroll {
+            padding: 0.5rem 1.25rem;
+            background: #F5C518;
+            color: #000;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-enroll:hover {
+            background: #D4AA00;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <main class="container">
+            <div class="page-hero">
+                <p
+                    style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                    Explore</p>
+                <h1>Find Your <span
+                        style="background:linear-gradient(135deg,#F5C518,#FFD700); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Next
+                        Skill</span></h1>
+                <p style="color:rgba(255,255,255,0.4); margin-top:1rem; font-size:1.1rem;">Hand-picked courses from
+                    world-class instructors.</p>
+                <div class="search-bar">
+                    <input type="text" placeholder="Search courses, topics, instructors..." id="searchInput">
+                    <button class="btn-enroll" onclick="filterCourses()">Search</button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <button class="filter-chip active" onclick="setFilter(this,'all')">All Courses</button>
+                <button class="filter-chip" onclick="setFilter(this,'development')">Development</button>
+                <button class="filter-chip" onclick="setFilter(this,'design')">Design</button>
+                <button class="filter-chip" onclick="setFilter(this,'business')">Business</button>
+                <button class="filter-chip" onclick="setFilter(this,'data')">Data Science</button>
+                <button class="filter-chip" onclick="setFilter(this,'marketing')">Marketing</button>
+            </div>
+
+            <div class="courses-grid" id="coursesGrid">
+                <% if(courses && courses.length> 0) { %>
+                    <% courses.forEach(course=> {
+                        // Calculate aggregate rating from relations
+                        let avgRating = 0;
+                        if(course.ratings && course.ratings.length > 0) {
+                        let sum = 0;
+                        course.ratings.forEach(r => sum += r.rating);
+                        avgRating = sum / course.ratings.length;
+                        }
+                        %>
+                        <div class="course-card" data-cat="<%= course.category.toLowerCase() %>">
+                            <div class="course-thumb"
+                                style="background:linear-gradient(135deg,#1e1e2e,#12121a); <% if(course.thumbnailUrl) { %>background-image: url('<%= course.thumbnailUrl %>'); background-size: cover;<% } %>">
+                                <% if(!course.thumbnailUrl) { %>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <polyline points="16 18 22 12 16 6" />
+                                        <polyline points="8 6 2 12 8 18" />
+                                    </svg>
+                                    <% } %>
+                                        <% if(course.isFree) { %>
+                                            <span class="course-badge badge-free">Free</span>
+                                            <% } else { %>
+                                                <span class="course-badge badge-paid">Premium</span>
+                                                <% } %>
+                            </div>
+                            <div class="course-body">
+                                <p class="course-cat">
+                                    <%= course.category %>
+                                </p>
+                                <h3 class="course-title">
+                                    <%= course.title %>
+                                </h3>
+                                <div class="course-meta">
+                                    <span>⭐ <%= avgRating> 0 ? avgRating.toFixed(1) : 'New' %></span>
+                                    <span>•</span><span>
+                                        <%= course.totalLessons || 0 %> lessons
+                                    </span>
+                                    <% if(course.totalDuration) { %>
+                                        <span>•</span><span>
+                                            <%= Math.round(course.totalDuration / 3600) %>h
+                                        </span>
+                                        <% } %>
+                                </div>
+                                <div class="course-footer">
+                                    <% if(course.isFree) { %>
+                                        <span class="course-price" style="color:#10B981;">Free</span>
+                                        <% } else { %>
+                                            <span class="course-price">$<%= course.price %></span>
+                                            <% } %>
+                                                <a href="/courses/<%= course.slug %>" class="btn-enroll">
+                                                    <%= course.isFree ? 'Start Free' : 'Enroll Now' %>
+                                                </a>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="empty-state" style="grid-column: 1 / -1;">
+                                    <i data-lucide="book-x"
+                                        style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                                    <h2>No courses found</h2>
+                                    <p>Check back later for new content.</p>
+                                </div>
+                                <% } %>
+            </div>
+        </main>
+
+        <%- include('../partials/footer') %>
+            <script>lucide.createIcons();</script>
+            <script>
+                function setFilter(el, cat) {
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    el.classList.add('active');
+                    document.querySelectorAll('.course-card').forEach(card => {
+                        card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'block' : 'none';
+                    });
+                }
+            </script>
+</body>
+
+</html>

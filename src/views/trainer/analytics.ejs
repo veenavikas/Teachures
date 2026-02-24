@@ -1,0 +1,318 @@
+<!-- Trainer Analytics Dashboard -->
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        bottom: -30px;
+        right: -30px;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(245, 197, 24, 0.05), transparent 70%);
+        pointer-events: none;
+    }
+
+    .metric-card:hover {
+        border-color: rgba(245, 197, 24, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .metric-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .metric-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .metric-value {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 2.2rem;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .metric-label {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.35);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+
+    .metric-change {
+        font-size: 0.78rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+
+    .metric-change.up {
+        color: #10B981;
+    }
+
+    .metric-change.down {
+        color: #EF4444;
+    }
+
+    .chart-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-card h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1.25rem;
+    }
+
+    .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        height: 120px;
+    }
+
+    .bar {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 4px 4px 0 0;
+        position: relative;
+        transition: all 0.5s ease;
+        cursor: pointer;
+    }
+
+    .bar:hover {
+        background: rgba(245, 197, 24, 0.3);
+    }
+
+    .bar-fill {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, #F5C518, rgba(245, 197, 24, 0.4));
+        border-radius: 4px 4px 0 0;
+        transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bar-label {
+        position: absolute;
+        bottom: -22px;
+        width: 100%;
+        text-align: center;
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .bar-val {
+        position: absolute;
+        top: -22px;
+        width: 100%;
+        text-align: center;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .bar:hover .bar-val {
+        opacity: 1;
+    }
+
+    .course-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .course-row:last-child {
+        border-bottom: none;
+    }
+
+    .course-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #F5C518;
+        flex-shrink: 0;
+    }
+
+    .course-name {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .course-enrolled {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.35);
+        width: 80px;
+        text-align: right;
+    }
+
+    .course-progress-bar {
+        width: 120px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .course-pct {
+        font-size: 0.82rem;
+        color: #F5C518;
+        font-weight: 700;
+        width: 40px;
+        text-align: right;
+    }
+
+    @media (max-width:900px) {
+        .analytics-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+
+<!-- Metric Cards -->
+<div class="analytics-grid">
+    <div class="metric-card">
+        <div class="metric-icon" style="background:rgba(245,197,24,0.1);">
+            <i data-lucide="users" style="color:#F5C518;"></i>
+        </div>
+        <div class="metric-value">
+            <%= analytics.totalStudents %>
+        </div>
+        <div class="metric-label">Total Students</div>
+        <div class="metric-change up">↑ 12% this month</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background:rgba(16,185,129,0.1);">
+            <i data-lucide="dollar-sign" style="color:#10B981;"></i>
+        </div>
+        <div class="metric-value">$<%= analytics.totalRevenue %>
+        </div>
+        <div class="metric-label">Total Revenue</div>
+        <div class="metric-change up">↑ 34% this month</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background:rgba(99,102,241,0.1);">
+            <i data-lucide="book-open" style="color:#6366F1;"></i>
+        </div>
+        <div class="metric-value">
+            <%= analytics.totalCourses %>
+        </div>
+        <div class="metric-label">Active Courses</div>
+        <div class="metric-change up">↑ <%= analytics.totalCourses %> published</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon" style="background:rgba(245,158,11,0.1);">
+            <i data-lucide="star" style="color:#F59E0B;"></i>
+        </div>
+        <div class="metric-value">
+            <%= analytics.avgRating.toFixed(1) %>
+        </div>
+        <div class="metric-label">Avg. Rating</div>
+        <div class="metric-change up">From <%= analytics.ratingCount %> reviews</div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1.5fr 1fr; gap:1.5rem;">
+    <!-- Revenue Chart (Mock) -->
+    <div class="chart-card">
+        <h3>📈 Revenue — Last 6 Months</h3>
+        <div style="margin-bottom:2rem;">
+            <div class="bar-chart" id="revenueChart">
+                <% const months=['Sep','Oct','Nov','Dec','Jan','Feb']; %>
+                    <% const vals=[820, 1100, 950, 1400, 1580, analytics.totalRevenue || 1250]; %>
+                        <% const maxVal=Math.max(...vals); %>
+                            <% vals.forEach(function(v, i) { %>
+                                <div class="bar" style="height:100%;">
+                                    <div class="bar-fill" style="height:<%= Math.round(v/maxVal*100) %>%;"></div>
+                                    <span class="bar-label">
+                                        <%= months[i] %>
+                                    </span>
+                                    <span class="bar-val">$<%= v %></span>
+                                </div>
+                                <% }); %>
+            </div>
+        </div>
+        <div
+            style="display:flex; justify-content:space-between; padding-top:2rem; border-top:1px solid rgba(255,255,255,0.04);">
+            <div>
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:#10B981;">$<%=
+                        vals.reduce((a,b)=>a+b,0) %></div>
+                <div
+                    style="font-size:0.75rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                    Total 6-Month Revenue</div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:#F5C518;">+28%</div>
+                <div
+                    style="font-size:0.75rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                    Growth Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Courses -->
+    <div class="chart-card">
+        <h3>🏆 Top Courses by Completion</h3>
+        <% if (analytics.courses && analytics.courses.length> 0) { %>
+            <% analytics.courses.slice(0,5).forEach(function(course) { %>
+                <% const pct=Math.round((course._count.enrollments || 0) * 0.75); %>
+                    <div class="course-row">
+                        <span class="course-dot"></span>
+                        <span class="course-name">
+                            <%= course.title.slice(0,28) %>
+                                <%= course.title.length> 28 ? '...' : '' %>
+                        </span>
+                        <div class="course-progress-bar">
+                            <div
+                                style="height:100%; width:<%= Math.min(pct,100) %>%; background:linear-gradient(90deg,#F5C518,#FFD700); border-radius:3px;">
+                            </div>
+                        </div>
+                        <span class="course-pct">
+                            <%= Math.min(pct,100) %>%
+                        </span>
+                        <span class="course-enrolled">
+                            <%= course._count.enrollments %> enrolled
+                        </span>
+                    </div>
+                    <% }); %>
+                        <% } else { %>
+                            <p
+                                style="text-align:center; color:rgba(255,255,255,0.2); padding:2rem 0; font-size:0.9rem;">
+                                No course data yet. Publish your first course.</p>
+                            <% } %>
+    </div>
+</div>

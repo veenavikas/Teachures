@@ -1,0 +1,181 @@
+<!-- Learner My Certificates Page -->
+<style>
+    .certs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .cert-card {
+        background: linear-gradient(135deg, rgba(245, 197, 24, 0.06), rgba(245, 197, 24, 0.02));
+        border: 1px solid rgba(245, 197, 24, 0.2);
+        border-radius: 16px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .cert-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 120px;
+        height: 120px;
+        background: radial-gradient(circle, rgba(245, 197, 24, 0.1), transparent 70%);
+        pointer-events: none;
+    }
+
+    .cert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(245, 197, 24, 0.1);
+    }
+
+    .cert-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(245, 197, 24, 0.15);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.25rem;
+    }
+
+    .cert-icon svg {
+        width: 28px;
+        height: 28px;
+        color: #F5C518;
+    }
+
+    .cert-course {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+    }
+
+    .cert-meta {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    .cert-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-cert-download {
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #F5C518, #D4AA00);
+        color: #000;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-cert-download:hover {
+        box-shadow: 0 6px 15px rgba(245, 197, 24, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .btn-cert-verify {
+        padding: 0.6rem 1.25rem;
+        background: rgba(255, 255, 255, 0.04);
+        color: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-cert-verify:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
+
+    .empty-certs {
+        text-align: center;
+        padding: 5rem 2rem;
+    }
+
+    .empty-certs svg {
+        width: 64px;
+        height: 64px;
+        color: rgba(255, 255, 255, 0.1);
+        margin: 0 auto 1.5rem;
+        display: block;
+    }
+
+    .empty-certs h3 {
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 1.2rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-certs p {
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+    <div>
+        <h2 style="font-size:1.5rem; font-weight:700; color:#fff; margin-bottom:0.25rem;">My Certificates</h2>
+        <p style="color:rgba(255,255,255,0.35); font-size:0.9rem;">
+            <%= certificates.length %> certificate<%= certificates.length !==1 ? 's' : '' %> earned
+        </p>
+    </div>
+</div>
+
+<% if (certificates.length===0) { %>
+    <div class="empty-certs">
+        <i data-lucide="award" style="width:64px; height:64px; color:rgba(255,255,255,0.1);"></i>
+        <h3>No Certificates Yet</h3>
+        <p>Complete a course to earn your first verified certificate.</p>
+        <a href="/courses"
+            style="display:inline-flex; align-items:center; gap:8px; padding:0.85rem 2rem; background:linear-gradient(135deg,#F5C518,#D4AA00); color:#000; border-radius:10px; font-weight:700; font-size:0.9rem; text-decoration:none;">Browse
+            Courses</a>
+    </div>
+    <% } else { %>
+        <div class="certs-grid">
+            <% certificates.forEach(function(cert) { %>
+                <div class="cert-card">
+                    <div class="cert-icon"><i data-lucide="award"></i></div>
+                    <div class="cert-course">
+                        <%= cert.course ? cert.course.title : 'Course Completed' %>
+                    </div>
+                    <div class="cert-meta">
+                        Issued <%= new Date(cert.issuedAt).toLocaleDateString('en-US', {year:'numeric', month:'long',
+                            day:'numeric'}) %>
+                            · Code: <span style="font-family:monospace; color:rgba(255,255,255,0.5);">
+                                <%= cert.verificationCode.slice(0,12) %>...
+                            </span>
+                    </div>
+                    <div class="cert-actions">
+                        <a href="/api/v1/certificates/<%= cert.id %>/download" class="btn-cert-download"
+                            target="_blank">
+                            <i data-lucide="download" style="width:15px;height:15px;"></i> Download PDF
+                        </a>
+                        <a href="/verify/<%= cert.verificationCode %>" class="btn-cert-verify" target="_blank">
+                            <i data-lucide="external-link" style="width:15px;height:15px;"></i> Verify
+                        </a>
+                    </div>
+                </div>
+                <% }); %>
+        </div>
+        <% } %>

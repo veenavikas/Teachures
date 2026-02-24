@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title + ' | Dashboard' : 'Dashboard' %>
+    </title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--color-black);
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--color-black);
+            border-right: 1px solid var(--color-gray-mid);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--color-gray-mid);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: var(--color-gray-light);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            color: var(--color-white);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .nav-item.active {
+            color: var(--color-white);
+            border-left-color: var(--color-primary);
+            background-color: rgba(245, 197, 24, 0.05);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--color-gray-mid);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--color-gray-mid);
+            background-size: cover;
+            background-position: center;
+            border: 2px solid var(--color-primary);
+        }
+
+        .user-info .name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--color-white);
+        }
+
+        .user-info .role {
+            font-size: 0.8rem;
+            color: var(--color-gray-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #111111;
+            /* Slightly lighter than black to contrast with sidebar */
+        }
+
+        .topbar {
+            height: 70px;
+            border-bottom: 1px solid var(--color-gray-mid);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background-color: var(--color-black);
+        }
+
+        .dashboard-body {
+            flex: 1;
+            padding: 2.5rem;
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i data-lucide="graduation-cap" class="text-primary"></i>
+            <span class="wordmark" style="font-family: var(--font-display); font-size: 1.5rem; letter-spacing:1px;">
+                <span class="text-white">TEACH</span><span class="text-primary">URES</span>
+            </span>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Sidebar Navigation">
+            <!-- Injected Sidebar per role: Admin, Trainer, or Learner -->
+            <%- include(sidebarPartial) %>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="avatar" style="background-image: url('<%= user?.avatar || '' %>');"></div>
+            <div class="user-info">
+                <div class="name">
+                    <%= user?.name || 'User Name' %>
+                </div>
+                <div class="role">
+                    <%= user?.role || 'Learner' %>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content" role="main">
+        <header class="topbar" role="banner">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="mobile-menu-btn" id="dashboardMenuToggle" aria-label="Open Sidebar">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h2 style="font-family: var(--font-heading); margin: 0; font-size: 1.25rem;">
+                    <%= title %>
+                </h2>
+            </div>
+            <div style="position: relative;">
+                <button class="btn btn-outline" id="notificationBtn" aria-label="Notifications"
+                    style="padding: 0.5rem; border: none; position: relative;" onclick="toggleNotifications()">
+                    <i data-lucide="bell"></i>
+                    <span id="notificationBadge"
+                        style="display: none; position: absolute; top: 0px; right: 0px; background: #EF4444; color: white; font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: translate(25%, -25%);">0</span>
+                </button>
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown" class="card"
+                    style="display: none; position: absolute; top: 100%; right: 0; width: 320px; max-height: 400px; z-index: 100; margin-top: 10px; padding: 0; overflow: hidden; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                    <div
+                        style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+                        <h4 style="margin: 0; font-size: 0.95rem;">Notifications</h4>
+                        <button onclick="markAllNotificationsRead()"
+                            style="background: none; border: none; color: var(--color-primary); font-size: 0.8rem; cursor: pointer;">Mark
+                            all read</button>
+                    </div>
+                    <div id="notificationList" style="overflow-y: auto; flex: 1;">
+                        <!-- Notifications injected here via JS -->
+                        <div style="padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem;">
+                            <i data-lucide="check-circle"
+                                style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <br>You're all caught up!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form action="/api/v1/auth/logout" method="POST" style="margin:0;">
+                <button class="btn btn-outline" type="submit" aria-label="Log Out"
+                    style="padding: 0.5rem; border: none;"><i data-lucide="log-out"></i></button>
+            </form>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <%- body %>
+        </div>
+    </main>
+
+    <script src="/js/main.js"></script>
+    <script>
+        lucide.createIcons();
+
+        // -----------------------------
+        // Mobile Sidebar Toggle
+        // -----------------------------
+        const toggleBtn = document.getElementById('dashboardMenuToggle');
+        const sidebar = document.querySelector('.sidebar');
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+            });
+            document.querySelector('.main-content').addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        }
+
+        // -----------------------------
+        // Notification System
+        // -----------------------------
+        const notifDropdown = document.getElementById('notificationDropdown');
+        const notifBadge = document.getElementById('notificationBadge');
+        const notifList = document.getElementById('notificationList');
+        let isNotifOpen = false;
+
+        function toggleNotifications() {
+            isNotifOpen = !isNotifOpen;
+            if(isNotifOpen) {
+                notifDropdown.style.opacity = '1';
+                notifDropdown.style.pointerEvents = 'auto';
+                fetchNotifications(); // Refresh on open
+            } else {
+                notifDropdown.style.opacity = '0';
+                notifDropdown.style.pointerEvents = 'none';
+            }
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            const btn = document.getElementById('notificationBtn');
+            if(isNotifOpen && !notifDropdown.contains(e.target) && !btn.contains(e.target)) {
+                toggleNotifications();
+            }
+        });
+
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/v1/notifications');
+                const data = await res.json();
+                
+                if(data.success) {
+                    // Update Badge
+                    if(data.unreadCount > 0) {
+                        notifBadge.style.display = 'flex';
+                        notifBadge.innerText = data.unreadCount > 9 ? '9+' : data.unreadCount;
+                    } else {
+                        notifBadge.style.display = 'none';
+                    }
+
+                    // Render List
+                    if(data.data.length === 0) {
+                        notifList.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem;"><i data-lucide="check-circle" style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5;"></i><br>You're all caught up!</div>`;
+                    } else {
+                        notifList.innerHTML = data.data.map(n => `
+                            <div onclick="markNotificationRead('${n.id}', '${n.link || '#'}')" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: ${n.isRead ? 'transparent' : 'rgba(245, 197, 24, 0.05)'}; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='${n.isRead ? 'transparent' : 'rgba(245, 197, 24, 0.05)'}'">
+                                <div style="font-size: 0.85rem; font-weight: ${n.isRead ? 'normal' : 'bold'}; color: ${n.isRead ? 'var(--color-gray-light)' : 'var(--color-white)'}; margin-bottom: 0.25rem;">${n.title}</div>
+                                <div style="font-size: 0.75rem; color: var(--muted); line-height: 1.4;">${n.message}</div>
+                                <div style="font-size: 0.65rem; color: var(--color-gray-mid); margin-top: 0.5rem;">${new Date(n.createdAt).toLocaleDateString()}</div>
+                            </div>
+                        `).join('');
+                    }
+                    lucide.createIcons();
+                }
+            } catch(e) { console.error('Error fetching notifications'); }
+        }
+
+        async function markNotificationRead(id, link) {
+            try {
+                await fetch(`/api/v1/notifications/${id}/read`, { method: 'POST' });
+                if(link !== '#') window.location.href = link;
+                else fetchNotifications(); // Refresh inline if no link
+            } catch(e) {}
+        }
+
+        async function markAllNotificationsRead() {
+            try {
+                await fetch('/api/v1/notifications/read-all', { method: 'POST' });
+                fetchNotifications();
+            } catch(e) {}
+        }
+
+        // Initial fetch on mount
+        document.addEventListener('DOMContentLoaded', fetchNotifications);
+
+    </script>
+
+    <%- include('../partials/cookie-banner') %>
+</body>
+
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Teachures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .about-hero {
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .about-hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3.5rem, 7vw, 6rem);
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .mission-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+            padding: 5rem 0;
+        }
+
+        .mission-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #F5C518;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+        }
+
+        .mission-headline {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .mission-text {
+            color: rgba(255, 255, 255, 0.45);
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .mission-visual {
+            background: rgba(245, 197, 24, 0.04);
+            border: 1px solid rgba(245, 197, 24, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+        }
+
+        .big-stat {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem;
+            background: linear-gradient(135deg, #F5C518, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            padding: 4rem 0;
+        }
+
+        .value-card {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            transition: all 0.3s;
+        }
+
+        .value-card:hover {
+            border-color: rgba(245, 197, 24, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .value-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(245, 197, 24, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .value-icon svg {
+            width: 24px;
+            height: 24px;
+            color: #F5C518;
+        }
+
+        .value-title {
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .value-text {
+            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(245, 197, 24, 0.05), transparent);
+            border-radius: 24px;
+            margin: 3rem 0 6rem;
+            border: 1px solid rgba(245, 197, 24, 0.08);
+        }
+
+        @media (max-width: 768px) {
+            .mission-section {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <main class="container">
+            <div class="about-hero">
+                <p
+                    style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                    Our Story</p>
+                <h1>Learning Should<br><span
+                        style="background:linear-gradient(135deg,#F5C518,#FFD700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Never
+                        Stop.</span></h1>
+                <p
+                    style="color:rgba(255,255,255,0.4); margin-top:1.5rem; font-size:1.1rem; max-width:550px; margin-left:auto; margin-right:auto; line-height:1.7;">
+                    We built Teachures because we believe that the best learning happens when great instructors meet
+                    motivated students — and nothing should get in the way of that.</p>
+            </div>
+
+            <!-- Mission -->
+            <div class="mission-section">
+                <div>
+                    <p class="mission-label">Our Mission</p>
+                    <h2 class="mission-headline">Democratizing World-Class Education</h2>
+                    <p class="mission-text">Teachures was founded with a single belief: everyone deserves access to
+                        high-quality, practical education — regardless of where they are or what they earn. We partner
+                        with industry-leading instructors and use technology to make learning engaging, trackable, and
+                        genuinely effective.</p>
+                    <p class="mission-text" style="margin-top:1rem;">We're not just another course platform. We're an
+                        ecosystem built for lifelong learners and ambitious educators.</p>
+                </div>
+                <div class="mission-visual">
+                    <div class="big-stat">12,000+</div>
+                    <p style="color:rgba(255,255,255,0.4); margin-top:0.75rem; font-size:1rem;">Active learners growing
+                        their skills every day</p>
+                    <div
+                        style="display:flex; justify-content:center; gap:2rem; margin-top:2.5rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:2rem;">
+                        <div>
+                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">400+
+                            </div>
+                            <div
+                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                                Courses</div>
+                        </div>
+                        <div>
+                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">200+
+                            </div>
+                            <div
+                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                                Instructors</div>
+                        </div>
+                        <div>
+                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">95%</div>
+                            <div
+                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                                Completion</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Values -->
+            <div>
+                <p
+                    style="text-align:center; font-size:0.85rem; font-weight:700; color:#F5C518; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                    Our Values</p>
+                <h2
+                    style="text-align:center; font-family:'Bebas Neue',sans-serif; font-size:3rem; letter-spacing:1px; margin-bottom:0;">
+                    What We Stand For</h2>
+            </div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i data-lucide="zap"></i></div>
+                    <h3 class="value-title">Speed Over Perfection</h3>
+                    <p class="value-text">We ship fast, learn from real user feedback, and iterate relentlessly.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i data-lucide="globe"></i></div>
+                    <h3 class="value-title">Radical Accessibility</h3>
+                    <p class="value-text">Great education should be available to anyone, anywhere, in any language.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i data-lucide="shield-check"></i></div>
+                    <h3 class="value-title">Quality Above All</h3>
+                    <p class="value-text">Every course on our platform is reviewed for accuracy, depth, and real-world
+                        relevance.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon"><i data-lucide="users"></i></div>
+                    <h3 class="value-title">Community-First</h3>
+                    <p class="value-text">Learning is social. We build tools that connect instructors and students in
+                        meaningful ways.</p>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-section">
+                <h2
+                    style="font-family:'DM Sans',sans-serif; font-size:2.5rem; font-weight:700; color:#fff; margin-bottom:1rem;">
+                    Ready to Start Learning?</h2>
+                <p style="color:rgba(255,255,255,0.4); margin-bottom:2.5rem; font-size:1rem;">Join 12,000+ learners
+                    building their future with Teachures.</p>
+                <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+                    <a href="/register"
+                        style="padding:0.9rem 2.5rem; background:linear-gradient(135deg,#F5C518,#D4AA00); color:#000; border-radius:10px; font-weight:700; font-size:0.95rem; text-decoration:none; text-transform:uppercase; letter-spacing:1px; transition:all 0.3s;">Get
+                        Started Free</a>
+                    <a href="/courses"
+                        style="padding:0.9rem 2.5rem; background:rgba(255,255,255,0.04); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:10px; font-weight:600; font-size:0.95rem; text-decoration:none; transition:all 0.3s;">Browse
+                        Courses</a>
+                </div>
+            </div>
+        </main>
+
+        <%- include('../partials/footer') %>
+            <script>lucide.createIcons();</script>
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+<div style="max-width: 600px; margin: 0 auto; padding: 2rem 0;">
+    <a href="/trainer/courses" class="text-muted"
+        style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem;">
+        <i data-lucide="arrow-left" class="icon-sm"></i> Back to Courses
+    </a>
+
+    <h2 class="auth-title">Create a New Course</h2>
+    <p class="text-muted" style="margin-bottom: 2rem;">Fill in the basic details to get started. You can change these
+        later.</p>
+
+    <form id="createCourseForm" class="card" style="padding: 2rem;">
+        <div class="form-group">
+            <label class="form-label">Course Title</label>
+            <input type="text" id="title" class="form-control" required
+                placeholder="e.g. Advanced Full-Stack with Node.js">
+            <small class="text-muted" style="display:block; margin-top:0.25rem;">Keep it clear and descriptive.</small>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Category</label>
+            <select id="category" class="form-control" required style="appearance: none; background-color: white;">
+                <option value="" disabled selected>Select a category</option>
+                <option value="Development">Development</option>
+                <option value="Business">Business</option>
+                <option value="Design">Design</option>
+                <option value="Marketing">Marketing</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Price ($ USD)</label>
+            <input type="number" id="price" class="form-control" min="0" step="1" value="0">
+            <small class="text-muted" style="display:block; margin-top:0.25rem;">Set to 0 for a free course.</small>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 2rem 0;">
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="/trainer/courses" class="btn btn-outline" style="border: none;">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create & Proceed</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('title').value;
+        const category = document.getElementById('category').value;
+        const price = document.getElementById('price').value;
+
+        try {
+            // Basic jwt fetch logic assuming token is stored in localStorage or handled via cookies in prod
+            const res = await fetch('/api/v1/courses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, category, price, isFree: price == 0 })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                window.location.href = `/trainer/courses/${data.data.id}/edit`;
+            } else {
+                alert(data.message || 'Error creating course');
+            }
+        } catch (err) {
+            alert('Internal error communicating with API.');
+        }
+    });
+</script>

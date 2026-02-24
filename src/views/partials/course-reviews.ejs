@@ -1,0 +1,252 @@
+<!-- Course Ratings & Reviews - shown on course detail page -->
+<style>
+    .rating-summary {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 2rem;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .big-rating {
+        text-align: center;
+    }
+
+    .big-rating-num {
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 5rem;
+        color: #F5C518;
+        line-height: 1;
+    }
+
+    .big-rating-stars {
+        color: #F5C518;
+        font-size: 1.3rem;
+        margin: 0.25rem 0;
+    }
+
+    .big-rating-count {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .rating-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .rating-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .rating-row-stars {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.4);
+        width: 30px;
+    }
+
+    .rating-row-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .rating-row-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #F5C518, #FFD700);
+    }
+
+    .rating-row-pct {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.3);
+        width: 30px;
+        text-align: right;
+    }
+
+    .review-form {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .star-picker {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .star-btn {
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.15);
+        transition: color 0.1s;
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .star-btn.active {
+        color: #F5C518;
+    }
+
+    .review-textarea {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .review-textarea:focus {
+        outline: none;
+        border-color: #F5C518;
+    }
+
+    .review-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .reviewer-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+    }
+
+    .reviewer-date {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.25);
+    }
+
+    .review-text {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 0.88rem;
+        line-height: 1.65;
+    }
+</style>
+
+<!-- Rating Summary -->
+<div class="rating-summary">
+    <div class="big-rating">
+        <div class="big-rating-num">
+            <%= avgRating.toFixed(1) %>
+        </div>
+        <div class="big-rating-stars">
+            <% for(let i=1;i<=5;i++) { %>
+                <% if(i <=Math.round(avgRating)) { %>⭐<% } else { %>☆<% } %>
+                            <% } %>
+        </div>
+        <div class="big-rating-count">
+            <%= reviews.length %> review<%= reviews.length !==1 ? 's' : '' %>
+        </div>
+    </div>
+    <div class="rating-bars">
+        <% for(let s=5; s>=1; s--) { %>
+            <% const count=reviews.filter(r=>r.rating===s).length; %>
+                <% const pct=reviews.length> 0 ? Math.round(count/reviews.length*100) : 0; %>
+                    <div class="rating-row">
+                        <span class="rating-row-stars">
+                            <%= s %>★
+                        </span>
+                        <div class="rating-row-bar">
+                            <div class="rating-row-fill" style="width:<%= pct %>%;"></div>
+                        </div>
+                        <span class="rating-row-pct">
+                            <%= pct %>%
+                        </span>
+                    </div>
+                    <% } %>
+    </div>
+</div>
+
+<!-- Write a Review (if enrolled and not yet reviewed) -->
+<% if (isEnrolled && !hasReviewed) { %>
+    <div class="review-form">
+        <h3 style="color:#fff; font-size:1rem; font-weight:700; margin-bottom:1rem;">Write a Review</h3>
+        <div class="star-picker" id="starPicker">
+            <% for(let i=1;i<=5;i++) { %>
+                <button class="star-btn" data-star="<%= i %>" onclick="setStar(<%= i %>)">★</button>
+                <% } %>
+        </div>
+        <textarea class="review-textarea" id="reviewBody"
+            placeholder="Share what you learned and how it helped you..."></textarea>
+        <button
+            style="margin-top:1rem; padding:0.7rem 1.75rem; background:linear-gradient(135deg,#F5C518,#D4AA00); color:#000; border:none; border-radius:8px; font-weight:700; cursor:pointer;"
+            onclick="submitReview()">Submit Review</button>
+    </div>
+    <% } %>
+
+        <!-- Review List -->
+        <% if (reviews.length===0) { %>
+            <p style="text-align:center; color:rgba(255,255,255,0.25); padding:3rem; font-size:0.9rem;">No reviews yet.
+                Be the first to share your experience!</p>
+            <% } else { %>
+                <% reviews.forEach(function(review) { %>
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div>
+                                <div class="reviewer-name">
+                                    <%= review.user ? review.user.name : 'Anonymous' %>
+                                </div>
+                                <div style="color:#F5C518; font-size:0.85rem;">
+                                    <% for(let i=1;i<=5;i++) { %>
+                                        <%= i<=review.rating ? '★' : '☆' %>
+                                            <% } %>
+                                </div>
+                            </div>
+                            <span class="reviewer-date">
+                                <%= new
+                                    Date(review.createdAt).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
+                                    %>
+                            </span>
+                        </div>
+                        <p class="review-text">
+                            <%= review.review || 'No comment provided.' %>
+                        </p>
+                    </div>
+                    <% }); %>
+                        <% } %>
+
+                            <script>
+                                let selectedStar = 0;
+                                function setStar(n) {
+                                    selectedStar = n;
+                                    document.querySelectorAll('.star-btn').forEach((b, i) => b.classList.toggle('active', i < n));
+                                }
+                                async function submitReview() {
+                                    const body = document.getElementById('reviewBody').value;
+                                    if (!selectedStar) return alert('Please select a rating.');
+                                    try {
+                                        const res = await fetch(`/api/v1/courses/<%= courseId %>/reviews`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ rating: selectedStar, review: body })
+                                        });
+                                        if (res.ok) { location.reload(); }
+                                        else { const d = await res.json(); alert(d.message || 'Failed to submit review.'); }
+                                    } catch (e) { alert('Error submitting review.'); }
+                                }
+                            </script>

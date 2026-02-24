@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= course.title %> | Buy Course
+    </title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- PayPal JS SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=<%= paypalClientId %>&currency=USD"></script>
+
+    <style>
+        body {
+            background-color: var(--color-black);
+            padding-top: 80px;
+        }
+
+        .checkout-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .summary-card {
+            background-color: var(--color-gray-dark);
+            border: 1px solid var(--color-gray-mid);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Reusing main public navbar here or simple checkout header -->
+    <nav class="navbar" style="position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--color-gray-mid);">
+        <div class="nav-container">
+            <a href="/" class="brand">
+                <span class="text-white">TEACH</span><span class="text-primary">URES</span>
+            </a>
+            <a href="/dashboard" class="text-muted" style="text-decoration: none;">Cancel</a>
+        </div>
+    </nav>
+
+    <div class="checkout-container">
+
+        <!-- Left: Order Details -->
+        <div>
+            <h2 style="font-family: var(--font-heading); margin-bottom: 2rem;">Checkout</h2>
+
+            <div class="summary-card" style="margin-bottom: 2rem;">
+                <h3
+                    style="font-size: 1.1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    Order Summary</h3>
+
+                <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div
+                        style="width: 150px; height: 100px; background-image: url('<%= course.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <h4 style="font-size: 1.25rem; margin-bottom: 0.5rem;">
+                            <%= course.title %>
+                        </h4>
+                        <p class="text-primary"
+                            style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Course Access</p>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: space-between; border-top: 1px solid var(--color-gray-mid); padding-top: 1rem; margin-top: 1rem;">
+                    <span style="font-weight: 600;">Total Amount</span>
+                    <span style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-primary);">$<%=
+                            course.price %></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Payment Provider -->
+        <div>
+            <div class="summary-card" id="payment-container">
+                <h3
+                    style="font-size: 1.1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    Complete Payment</h3>
+
+                <!-- PayPal Button Container -->
+                <div id="paypal-button-container"></div>
+            </div>
+
+            <div id="success-screen" class="summary-card" style="display: none; text-align: center;">
+                <i data-lucide="check-circle" class="text-success"
+                    style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                <h3 style="margin-bottom: 1rem;">Payment Successful!</h3>
+                <p class="text-muted" style="margin-bottom: 1.5rem;">You have been enrolled in the course.</p>
+                <a href="/learner/courses/<%= course.slug %>/learn" class="btn btn-primary" style="width: 100%;">Start
+                    Learning</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // PayPal JS SDK Integration
+        paypal.Buttons({
+            // 1. App calls backend to create order
+            createOrder: async function (data, actions) {
+                try {
+                    const res = await fetch('/api/v1/payments/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ courseId: '<%= course.id %>' })
+                    });
+                    const orderData = await res.json();
+                    if (!orderData.success) throw new Error(orderData.message);
+                    return orderData.orderID;
+                } catch (err) {
+                    alert("Error establishing checkout session. Please try again.");
+                    console.error(err);
+                }
+            },
+            // 2. App calls backend to capture the approved transfer
+            onApprove: async function (data, actions) {
+                try {
+                    const res = await fetch('/api/v1/payments/capture-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ orderID: data.orderID })
+                    });
+                    const captureData = await res.json();
+                    if (captureData.success) {
+                        document.getElementById('payment-container').style.display = 'none';
+                        document.getElementById('success-screen').style.display = 'block';
+                    } else {
+                        alert("Payment failed or was canceled.");
+                    }
+                } catch (err) {
+                    alert('Sorry, your transaction could not be processed.');
+                }
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+
+</html>

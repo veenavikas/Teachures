@@ -1,0 +1,26 @@
+<header class="navbar" role="banner">
+    <div class="logo" aria-label="Teachures Logo">
+        <i data-lucide="graduation-cap" class="text-primary" aria-hidden="true"></i>
+        <span class="wordmark">
+            <span class="text-white">TEACH</span><span class="text-gradient-primary">URES</span>
+        </span>
+    </div>
+    <nav class="nav-links" aria-label="Main Navigation">
+        <a href="/courses">Courses</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/about">About</a>
+    </nav>
+    <div class="auth-buttons">
+        <a href="/login" class="btn btn-outline">Login</a>
+        <a href="/register" class="btn btn-primary">Start for Free</a>
+        <button class="mobile-menu-btn" id="mobileNavToggle" aria-label="Toggle Navigation">
+            <i data-lucide="menu"></i>
+        </button>
+</header>
+
+<script>
+    document.getElementById('mobileNavToggle')?.addEventListener('click', () => {
+        document.querySelector('.nav-links').classList.toggle('show');
+        document.querySelector('.auth-buttons').classList.toggle('show');
+    });
+</script>

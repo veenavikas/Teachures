@@ -1,0 +1,373 @@
+<!-- Privacy & Settings Page (GDPR/CCPA Management) -->
+<style>
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .settings-section {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-desc {
+        font-size: 0.88rem;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .setting-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .setting-label {
+        font-weight: 600;
+        color: #fff;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .setting-hint {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.4);
+        line-height: 1.5;
+    }
+
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-export {
+        background: linear-gradient(135deg, #F5C518, #D4AA00);
+        color: #000;
+    }
+
+    .btn-export:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(245, 197, 24, 0.3);
+    }
+
+    .btn-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+        background: #EF4444;
+        color: #fff;
+    }
+
+    .btn-save {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-save:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+        margin-top: 4px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: .3s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+    }
+
+    input:checked+.slider {
+        background-color: #10B981;
+    }
+
+    input:checked+.slider:before {
+        transform: translateX(20px);
+    }
+
+    input:disabled+.slider {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Danger Modal */
+    .danger-modal-bg {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(8px);
+    }
+
+    .danger-modal-bg.show {
+        display: flex;
+    }
+
+    .danger-modal {
+        background: #111;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        padding: 2rem;
+    }
+
+    .danger-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #EF4444;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .danger-text {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .danger-input {
+        width: 100%;
+        padding: 0.85rem;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .danger-input:focus {
+        outline: none;
+        border-color: #EF4444;
+    }
+</style>
+
+<div class="settings-container">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size:1.8rem; font-weight:700; color:#fff; margin-bottom:0.25rem;">Privacy & Data Settings</h2>
+        <p style="color:rgba(255,255,255,0.4); font-size:0.9rem;">Manage your cookie preferences, download your data, or
+            delete your account.</p>
+    </div>
+
+    <!-- Cookie Preferences -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3 class="section-title">Cookie Preferences</h3>
+            <div class="section-desc">Manage how we use cookies. Changes take effect immediately.</div>
+        </div>
+
+        <div class="setting-row">
+            <div>
+                <div class="setting-label">Strictly Necessary (Essential)</div>
+                <div class="setting-hint">Required for core functionality such as secure login, video playback, and
+                    session management.</div>
+            </div>
+            <label class="switch"><input type="checkbox" checked disabled><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-row">
+            <div>
+                <div class="setting-label">Analytics & Performance</div>
+                <div class="setting-hint">Helps us understand how visitors interact with the platform by collecting
+                    anonymous data.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="prefAnalytics" <%=consent.analytics ? 'checked' : '' %>
+                onchange="updateConsent()"><span class="slider"></span></label>
+        </div>
+
+        <div class="setting-row">
+            <div>
+                <div class="setting-label">Marketing & Personalization</div>
+                <div class="setting-hint">Used to track visitors across websites to display relevant advertisements and
+                    personalized content.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="prefMarketing" <%=consent.marketing ? 'checked' : '' %>
+                onchange="updateConsent()"><span class="slider"></span></label>
+        </div>
+    </div>
+
+    <!-- Data Export -->
+    <div class="settings-section">
+        <div class="section-header">
+            <h3 class="section-title">Download Your Data</h3>
+            <div class="section-desc">Get a copy of your data (courses, progress, certificates, profile) in JSON format
+                as required by GDPR/CCPA.</div>
+        </div>
+        <div class="setting-row" style="align-items: center;">
+            <div class="setting-hint" style="max-width: 400px;">Your export will begin downloading immediately. For
+                security reasons, sensitive data like passwords are never exported.</div>
+            <a href="/api/v1/compliance/export" class="btn-action btn-export" target="_blank">
+                <i data-lucide="download" style="width:16px;height:16px;"></i> Export Data
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Deletion -->
+    <div class="settings-section" style="border-color: rgba(239,68,68,0.2);">
+        <div class="section-header">
+            <h3 class="section-title" style="color: #EF4444;">Danger Zone</h3>
+            <div class="section-desc">Permanently delete your account and anonymize your personal information.</div>
+        </div>
+        <div class="setting-row" style="align-items: center;">
+            <div class="setting-hint" style="max-width: 400px; color: rgba(239,68,68,0.8);">
+                <strong>Warning:</strong> This action is irreversible. You will lose access to all purchased courses,
+                progress, and certificates.
+            </div>
+            <button class="btn-action btn-danger"
+                onclick="document.getElementById('deleteModal').classList.add('show')">
+                Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="danger-modal-bg" id="deleteModal">
+    <div class="danger-modal">
+        <div class="danger-title"><i data-lucide="alert-triangle"></i> Delete Account</div>
+        <div class="danger-text">
+            For transactional integrity, your account will be **anonymized** rather than entirely dropped from the
+            database.
+            However, this means your email, name, and profile are completely scrambled. You will **never** be able to
+            log in again, and all access to courses is permanently lost.<br><br>
+            Please type <strong>DELETE</strong> below to confirm.
+        </div>
+        <input type="text" id="deleteConfirmInput" class="danger-input" placeholder="Type DELETE here"
+            autocomplete="off" onkeyup="checkDeleteInput()">
+        <div style="display:flex; gap:1rem; justify-content:flex-end;">
+            <button class="btn-action btn-save" style="border-radius:6px;" onclick="closeDeleteModal()">Cancel</button>
+            <button class="btn-action btn-danger" id="btnConfirmDelete"
+                style="border-radius:6px; opacity:0.3; cursor:not-allowed;" disabled
+                onclick="executeDelete()">Permanently Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateConsent() {
+        const prefs = {
+            essential: true,
+            analytics: document.getElementById('prefAnalytics').checked,
+            marketing: document.getElementById('prefMarketing').checked
+        };
+        fetch('/api/v1/compliance/consent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ preferences: prefs })
+        }).then(res => {
+            if (res.ok) {
+                // Update local cookie
+                const oneYear = 365 * 24 * 60 * 60;
+                document.cookie = `teachures_consent=${encodeURIComponent(JSON.stringify(prefs))}; max-age=${oneYear}; path=/`;
+            }
+        });
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteConfirmInput').value = '';
+        document.getElementById('btnConfirmDelete').disabled = true;
+        document.getElementById('btnConfirmDelete').style.opacity = '0.3';
+        document.getElementById('btnConfirmDelete').style.cursor = 'not-allowed';
+        document.getElementById('deleteModal').classList.remove('show');
+    }
+
+    function checkDeleteInput() {
+        const val = document.getElementById('deleteConfirmInput').value;
+        const btn = document.getElementById('btnConfirmDelete');
+        if (val === 'DELETE') {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.3';
+            btn.style.cursor = 'not-allowed';
+        }
+    }
+
+    async function executeDelete() {
+        try {
+            const res = await fetch('/api/v1/compliance/account', { method: 'DELETE' });
+            if (res.ok) {
+                window.location.href = '/login?msg=account_deleted';
+            } else {
+                alert('Failed to delete account. Please try again or contact support.');
+            }
+        } catch (e) {
+            alert('A network error occurred.');
+        }
+    }
+</script>

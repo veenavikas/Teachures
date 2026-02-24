@@ -1,0 +1,186 @@
+/* /src/public/css/base.css */
+
+:root {
+  --color-primary: #F5C518;
+  --color-primary-glow: rgba(245, 197, 24, 0.4);
+  --color-primary-dim: #D4AA00;
+
+  --color-black: #050505;
+  --color-bg-mesh: #0A0A0A;
+
+  --color-white: #FFFFFF;
+  --color-gray-light: #A1A1AA;
+  --color-gray-mid: #27272A;
+  --color-gray-dark: #18181B;
+
+  --color-danger: #EF4444;
+  --color-success: #10B981;
+
+  --font-display: 'Bebas Neue', display, sans-serif;
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'Inter', 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --shadow-glow: 0 0 20px var(--color-primary-glow);
+  --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+  --glass-bg: rgba(24, 24, 27, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-black);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(245, 197, 24, 0.05), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(245, 197, 24, 0.04), transparent 30%);
+  color: var(--color-gray-light);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1.2;
+}
+
+h1.display {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 8vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-gray-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #FFD700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  text-shadow: 0 0 10px var(--color-primary-glow);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-muted {
+  color: var(--color-gray-light);
+}
+
+.text-white {
+  color: var(--color-white);
+}
+
+.bg-black {
+  background-color: var(--color-black);
+}
+
+.bg-dark {
+  background-color: var(--color-gray-dark);
+}
+
+/* Accessibility: Global Focus Styles (WCAG 2.1) */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 4px rgba(245, 197, 24, 0.2);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 20px var(--color-primary-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(245, 197, 24, 0.6);
+  }
+
+  100% {
+    box-shadow: 0 0 20px var(--color-primary-glow);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}

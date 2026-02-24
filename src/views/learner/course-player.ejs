@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <%= title %> | Teachures Player
+    </title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--color-black);
+        }
+
+        .player-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background-color: #111;
+            border-bottom: 1px solid var(--color-gray-mid);
+        }
+
+        .player-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .video-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background-color: #000;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: #000;
+            position: relative;
+        }
+
+        /* Simulate Video.js Custom Theme */
+        .vjs-custom {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-gray-mid);
+        }
+
+        .content-area {
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            background-color: var(--color-black);
+        }
+
+        .sidebar-curriculum {
+            width: 350px;
+            background-color: #111;
+            border-left: 1px solid var(--color-gray-mid);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--color-gray-mid);
+        }
+
+        .accordion {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            padding: 1.25rem 1.5rem;
+            background-color: var(--color-gray-dark);
+            border-bottom: 1px solid var(--color-gray-mid);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .lesson-item {
+            padding: 1rem 1.5rem 1rem 3rem;
+            border-bottom: 1px solid var(--color-gray-mid);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .lesson-item:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .lesson-item.active {
+            background-color: rgba(245, 197, 24, 0.05);
+            border-left: 3px solid var(--color-primary);
+            padding-left: calc(3rem - 3px);
+        }
+
+        .lesson-icon {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Watermark Canvas overlay - replaced with robust DOM watermark */
+        #wm-anti-piracy {
+            position: absolute;
+            pointer-events: none;
+            z-index: 2147483647;
+            /* Max z-index */
+            color: rgba(255, 255, 255, 0.25);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+            user-select: none;
+            mix-blend-mode: overlay;
+            transition: top 2s ease-in-out, left 2s ease-in-out;
+        }
+    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <header class="player-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/learner/dashboard" class="text-white" style="text-decoration: none;"><i data-lucide="arrow-left"
+                    style="width: 20px;"></i></a>
+            <span style="font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem;">
+                <%= course.title %>
+            </span>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div
+                style="width: 150px; height: 6px; background: var(--color-gray-mid); border-radius: 3px; overflow: hidden;">
+                <div style="width: 12%; height: 100%; background: var(--color-primary);"></div>
+            </div>
+            <span class="text-white" style="font-size: 0.85rem; font-weight: 700; margin-right: 1rem;">12%
+                Complete</span>
+            <button class="btn btn-outline" onclick="openReviewModal()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem;">
+                <i data-lucide="star" style="width: 14px; margin-right: 5px;"></i> Leave Review
+            </button>
+        </div>
+    </header>
+
+    <div class="player-main">
+
+        <div class="video-area">
+            <div class="video-container">
+                <!-- Secure Video Player Container -->
+                <div class="vjs-custom" id="videoWrapper">
+                    [Video.js Player Zone for S3 Signed URLs]
+                </div>
+            </div>
+
+            <div class="content-area">
+                <h2 style="margin-bottom: 1rem;">1. Introduction to the Platform</h2>
+
+                <div
+                    style="display: flex; gap: 1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 2rem;">
+                    <button
+                        style="background:none; border:none; color: var(--color-primary); font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--color-primary);">Overview</button>
+                    <button
+                        style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem;">Q&A</button>
+                    <button
+                        style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem;">Resources</button>
+                </div>
+
+                <p class="text-white" style="line-height: 1.8;">
+                    Welcome to the beginning of your journey. In this lesson, we will cover the foundational concepts
+                    and set up your learning environment...
+                </p>
+            </div>
+        </div>
+
+        <div class="sidebar-curriculum">
+            <div class="sidebar-header">
+                <h3 style="font-size: 1.1rem; margin: 0;">Course Content</h3>
+            </div>
+
+            <div class="accordion">
+                <% if(course.sections && course.sections.length> 0) { %>
+                    <% course.sections.forEach((section, sIdx)=> { %>
+                        <div class="section-header">
+                            <span>Section <%= sIdx + 1 %>: <%= section.title %></span>
+                            <i data-lucide="chevron-down" class="icon-sm"></i>
+                        </div>
+
+                        <div class="section-body">
+                            <% if(section.lessons && section.lessons.length> 0) { %>
+                                <% section.lessons.forEach((lesson, lIdx)=> { %>
+                                    <div class="lesson-item <%= (sIdx === 0 && lIdx === 0) ? 'active' : '' %>">
+                                        <% if((sIdx===0 && lIdx===0)) { %>
+                                            <i data-lucide="play-circle" class="text-primary lesson-icon"></i>
+                                            <% } else { %>
+                                                <i data-lucide="circle" class="text-muted lesson-icon"></i>
+                                                <% } %>
+                                                    <span
+                                                        style="font-size: 0.9rem; color: <%= (sIdx === 0 && lIdx === 0) ? 'var(--color-white)' : 'var(--color-gray-light)' %>">
+                                                        <%= lIdx + 1 %>. <%= lesson.title %>
+                                                    </span>
+                                    </div>
+                                    <% }) %>
+                                        <% } %>
+                        </div>
+                        <% }) %>
+                            <% } %>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="card" style="width: 400px; padding: 2rem; position: relative;">
+            <button onclick="closeReviewModal()"
+                style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-gray-light); cursor: pointer;">
+                <i data-lucide="x"></i>
+            </button>
+            <h3 style="margin-bottom: 1.5rem; font-family: var(--font-heading);">Rate this Course</h3>
+
+            <form id="reviewForm">
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;"
+                    id="starRating">
+                    <i data-lucide="star" data-rating="1"
+                        style="cursor: pointer; width: 32px; height: 32px; color: var(--color-gray-mid);"></i>
+                    <i data-lucide="star" data-rating="2"
+                        style="cursor: pointer; width: 32px; height: 32px; color: var(--color-gray-mid);"></i>
+                    <i data-lucide="star" data-rating="3"
+                        style="cursor: pointer; width: 32px; height: 32px; color: var(--color-gray-mid);"></i>
+                    <i data-lucide="star" data-rating="4"
+                        style="cursor: pointer; width: 32px; height: 32px; color: var(--color-gray-mid);"></i>
+                    <i data-lucide="star" data-rating="5"
+                        style="cursor: pointer; width: 32px; height: 32px; color: var(--color-gray-mid);"></i>
+                </div>
+                <input type="hidden" id="ratingInput" name="rating" value="0" required>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--color-gray-light);">Your Review
+                        (Optional)</label>
+                    <textarea id="reviewTextInput" rows="4"
+                        style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.75rem; border-radius: 8px;"
+                        placeholder="What did you think of the course?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="submitReviewBtn">Submit
+                    Review</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        const courseId = '<%= course.id %>';
+
+        // --- Rating Modal Logic ---
+        const reviewModal = document.getElementById('reviewModal');
+        const stars = document.querySelectorAll('#starRating i');
+        const ratingInput = document.getElementById('ratingInput');
+
+        function openReviewModal() {
+            reviewModal.style.display = 'flex';
+        }
+        function closeReviewModal() {
+            reviewModal.style.display = 'none';
+        }
+
+        stars.forEach(star => {
+            star.addEventListener('click', (e) => {
+                const rating = parseInt(e.currentTarget.getAttribute('data-rating'));
+                ratingInput.value = rating;
+                updateStarVisuals(rating);
+            });
+            star.addEventListener('mouseover', (e) => {
+                updateStarVisuals(parseInt(e.currentTarget.getAttribute('data-rating')), true);
+            });
+            star.addEventListener('mouseout', () => {
+                updateStarVisuals(parseInt(ratingInput.value));
+            });
+        });
+
+        function updateStarVisuals(rating, isHover = false) {
+            stars.forEach((star, idx) => {
+                if (idx < rating) {
+                    star.style.color = 'var(--color-primary)';
+                    star.style.fill = isHover ? 'none' : 'var(--color-primary)';
+                } else {
+                    star.style.color = 'var(--color-gray-mid)';
+                    star.style.fill = 'none';
+                }
+            });
+        }
+
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rating = ratingInput.value;
+            const review = document.getElementById('reviewTextInput').value;
+
+            if (rating == 0) return alert('Please select a star rating.');
+
+            const btn = document.getElementById('submitReviewBtn');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+
+            try {
+                const res = await fetch(`/api/v1/courses/${courseId}/rate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating, review })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeReviewModal();
+                    alert('Thank you for your review!');
+                } else {
+                    alert(data.message || 'Error submitting review');
+                }
+            } catch (err) {
+                alert('Connection error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Submit Review';
+            }
+        });
+
+        // Advanced Dynamic Watermark Anti-Piracy
+        (function () {
+            const email = '<%= typeof user !== "undefined" ? user.email : "learner@example.com" %>';
+            const videoContainer = document.querySelector('.video-container');
+            let watermark = null;
+
+            function createWatermark() {
+                if (watermark) watermark.remove();
+                watermark = document.createElement('div');
+                watermark.id = 'wm-anti-piracy';
+                videoContainer.appendChild(watermark);
+                updateWatermarkText();
+                moveWatermark();
+            }
+
+            function updateWatermarkText() {
+                if (!watermark) return;
+                const time = new Date().toISOString().split('T')[1].split('.')[0];
+                watermark.innerText = `${email} - ${time}`;
+            }
+
+            function moveWatermark() {
+                if (!watermark) return;
+                const containerW = videoContainer.clientWidth;
+                const containerH = videoContainer.clientHeight;
+                // Keep within bounds roughly
+                const maxLeft = Math.max(10, containerW - 250);
+                const maxTop = Math.max(10, containerH - 30);
+
+                watermark.style.left = Math.floor(Math.random() * maxLeft) + 'px';
+                watermark.style.top = Math.floor(Math.random() * maxTop) + 'px';
+            }
+
+            createWatermark();
+
+            // Update text every second, move every 10 seconds
+            setInterval(updateWatermarkText, 1000);
+            setInterval(moveWatermark, 10000);
+
+            // Tamper Protection (MutationObserver)
+            // If the user tries to delete the watermark or hide it via DevTools, we recreate it.
+            const observer = new MutationObserver((mutations) => {
+                let tampered = false;
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.removedNodes.forEach((node) => {
+                            if (node.id === 'wm-anti-piracy') tampered = true;
+                        });
+                    } else if (mutation.type === 'attributes' && mutation.target.id === 'wm-anti-piracy') {
+                        // Check if they tried to hide it via CSS
+                        const style = window.getComputedStyle(watermark);
+                        if (style.display === 'none' || style.opacity === '0' || style.visibility === 'hidden') {
+                            tampered = true;
+                        }
+                    }
+                });
+
+                if (tampered) {
+                    console.warn("Security Event: Watermark tampering detected.");
+                    createWatermark(); // Respawn instantly
+                }
+            });
+
+            observer.observe(videoContainer, { childList: true, subtree: true, attributes: true });
+
+            // Ensure fullscreen uses the container, not just the video element, so watermark stays visible
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement === videoContainer) {
+                    moveWatermark();
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

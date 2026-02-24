@@ -1,0 +1,94 @@
+<div class="kpi-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Total Students</h3>
+            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
+                    data-lucide="users" class="text-primary icon-sm"></i></div>
+        </div>
+        <div style="font-size: 2rem; font-family: var(--font-display);">
+            <%= stats.totalStudents || 0 %>
+        </div>
+        <div class="text-success" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"><i
+                data-lucide="trending-up" class="icon-sm" style="vertical-align: middle;"></i> +12% this month</div>
+    </div>
+
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Monthly Earnings</h3>
+            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
+                    data-lucide="dollar-sign" class="text-primary icon-sm"></i></div>
+        </div>
+        <div style="font-size: 2rem; font-family: var(--font-display);">$<%= stats.monthlyEarnings || 0 %>
+        </div>
+        <div class="text-success" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"><i
+                data-lucide="trending-up" class="icon-sm" style="vertical-align: middle;"></i> +5% this month</div>
+    </div>
+
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Active Courses</h3>
+            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
+                    data-lucide="book-open" class="text-primary icon-sm"></i></div>
+        </div>
+        <div style="font-size: 2rem; font-family: var(--font-display);">
+            <%= stats.activeCourses || 0 %>
+        </div>
+        <div class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">2 drafts pending</div>
+    </div>
+
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Avg. Rating</h3>
+            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i data-lucide="star"
+                    class="text-primary icon-sm"></i></div>
+        </div>
+        <div style="font-size: 2rem; font-family: var(--font-display);">
+            <%= stats.avgRating ? stats.avgRating.toFixed(1) : 'N/A' %>
+        </div>
+        <div class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">Based on <%= stats.totalReviews || 0 %>
+                reviews</div>
+    </div>
+</div>
+
+<div class="grid-2" style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+    <!-- Chart Area -->
+    <div class="card" style="padding: 1.5rem;">
+        <h3
+            style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
+            Enrollments & Views</h3>
+        <div
+            style="height: 300px; width: 100%; border: 1px dashed var(--color-gray-mid); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-light);">
+            [Chart.js Line Chart Placeholder]
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column;">
+        <h3
+            style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
+            Recent Activity</h3>
+        <div style="flex: 1; overflow-y: auto;">
+            <% if(recentActivity && recentActivity.length) { %>
+                <ul style="list-style: none; padding: 0;">
+                    <% recentActivity.forEach(activity=> { %>
+                        <li style="margin-bottom: 1.25rem; display: flex; gap: 1rem;">
+                            <div
+                                style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--color-primary); margin-top: 6px;">
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 0.95rem; color: var(--color-white);">
+                                    <%= activity.text %>
+                                </p>
+                                <small style="color: var(--color-gray-light);">
+                                    <%= activity.time %>
+                                </small>
+                            </div>
+                        </li>
+                        <% }) %>
+                </ul>
+                <% } else { %>
+                    <p class="text-muted text-center" style="margin-top: 2rem;">No recent activity.</p>
+                    <% } %>
+        </div>
+    </div>
+</div>

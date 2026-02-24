@@ -1,0 +1,123 @@
+<div class="grid-2" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; position: relative;">
+
+    <!-- Left Side: Curriculum Builder -->
+    <div class="card" style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
+            Curriculum Builder</h3>
+
+        <div id="curriculumContainer" style="min-height: 200px;">
+            <!-- Sections will be injected here via JS -->
+            <p class="text-muted text-center" style="margin-top: 3rem;">Loading curriculum...</p>
+        </div>
+
+        <button id="addSectionBtn" class="btn btn-outline"
+            style="width: 100%; margin-top: 1.5rem; border: 1px dashed var(--color-primary); color: var(--color-primary);">
+            <i data-lucide="plus" style="margin-right: 8px;"></i> Add Section
+        </button>
+    </div>
+
+    <!-- Right Side: Course Settings -->
+    <div class="card" style="padding: 2rem; align-self: start; position: sticky; top: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Course
+            Settings</h3>
+
+        <form id="courseSettingsForm">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" id="courseTitle" class="form-control" value="<%= course.title %>" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="courseDesc" class="form-control" rows="4"><%= course.description %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Thumbnail URL</label>
+                <input type="url" id="courseThumb" class="form-control" value="<%= course.thumbnailUrl || '' %>"
+                    placeholder="https://...">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label">Price ($)</label>
+                    <input type="number" id="coursePrice" class="form-control" value="<%= course.price %>" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Level</label>
+                    <select id="courseLevel" class="form-control" style="appearance: none; background: white;">
+                        <option value="BEGINNER" <%=course.level==='BEGINNER' ? 'selected' : '' %>>Beginner</option>
+                        <option value="INTERMEDIATE" <%=course.level==='INTERMEDIATE' ? 'selected' : '' %>>Intermediate
+                        </option>
+                        <option value="ADVANCED" <%=course.level==='ADVANCED' ? 'selected' : '' %>>Advanced</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 1.5rem 0;">
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Save
+                Changes</button>
+
+            <% if (!course.isPublished) { %>
+                <button type="button" id="publishBtn" class="btn btn-outline"
+                    style="width: 100%; color: var(--color-success); border-color: var(--color-success);">Publish
+                    Course</button>
+                <% } else { %>
+                    <span class="text-success"
+                        style="display: block; text-align: center; font-weight: 700; padding: 0.75rem;">Course is
+                        Published</span>
+                    <% } %>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for Lesson Editing -->
+<div id="lessonModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 600px; padding: 2rem; position: relative;">
+        <button onclick="document.getElementById('lessonModal').style.display = 'none';"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+
+        <h3 style="margin-bottom: 1.5rem;" id="lessonModalTitle">Edit Lesson</h3>
+
+        <form id="lessonForm">
+            <input type="hidden" id="modalLessonId">
+            <input type="hidden" id="modalSectionId">
+
+            <div class="form-group">
+                <label class="form-label">Lesson Title</label>
+                <input type="text" id="lessonTitle" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Content Type</label>
+                <select id="lessonType" class="form-control" style="appearance: none; background: white;">
+                    <option value="VIDEO">Video</option>
+                    <option value="ARTICLE">Article</option>
+                    <option value="QUIZ">Quiz</option>
+                </select>
+            </div>
+
+            <!-- Logic for video upload / text editor goes here -->
+            <div class="form-group" id="videoZone"
+                style="margin-top: 1rem; border: 2px dashed var(--color-primary); padding: 2rem; text-align: center; border-radius: 4px; cursor: pointer;">
+                <i data-lucide="upload-cloud" class="text-primary"
+                    style="width: 32px; height: 32px; margin-bottom: 0.5rem;"></i>
+                <p class="text-white">Click to upload video</p>
+                <small class="text-muted">Video to S3 integration pending Phase 2</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Save Lesson</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="/js/curriculum.js"></script>
+<script>
+    window.COURSE_ID = '<%= course.id %>';
+    // Logic to fetch sections / initialize SortableJS rests in curriculum.js
+</script>

@@ -1,0 +1,95 @@
+<div class="card" style="padding: 1.5rem;">
+    <h3
+        style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        Platform Support Tickets
+        <span style="font-size: 0.85rem; font-weight: normal; color: var(--color-gray-light);">Showing latest <%=
+                tickets.length %> tickets</span>
+    </h3>
+
+    <div style="overflow-x: auto;">
+        <% if(tickets && tickets.length> 0) { %>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr
+                        style="border-bottom: 1px solid var(--glass-border); color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
+                        <th style="padding: 1rem;">ID</th>
+                        <th style="padding: 1rem;">User</th>
+                        <th style="padding: 1rem;">Subject</th>
+                        <th style="padding: 1rem;">Priority</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Updated</th>
+                        <th style="padding: 1rem; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tickets.forEach(ticket=> { %>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; cursor: pointer;"
+                            class="ticket-row" data-id="<%= ticket.id %>">
+                            <td
+                                style="padding: 1.25rem 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-gray-light);">
+                                #<%= ticket.id.slice(-6).toUpperCase() %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <div style="font-weight: 500; color: var(--color-white);">
+                                    <%= ticket.user.name %>
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--color-gray-light);">
+                                    <%= ticket.user.email %>
+                                </div>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; font-weight: 500; color: var(--color-white);">
+                                <%= ticket.subject %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <% if(ticket.priority==='HIGH' || ticket.priority==='URGENT' ) { %>
+                                    <span style="color: #EF4444; font-size: 0.85rem; font-weight: 600;"><i
+                                            data-lucide="alert-circle"
+                                            style="width: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                                        <%= ticket.priority %>
+                                    </span>
+                                    <% } else { %>
+                                        <span style="color: var(--color-gray-light); font-size: 0.85rem;">
+                                            <%= ticket.priority %>
+                                        </span>
+                                        <% } %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <% let statusColor, statusBg; switch(ticket.status) { case 'OPEN' :
+                                    statusColor='#3B82F6' ; statusBg='rgba(59, 130, 246, 0.1)' ; break;
+                                    case 'IN_PROGRESS' : statusColor='#F5C518' ; statusBg='rgba(245, 197, 24, 0.1)' ;
+                                    break; case 'RESOLVED' : case 'CLOSED' : statusColor='#10B981' ;
+                                    statusBg='rgba(16, 185, 129, 0.1)' ; break; } %>
+                                    <span
+                                        style="background: <%= statusBg %>; color: <%= statusColor %>; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">
+                                        <%= ticket.status.replace('_', ' ' ) %>
+                                    </span>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; font-size: 0.85rem; color: var(--color-gray-light);">
+                                <%= new Date(ticket.updatedAt).toLocaleDateString() %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; text-align: right;">
+                                <button class="btn btn-outline" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;"
+                                    onclick="adminViewTicket('<%= ticket.id %>')">Manage</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+            <% } else { %>
+                <div style="text-align: center; padding: 4rem 2rem; color: var(--color-gray-light);">
+                    <i data-lucide="check-circle-2"
+                        style="width: 48px; height: 48px; margin-bottom: 1rem; color: var(--color-success, #10B981);"></i>
+                    <p>Inbox zero! No active support tickets.</p>
+                </div>
+                <% } %>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    function adminViewTicket(id) {
+        alert('Admin Ticket management detail view pending: ' + id);
+        // We will build the ticket detail view/reply interface next
+    }
+</script>

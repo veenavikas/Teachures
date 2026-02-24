@@ -1,0 +1,226 @@
+<div class="kpi-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+    <div class="card" style="padding: 1.5rem; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: -20px; right: -20px; opacity: 0.05;">
+            <i data-lucide="life-buoy" style="width: 120px; height: 120px;"></i>
+        </div>
+        <h3 style="font-size: 1rem; color: var(--color-gray-light); margin-bottom: 0.5rem; position: relative;">Support
+            Center</h3>
+        <p style="color: var(--color-white); font-size: 0.95rem; line-height: 1.5; position: relative;">
+            Need help with a course, payment, or technical issue? Open a ticket to get assistance from our support team.
+        </p>
+        <button class="btn btn-primary" onclick="openTicketModal()"
+            style="margin-top: 1rem; width: 100%; position: relative;">
+            <i data-lucide="plus" style="width: 16px; margin-right: 0.5rem;"></i> Open New Ticket
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="card"
+        style="padding: 1.5rem; grid-column: span 2; display: flex; align-items: center; justify-content: space-around;">
+        <div style="text-align: center;">
+            <h4
+                style="font-size: 0.85rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
+                Total Tickets</h4>
+            <span style="font-size: 2.5rem; font-family: var(--font-display); color: var(--color-white);">
+                <%= tickets.length %>
+            </span>
+        </div>
+        <div style="width: 1px; height: 60px; background: var(--glass-border);"></div>
+        <div style="text-align: center;">
+            <h4
+                style="font-size: 0.85rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
+                Open / Pending</h4>
+            <span style="font-size: 2.5rem; font-family: var(--font-display); color: var(--color-primary);">
+                <%= tickets.filter(t=> t.status === 'OPEN' || t.status === 'IN_PROGRESS').length %>
+            </span>
+        </div>
+        <div style="width: 1px; height: 60px; background: var(--glass-border);"></div>
+        <div style="text-align: center;">
+            <h4
+                style="font-size: 0.85rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
+                Resolved</h4>
+            <span style="font-size: 2.5rem; font-family: var(--font-display); color: var(--color-success, #10B981);">
+                <%= tickets.filter(t=> t.status === 'RESOLVED' || t.status === 'CLOSED').length %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="padding: 1.5rem;">
+    <h3
+        style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+        Ticket History
+    </h3>
+
+    <div style="overflow-x: auto;">
+        <% if(tickets && tickets.length> 0) { %>
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr
+                        style="border-bottom: 1px solid var(--glass-border); color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">
+                        <th style="padding: 1rem;">ID</th>
+                        <th style="padding: 1rem;">Subject</th>
+                        <th style="padding: 1rem;">Priority</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Last Updated</th>
+                        <th style="padding: 1rem; text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% tickets.forEach(ticket=> { %>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; cursor: pointer;"
+                            class="ticket-row" data-id="<%= ticket.id %>">
+                            <td
+                                style="padding: 1.25rem 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-gray-light);">
+                                #<%= ticket.id.slice(-6).toUpperCase() %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; font-weight: 500; color: var(--color-white);">
+                                <%= ticket.subject %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <% if(ticket.priority==='HIGH' || ticket.priority==='URGENT' ) { %>
+                                    <span style="color: #EF4444; font-size: 0.85rem; font-weight: 600;"><i
+                                            data-lucide="alert-circle"
+                                            style="width: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                                        <%= ticket.priority %>
+                                    </span>
+                                    <% } else { %>
+                                        <span style="color: var(--color-gray-light); font-size: 0.85rem;">
+                                            <%= ticket.priority %>
+                                        </span>
+                                        <% } %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <% let statusColor, statusBg; switch(ticket.status) { case 'OPEN' :
+                                    statusColor='#3B82F6' ; statusBg='rgba(59, 130, 246, 0.1)' ; break;
+                                    case 'IN_PROGRESS' : statusColor='#F5C518' ; statusBg='rgba(245, 197, 24, 0.1)' ;
+                                    break; case 'RESOLVED' : case 'CLOSED' : statusColor='#10B981' ;
+                                    statusBg='rgba(16, 185, 129, 0.1)' ; break; } %>
+                                    <span
+                                        style="background: <%= statusBg %>; color: <%= statusColor %>; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px;">
+                                        <%= ticket.status.replace('_', ' ' ) %>
+                                    </span>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; font-size: 0.85rem; color: var(--color-gray-light);">
+                                <%= new Date(ticket.updatedAt).toLocaleDateString() %>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; text-align: right;">
+                                <button class="btn btn-outline" style="padding: 0.4rem 0.75rem; font-size: 0.75rem;"
+                                    onclick="viewTicket('<%= ticket.id %>')">View</button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+            <% } else { %>
+                <div style="text-align: center; padding: 4rem 2rem; color: var(--color-gray-light);">
+                    <i data-lucide="inbox" style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>You have no support tickets.</p>
+                </div>
+                <% } %>
+    </div>
+</div>
+
+<!-- New Ticket Modal -->
+<div id="newTicketModal" class="modal"
+    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+    <div class="card" style="width: 500px; padding: 2rem; position: relative;">
+        <button onclick="closeTicketModal()"
+            style="position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: var(--color-gray-light); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+        <h3 style="margin-bottom: 0.5rem; font-family: var(--font-heading); font-size: 1.5rem;">Open a Support Ticket
+        </h3>
+        <p style="color: var(--color-gray-light); font-size: 0.9rem; margin-bottom: 2rem;">Please provide details so we
+            can assist you quickly.</p>
+
+        <form id="ticketForm">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label
+                    style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Subject
+                    *</label>
+                <input type="text" id="ticketSubject" required
+                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px;"
+                    placeholder="Brief summary of your issue">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label
+                    style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Priority</label>
+                <select id="ticketPriority"
+                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px; appearance: none;">
+                    <option value="LOW" style="background: var(--color-black);">Low - General Inquiry</option>
+                    <option value="MEDIUM" style="background: var(--color-black);" selected>Medium - Issue with a course
+                        or feature</option>
+                    <option value="HIGH" style="background: var(--color-black);">High - Blocking me from learning
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label
+                    style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Description
+                    *</label>
+                <textarea id="ticketDesc" rows="5" required
+                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px;"
+                    placeholder="Please describe the issue in detail..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-outline" onclick="closeTicketModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="submitTicketBtn">Submit Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('newTicketModal');
+
+    function openTicketModal() {
+        modal.style.display = 'flex';
+    }
+
+    function closeTicketModal() {
+        modal.style.display = 'none';
+        document.getElementById('ticketForm').reset();
+    }
+
+    document.getElementById('ticketForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitTicketBtn');
+        const subject = document.getElementById('ticketSubject').value;
+        const priority = document.getElementById('ticketPriority').value;
+        const description = document.getElementById('ticketDesc').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin" style="width: 16px; margin-right: 8px;"></i> Submitting...';
+        lucide.createIcons();
+
+        try {
+            const res = await fetch('/api/v1/support', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subject, priority, description })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to create ticket');
+                btn.disabled = false;
+                btn.innerText = 'Submit Ticket';
+            }
+        } catch (err) {
+            alert('Connection error');
+            btn.disabled = false;
+            btn.innerText = 'Submit Ticket';
+        }
+    });
+
+    function viewTicket(id) {
+        // We will build the ticket detail view next
+        alert('Ticket viewer pending implementation for ID: ' + id);
+    }
+</script>

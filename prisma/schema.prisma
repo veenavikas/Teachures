@@ -1,0 +1,377 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── TENANT (for multi-tenancy) ──────────────────────────
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  plan        Plan     @default(FREE)
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  users       User[]
+  courses     Course[]
+}
+
+// ─── USER ────────────────────────────────────────────────
+model User {
+  id              String       @id @default(cuid())
+  tenantId        String?
+  tenant          Tenant?      @relation(fields: [tenantId], references: [id])
+  email           String       @unique
+  passwordHash    String?
+  name            String
+  avatar          String?
+  role            Role         @default(LEARNER)
+  isVerified      Boolean      @default(false)
+  twoFactorEnabled Boolean     @default(false)
+  twoFactorSecret String?
+  oauthProvider   String?
+  oauthId         String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  trainerProfile  TrainerProfile?
+  enrollments     Enrollment[]
+  certificates    Certificate[]
+  quizAttempts    QuizAttempt[]
+  courseProgress  CourseProgress[]
+  badges          UserBadge[]
+  supportTickets  SupportTicket[]
+  consent         ConsentLog[]
+  notifications   Notification[]
+  coursesCreated  Course[]       @relation("TrainerCourses")
+  ratings         CourseRating[]
+  payments        Payment[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model TrainerProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  bio         String?
+  expertise   String[]
+  website     String?
+  payoutEmail String?
+  totalRevenue Float   @default(0)
+  paypalAccountId String?
+  isApproved  Boolean  @default(false)
+}
+
+// ─── COURSE ──────────────────────────────────────────────
+model Course {
+  id            String       @id @default(cuid())
+  tenantId      String?
+  tenant        Tenant?      @relation(fields: [tenantId], references: [id])
+  trainerId     String
+  trainer       User         @relation("TrainerCourses", fields: [trainerId], references: [id])
+  title         String
+  slug          String       @unique
+  description   String
+  thumbnailUrl  String?
+  previewVideoUrl String?
+  category      String
+  tags          String[]
+  level         Level        @default(BEGINNER)
+  language      String       @default("en")
+  price         Float        @default(0)
+  isFree        Boolean      @default(false)
+  isPublished   Boolean      @default(false)
+  totalDuration Int          @default(0) // seconds
+  totalLessons  Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  sections      Section[]
+  enrollments   Enrollment[]
+  ratings       CourseRating[]
+  certificates  Certificate[]
+  progress      CourseProgress[]
+
+  @@index([trainerId])
+  @@index([isPublished])
+  @@index([category])
+  @@index([slug])
+}
+
+model Section {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  title     String
+  order     Int
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id            String      @id @default(cuid())
+  sectionId     String
+  section       Section     @relation(fields: [sectionId], references: [id])
+  title         String
+  order         Int
+  type          LessonType  @default(VIDEO)
+  videoUrl      String?     // S3 key (NOT direct URL)
+  videoDuration Int?        // seconds
+  content       String?     // Rich text / markdown
+  attachments   Json?       // Array of {name, url}
+  isPreview     Boolean     @default(false)
+  quiz          Quiz?
+  progress      LessonProgress[]
+}
+
+// ─── QUIZ ────────────────────────────────────────────────
+model Quiz {
+  id           String        @id @default(cuid())
+  lessonId     String        @unique
+  lesson       Lesson        @relation(fields: [lessonId], references: [id])
+  title        String
+  passingScore Int           @default(70) // percentage
+  timeLimit    Int?          // seconds
+  questions    Question[]
+  attempts     QuizAttempt[]
+}
+
+model Question {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  text      String
+  type      QuestionType @default(MCQ)
+  options   Json     // [{id, text, isCorrect}]
+  order     Int
+  points    Int      @default(1)
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id])
+  answers     Json     // {questionId: selectedOptionId}
+  score       Float
+  passed      Boolean
+  completedAt DateTime @default(now())
+}
+
+// ─── ENROLLMENT & PROGRESS ───────────────────────────────
+model Enrollment {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  courseId    String
+  course      Course           @relation(fields: [courseId], references: [id])
+  enrolledAt  DateTime         @default(now())
+  paymentId   String?
+  payment     Payment?         @relation(fields: [paymentId], references: [id])
+  
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model CourseProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+  completedLessons Int     @default(0)
+  percentComplete Float    @default(0)
+  lastAccessedAt  DateTime @default(now())
+  completedAt     DateTime?
+  
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  watchedSeconds Int   @default(0)
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  @@unique([userId, lessonId])
+}
+
+// ─── PAYMENTS ────────────────────────────────────────────
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  paypalPaymentId String        @unique
+  amount          Float
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  type            PaymentType   @default(ONE_TIME)
+  createdAt       DateTime      @default(now())
+  enrollments     Enrollment[]
+}
+
+// ─── CERTIFICATES ─────────────────────────────────────────
+model Certificate {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id])
+  pdfUrl     String
+  issuedAt   DateTime @default(now())
+  verifyCode String   @unique @default(cuid())
+  @@unique([userId, courseId])
+}
+
+// ─── GAMIFICATION ─────────────────────────────────────────
+model Badge {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  iconUrl     String
+  condition   String      // e.g. "complete_5_courses"
+  points      Int         @default(10)
+  users       UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  awardedAt DateTime @default(now())
+  @@unique([userId, badgeId])
+}
+
+// ─── RATINGS ──────────────────────────────────────────────
+model CourseRating {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  rating    Int      // 1-5
+  review    String?
+  createdAt DateTime @default(now())
+  @@unique([userId, courseId])
+}
+
+// ─── SUPPORT ──────────────────────────────────────────────
+model SupportTicket {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  subject     String
+  description String
+  status      TicketStatus  @default(OPEN)
+  priority    Priority      @default(MEDIUM)
+  messages    TicketMessage[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model TicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id])
+  senderId  String
+  message   String
+  createdAt DateTime      @default(now())
+}
+
+// ─── COMPLIANCE ───────────────────────────────────────────
+model ConsentLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // "gdpr", "ccpa", "marketing"
+  accepted    Boolean
+  ipAddress   String
+  userAgent   String
+  createdAt   DateTime @default(now())
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   // "course", "payment", "badge", "system"
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+}
+
+// ─── ENUMS ────────────────────────────────────────────────
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  TRAINER
+  LEARNER
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum LessonType {
+  VIDEO
+  ARTICLE
+  QUIZ
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentType {
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}

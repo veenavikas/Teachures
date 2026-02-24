@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | Teachures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .pricing-hero {
+            text-align: center;
+            padding: 5rem 2rem 3rem;
+        }
+
+        .pricing-hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(3rem, 6vw, 5rem);
+            letter-spacing: 2px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .toggle {
+            width: 48px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            border: none;
+        }
+
+        .toggle-knob {
+            width: 20px;
+            height: 20px;
+            background: #F5C518;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 0 6rem;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .plan-card:hover {
+            border-color: rgba(245, 197, 24, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .plan-card.featured {
+            background: rgba(245, 197, 24, 0.04);
+            border-color: rgba(245, 197, 24, 0.25);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #F5C518;
+            color: #000;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 4px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .plan-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #F5C518;
+            margin-bottom: 1rem;
+        }
+
+        .plan-price {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            letter-spacing: 1px;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .plan-period {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .plan-desc {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .feature-list li svg {
+            width: 18px;
+            height: 18px;
+            color: #F5C518;
+            flex-shrink: 0;
+        }
+
+        .feature-list li.muted {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-list li.muted svg {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .plan-cta {
+            display: block;
+            width: 100%;
+            padding: 0.9rem;
+            text-align: center;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .plan-cta.primary {
+            background: linear-gradient(135deg, #F5C518, #D4AA00);
+            color: #000;
+        }
+
+        .plan-cta.primary:hover {
+            box-shadow: 0 8px 20px rgba(245, 197, 24, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .plan-cta.outline {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .plan-cta.outline:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #fff;
+        }
+
+        .faq-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1.5rem 0;
+            cursor: pointer;
+        }
+
+        .faq-q {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .faq-q svg {
+            width: 20px;
+            height: 20px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .faq-a {
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.7;
+            margin-top: 1rem;
+            display: none;
+            font-size: 0.93rem;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <main>
+            <div class="pricing-hero container">
+                <p
+                    style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                    Transparent Pricing</p>
+                <h1>Simple Plans.<br><span
+                        style="background:linear-gradient(135deg,#F5C518,#FFD700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">No
+                        Surprises.</span></h1>
+                <p
+                    style="color:rgba(255,255,255,0.4); margin-top:1rem; font-size:1.1rem; max-width:500px; margin-left:auto; margin-right:auto;">
+                    Start for free. Scale when ready. Cancel anytime.</p>
+            </div>
+
+            <div class="container">
+                <div class="plans-grid">
+                    <!-- Free Plan -->
+                    <div class="plan-card">
+                        <p class="plan-name">Starter</p>
+                        <div class="plan-price">$0</div>
+                        <p class="plan-period">forever free</p>
+                        <p class="plan-desc">Perfect to explore and start your first course.</p>
+                        <ul class="feature-list">
+                            <li><i data-lucide="check"></i> Access 50+ free courses</li>
+                            <li><i data-lucide="check"></i> Community forum access</li>
+                            <li><i data-lucide="check"></i> Progress tracking</li>
+                            <li class="muted"><i data-lucide="x"></i> Certificates of completion</li>
+                            <li class="muted"><i data-lucide="x"></i> Premium courses</li>
+                            <li class="muted"><i data-lucide="x"></i> Offline access</li>
+                        </ul>
+                        <a href="/register" class="plan-cta outline">Get Started Free</a>
+                    </div>
+
+                    <!-- Pro Plan -->
+                    <div class="plan-card featured">
+                        <span class="plan-badge">Most Popular</span>
+                        <p class="plan-name">Pro</p>
+                        <div class="plan-price">$29</div>
+                        <p class="plan-period">per month</p>
+                        <p class="plan-desc">Everything you need to learn fast and get certified.</p>
+                        <ul class="feature-list">
+                            <li><i data-lucide="check"></i> Access ALL 400+ courses</li>
+                            <li><i data-lucide="check"></i> Verified certificates</li>
+                            <li><i data-lucide="check"></i> Download for offline</li>
+                            <li><i data-lucide="check"></i> Priority support</li>
+                            <li><i data-lucide="check"></i> Gamification & badges</li>
+                            <li class="muted"><i data-lucide="x"></i> Team management</li>
+                        </ul>
+                        <a href="/register" class="plan-cta primary">Start 14-Day Trial</a>
+                    </div>
+
+                    <!-- Team Plan -->
+                    <div class="plan-card">
+                        <p class="plan-name">Teams</p>
+                        <div class="plan-price">$79</div>
+                        <p class="plan-period">per seat / month</p>
+                        <p class="plan-desc">Built for organizations that take learning seriously.</p>
+                        <ul class="feature-list">
+                            <li><i data-lucide="check"></i> Everything in Pro</li>
+                            <li><i data-lucide="check"></i> Team analytics dashboard</li>
+                            <li><i data-lucide="check"></i> Custom course builder</li>
+                            <li><i data-lucide="check"></i> SSO / SCIM integration</li>
+                            <li><i data-lucide="check"></i> Dedicated account manager</li>
+                            <li><i data-lucide="check"></i> SLA guarantee</li>
+                        </ul>
+                        <a href="mailto:sales@teachures.com" class="plan-cta outline">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="faq-section">
+                <h2
+                    style="font-family:'Bebas Neue',sans-serif; font-size:3rem; text-align:center; margin-bottom:2.5rem; letter-spacing:1px;">
+                    FAQ</h2>
+
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Can I cancel anytime? <i data-lucide="chevron-down"></i></div>
+                    <div class="faq-a">Yes, absolutely. You can cancel your subscription at any time from your account
+                        settings. No questions asked, no hidden fees.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Is there a free trial? <i data-lucide="chevron-down"></i></div>
+                    <div class="faq-a">Pro plans come with a 14-day free trial. No credit card required to start.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Do certificates expire? <i data-lucide="chevron-down"></i></div>
+                    <div class="faq-a">No. All Teachures certificates are issued permanently and include a verification
+                        link that never expires.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q">Can I become an instructor? <i data-lucide="chevron-down"></i></div>
+                    <div class="faq-a">Yes! Register as a Trainer and start creating courses immediately. Earn revenue
+                        on every enrollment.</div>
+                </div>
+            </div>
+        </main>
+
+        <%- include('../partials/footer') %>
+            <script>lucide.createIcons();</script>
+            <script>
+                function toggleFaq(el) {
+                    const ans = el.querySelector('.faq-a');
+                    ans.style.display = ans.style.display === 'block' ? 'none' : 'block';
+                }
+            </script>
+</body>
+
+</html>

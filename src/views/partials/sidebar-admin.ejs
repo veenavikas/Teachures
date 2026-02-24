@@ -1,0 +1,21 @@
+<a href="/admin/dashboard" class="nav-item <%= path === '/admin/dashboard' ? 'active' : '' %>">
+    <i data-lucide="pie-chart"></i> Overview
+</a>
+<a href="/admin/users" class="nav-item <%= path.startsWith('/admin/users') ? 'active' : '' %>">
+    <i data-lucide="users"></i> Manage Users
+</a>
+<a href="/admin/trainers" class="nav-item <%= path.startsWith('/admin/trainers') ? 'active' : '' %>">
+    <i data-lucide="briefcase"></i> Trainers
+</a>
+<a href="/admin/courses" class="nav-item <%= path.startsWith('/admin/courses') ? 'active' : '' %>">
+    <i data-lucide="library"></i> All Courses
+</a>
+<a href="/admin/revenue" class="nav-item <%= path === '/admin/revenue' ? 'active' : '' %>">
+    <i data-lucide="credit-card"></i> Revenue
+</a>
+<a href="/admin/support" class="nav-item <%= path.startsWith('/admin/support') ? 'active' : '' %>">
+    <i data-lucide="life-buoy"></i> Support
+</a>
+<a href="/admin/settings" class="nav-item <%= path === '/admin/settings' ? 'active' : '' %>">
+    <i data-lucide="settings"></i> Settings
+</a>
