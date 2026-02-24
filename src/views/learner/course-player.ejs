@@ -223,7 +223,8 @@
                                                 <i data-lucide="circle" class="text-muted lesson-icon"></i>
                                                 <% } %>
                                                     <span
-                                                        style="font-size: 0.9rem; color: <%= (sIdx === 0 && lIdx === 0) ? 'var(--color-white)' : 'var(--color-gray-light)' %>">
+                                                        class="<%= (sIdx === 0 && lIdx === 0) ? 'text-white' : 'text-muted' %>"
+                                                        style="font-size: 0.9rem;">
                                                         <%= lIdx + 1 %>. <%= lesson.title %>
                                                     </span>
                                     </div>
