@@ -51,6 +51,19 @@ exports.register = async (req, res) => {
             await prisma.instructorProfile.create({ data: { userId: user.id } });
         }
 
+        // Do not auto-login if it's an unapproved instructor
+        if (user.role === 'INSTRUCTOR') {
+            const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
+            if (!isApiCall) {
+                return res.redirect('/login?error=instructor_pending');
+            }
+            return res.status(201).json({
+                success: true,
+                message: 'Instructor registration successful. Pending admin approval.',
+                data: { user: { id: user.id, name: user.name, email: user.email, role: user.role } }
+            });
+        }
+
         const tokens = generateTokens(user);
 
         // Set both tokens as cookies
@@ -72,7 +85,7 @@ exports.register = async (req, res) => {
         // For browser form submissions, redirect to dashboard
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
-            const dashboard = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/wp-admin/dashboard' : '/student/dashboard';
+            const dashboard = user.role === 'ADMINISTRATOR' ? '/wp-admin/dashboard' : '/student/dashboard';
             return res.redirect(dashboard);
         }
 

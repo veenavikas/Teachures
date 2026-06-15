@@ -202,4 +202,26 @@ router.post('/moderation/:id/approve', async (req, res) => {
     }
 });
 
+// Placeholder Routes for missing tabs
+router.get('/instructors', (req, res) => {
+    res.render('admin/coming-soon', {
+        layout: 'layouts/dashboard', title: 'Instructors', path: '/wp-admin/instructors', user: req.user, sidebarPartial: '../partials/sidebar-admin'
+    });
+});
+router.get('/courses', (req, res) => {
+    res.render('admin/coming-soon', {
+        layout: 'layouts/dashboard', title: 'Courses', path: '/wp-admin/courses', user: req.user, sidebarPartial: '../partials/sidebar-admin'
+    });
+});
+router.get('/revenue', (req, res) => {
+    res.render('admin/coming-soon', {
+        layout: 'layouts/dashboard', title: 'Revenue', path: '/wp-admin/revenue', user: req.user, sidebarPartial: '../partials/sidebar-admin'
+    });
+});
+router.get('/settings', (req, res) => {
+    res.render('admin/coming-soon', {
+        layout: 'layouts/dashboard', title: 'Settings', path: '/wp-admin/settings', user: req.user, sidebarPartial: '../partials/sidebar-admin'
+    });
+});
+
 module.exports = router;
