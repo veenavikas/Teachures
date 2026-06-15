@@ -1,6 +1,8 @@
 <h2 class="form-title">Welcome back</h2>
 <p class="form-subtitle">Log in to access your dashboard.</p>
 
+<div id="error-message" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #EF4444; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;"></div>
+
 <form action="/api/v1/auth/login" method="POST">
     <div class="form-group">
         <label class="form-label">Email Address</label>
@@ -50,5 +52,16 @@
         toggleBtn.addEventListener('click', function () {
             passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
         });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const errorDiv = document.getElementById('error-message');
+    if (error === 'instructor_pending') {
+        errorDiv.textContent = 'Your Instructor account is currently pending admin approval.';
+        errorDiv.style.display = 'block';
+    } else if (error === 'invalid_credentials') {
+        errorDiv.textContent = 'Invalid email or password. Please try again.';
+        errorDiv.style.display = 'block';
     }
 </script>

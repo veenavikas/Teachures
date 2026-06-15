@@ -108,6 +108,16 @@ exports.login = async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
+        if (user.role === 'INSTRUCTOR') {
+            const profile = await prisma.instructorProfile.findUnique({ where: { userId: user.id } });
+            if (profile && !profile.isApproved) {
+                if (req.accepts('html') && !req.headers['x-requested-with']) {
+                    return res.redirect('/login?error=instructor_pending');
+                }
+                return res.status(403).json({ success: false, message: 'Instructor account pending admin approval.' });
+            }
+        }
+
         // 2FA Verification during Login
         if (user.twoFactorEnabled) {
             const { twoFactorCode } = req.body;
