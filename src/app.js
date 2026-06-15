@@ -118,7 +118,7 @@ app.use('/api/v1/cms', cmsRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/instructor', instructorRoutes);
 app.use('/student', studentRoutes);
-app.use('/admin', adminRoutes);
+app.use('/wp-admin', adminRoutes);
 app.use('/', publicRoutes);
 
 // Start Server

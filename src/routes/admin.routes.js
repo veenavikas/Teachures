@@ -91,7 +91,7 @@ router.get('/pages', async (req, res) => {
         res.render('admin/pages/index', {
             layout: 'layouts/dashboard',
             title: 'Manage Pages',
-            path: '/admin/pages',
+            path: '/wp-admin/pages',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             pages
@@ -105,7 +105,7 @@ router.get('/pages/new', (req, res) => {
     res.render('admin/pages/edit', {
         layout: 'layouts/dashboard',
         title: 'Create Page',
-        path: '/admin/pages',
+        path: '/wp-admin/pages',
         user: req.user,
         sidebarPartial: '../partials/sidebar-admin',
         page: null
@@ -119,7 +119,7 @@ router.get('/pages/:id/edit', async (req, res) => {
         res.render('admin/pages/edit', {
             layout: 'layouts/dashboard',
             title: 'Edit Page',
-            path: '/admin/pages',
+            path: '/wp-admin/pages',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             page
@@ -138,7 +138,7 @@ router.get('/users', async (req, res) => {
         res.render('admin/users', {
             layout: 'layouts/dashboard',
             title: 'User Management',
-            path: '/admin/users',
+            path: '/wp-admin/users',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             users
@@ -155,7 +155,7 @@ router.post('/users/:id/role', async (req, res) => {
             where: { id: req.params.id },
             data: { role }
         });
-        res.redirect('/admin/users');
+        res.redirect('/wp-admin/users');
     } catch (error) {
         res.status(500).send('Server Error');
     }
@@ -172,7 +172,7 @@ router.get('/moderation', async (req, res) => {
         res.render('admin/moderation', {
             layout: 'layouts/dashboard',
             title: 'Content Moderation',
-            path: '/admin/moderation',
+            path: '/wp-admin/moderation',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             courses
@@ -196,7 +196,7 @@ router.post('/moderation/:id/approve', async (req, res) => {
             await createNotification(course.instructorId, 'Course Approved! 🎉', `Your course "${course.title}" has been approved and is now live!`, `/courses/${course.slug}`);
         }
         
-        res.redirect('/admin/moderation');
+        res.redirect('/wp-admin/moderation');
     } catch (error) {
         res.status(500).send('Server Error');
     }

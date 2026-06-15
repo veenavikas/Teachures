@@ -10,7 +10,7 @@ router.get('/instructor/overview', requireRole('INSTRUCTOR'), analyticsControlle
 router.get('/instructor/courses/:courseId', requireRole('INSTRUCTOR'), analyticsController.getCourseAnalytics);
 
 // --- ADMIN ROUTES ---
-router.get('/admin/platform', requireRole('ADMINISTRATOR'), analyticsController.getPlatformAnalytics);
-router.get('/admin/revenue', requireRole('ADMINISTRATOR'), analyticsController.getRevenueAnalytics);
+router.get('/wp-admin/platform', requireRole('ADMINISTRATOR'), analyticsController.getPlatformAnalytics);
+router.get('/wp-admin/revenue', requireRole('ADMINISTRATOR'), analyticsController.getRevenueAnalytics);
 
 module.exports = router;

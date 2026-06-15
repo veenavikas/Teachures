@@ -1,6 +1,6 @@
 <div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h2><%= page ? 'Edit Page' : 'Create New Page' %></h2>
-    <a href="/admin/pages" class="btn btn-outline">Back</a>
+    <a href="/wp-admin/pages" class="btn btn-outline">Back</a>
 </div>
 
 <div class="card" style="max-width: 800px;">
@@ -70,7 +70,7 @@
             const result = await res.json();
 
             if (result.success) {
-                window.location.href = '/admin/pages';
+                window.location.href = '/wp-admin/pages';
             } else {
                 alert('Error: ' + result.message);
             }
