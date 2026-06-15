@@ -506,3 +506,66 @@ footer {
 .mobile-menu-btn {
     display: none;
 }
+
+/* ==================================================
+   FORM & DASHBOARD STYLES
+   ================================================== */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.85rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.2);
+}
+
+/* Dashboard Dark Theme Overrides */
+.dashboard-body .card {
+    background: #1A1A1A; /* Solid dark card for dashboard */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: #F8FAFC;
+}
+
+.dashboard-body .form-label {
+    color: #E2E8F0;
+}
+
+.dashboard-body .form-control {
+    background: #242424;
+    border: 1px solid #333333;
+    color: #F8FAFC;
+}
+
+.dashboard-body .form-control:focus {
+    border-color: var(--color-primary);
+    background: #2A2A2A;
+}
+
+.dashboard-body .text-muted {
+    color: #94A3B8;
+}
+
+.dashboard-body .card h3 {
+    color: #F8FAFC;
+}
