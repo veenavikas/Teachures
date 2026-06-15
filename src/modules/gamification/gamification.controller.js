@@ -59,6 +59,55 @@ exports.getAllBadges = async (req, res) => {
     }
 };
 
+// --- UTILITIES FOR POINTS & BADGES ---
+
+exports.awardPoints = async (userId, amount) => {
+    try {
+        const user = await prisma.user.update({
+            where: { id: userId },
+            data: { totalPoints: { increment: amount } }
+        });
+        await this.checkAndAwardBadges(userId);
+        return user.totalPoints;
+    } catch (error) {
+        console.error('Failed to award points:', error);
+    }
+};
+
+exports.checkAndAwardBadges = async (userId) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { badges: true, quizAttempts: true, progress: true }
+        });
+
+        const availableBadges = await prisma.badge.findMany();
+
+        for (const badge of availableBadges) {
+            const hasBadge = user.badges.find(b => b.badgeId === badge.id);
+            if (!hasBadge) {
+                let shouldAward = false;
+
+                // Example logic based on conditions
+                if (badge.condition === 'first_quiz_passed' && user.quizAttempts.some(q => q.passed)) {
+                    shouldAward = true;
+                } else if (badge.condition === '100_points' && user.totalPoints >= 100) {
+                    shouldAward = true;
+                }
+
+                if (shouldAward) {
+                    await prisma.userBadge.create({
+                        data: { userId, badgeId: badge.id }
+                    });
+                    await createNotification(userId, 'New Badge Unlocked! 🏆', `You earned the "${badge.name}" badge.`, '/student/profile');
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to check and award badges:', error);
+    }
+};
+
 exports.getMyBadges = async (req, res) => {
     try {
         const userBadges = await prisma.userBadge.findMany({
@@ -73,42 +122,19 @@ exports.getMyBadges = async (req, res) => {
 
 exports.getLeaderboard = async (req, res) => {
     try {
-        // Simple aggregate: sum of badge points per user
-        // Due to prisma limitations with summing relational data directly without group by easily,
-        // we fetch and map or use raw query. For MVP, we'll fetch UserBadges.
-
         const users = await prisma.user.findMany({
-            where: { role: 'LEARNER' },
+            where: { role: 'STUDENT' },
             select: {
                 id: true,
                 name: true,
                 avatar: true,
-                badges: {
-                    select: {
-                        badge: {
-                            select: { points: true }
-                        }
-                    }
-                }
-            }
+                totalPoints: true
+            },
+            orderBy: { totalPoints: 'desc' },
+            take: 10
         });
 
-        // Calculate points
-        const leaderboard = users.map(user => {
-            const points = user.badges.reduce((sum, ub) => sum + ub.badge.points, 0);
-            return {
-                id: user.id,
-                name: user.name,
-                avatar: user.avatar,
-                points
-            };
-        });
-
-        // Sort descending by points, limit to top 10
-        leaderboard.sort((a, b) => b.points - a.points);
-        const top10 = leaderboard.slice(0, 10);
-
-        res.json({ success: true, data: top10 });
+        res.json({ success: true, data: users });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

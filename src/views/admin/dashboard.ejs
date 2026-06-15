@@ -58,9 +58,8 @@
         <h3
             style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
             Revenue (Last 30 Days)</h3>
-        <div
-            style="height: 300px; width: 100%; border: 1px dashed var(--color-gray-mid); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-light);">
-            [Chart.js Line Chart Placeholder]
+        <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="revenueChart"></canvas>
         </div>
     </div>
 
@@ -69,12 +68,50 @@
         <h3
             style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
             User Roles</h3>
-        <div
-            style="height: 300px; width: 100%; border: 1px dashed var(--color-gray-mid); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-light);">
-            [Chart.js Doughnut Chart Placeholder]
+        <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="rolesChart"></canvas>
+            <script id="rolesData" type="application/json"><%- stats.roleDistribution || '[]' %></script>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Roles Chart
+    const rolesData = JSON.parse(document.getElementById('rolesData').textContent);
+    if(rolesData.length > 0 && document.getElementById('rolesChart')) {
+        new Chart(document.getElementById('rolesChart'), {
+            type: 'doughnut',
+            data: {
+                labels: rolesData.map(d => d.label),
+                datasets: [{
+                    data: rolesData.map(d => d.value),
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // Revenue Chart (Placeholder data but real implementation)
+    if(document.getElementById('revenueChart')) {
+        new Chart(document.getElementById('revenueChart'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [1200, 1900, 3000, 2400], // To be fully dynamic later
+                    borderColor: '#10b981',
+                    tension: 0.1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+});
+</script>
 
 <!-- Recent Enrollments Table -->
 <div class="card" style="margin-top: 1.5rem; padding: 1.5rem;">

@@ -1,0 +1,81 @@
+<div class="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="px-6 py-8 sm:p-10">
+            <div class="text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 tracking-tight">Trainer Onboarding</h2>
+                <p class="mt-4 text-lg text-gray-500">Complete your profile to start creating courses and earning revenue.</p>
+            </div>
+
+            <form id="onboardingForm" class="mt-12 space-y-8" action="/instructor/onboarding" method="POST">
+                <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
+                    <div class="sm:col-span-2">
+                        <label for="bio" class="block text-sm font-medium text-gray-700">Short Bio</label>
+                        <div class="mt-1">
+                            <textarea id="bio" name="bio" rows="4" class="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border border-gray-300 rounded-md" placeholder="Tell students about your background and experience..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="expertise" class="block text-sm font-medium text-gray-700">Expertise (Comma separated)</label>
+                        <div class="mt-1">
+                            <input type="text" name="expertise" id="expertise" class="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" placeholder="e.g. JavaScript, Python, Data Science">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-1">
+                        <label for="website" class="block text-sm font-medium text-gray-700">Personal Website / Portfolio</label>
+                        <div class="mt-1">
+                            <input type="url" name="website" id="website" class="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" placeholder="https://">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-1">
+                        <label for="paypalAccountId" class="block text-sm font-medium text-gray-700">PayPal Email (for payouts)</label>
+                        <div class="mt-1">
+                            <input type="email" name="paypalAccountId" id="paypalAccountId" required class="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" placeholder="payouts@example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sm:col-span-2 mt-8">
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Submit Profile for Approval
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Convert expertise string to array
+    if(data.expertise) {
+        data.expertise = data.expertise.split(',').map(item => item.trim()).filter(Boolean);
+    } else {
+        data.expertise = [];
+    }
+
+    try {
+        const response = await fetch('/instructor/onboarding', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Onboarding submitted successfully! Redirecting to dashboard...');
+            window.location.href = '/instructor/dashboard';
+        } else {
+            alert(result.message || 'Error submitting onboarding form');
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+    }
+});
+</script>

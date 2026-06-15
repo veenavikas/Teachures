@@ -30,17 +30,18 @@ model User {
   passwordHash    String?
   name            String
   avatar          String?
-  role            Role         @default(LEARNER)
+  role            Role         @default(SUBSCRIBER)
   isVerified      Boolean      @default(false)
   twoFactorEnabled Boolean     @default(false)
   twoFactorSecret String?
   oauthProvider   String?
   oauthId         String?
+  totalPoints     Int          @default(0)
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
   // Relations
-  trainerProfile  TrainerProfile?
+  instructorProfile InstructorProfile?
   enrollments     Enrollment[]
   certificates    Certificate[]
   quizAttempts    QuizAttempt[]
@@ -49,15 +50,18 @@ model User {
   supportTickets  SupportTicket[]
   consent         ConsentLog[]
   notifications   Notification[]
-  coursesCreated  Course[]       @relation("TrainerCourses")
+  coursesCreated  Course[]       @relation("InstructorCourses")
   ratings         CourseRating[]
   payments        Payment[]
+  assignmentSubmissions AssignmentSubmission[]
+  qnas            CourseQnA[]
+  qnaReplies      QnaReply[]
 
   @@index([email])
   @@index([role])
 }
 
-model TrainerProfile {
+model InstructorProfile {
   id          String   @id @default(cuid())
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
@@ -75,8 +79,8 @@ model Course {
   id            String       @id @default(cuid())
   tenantId      String?
   tenant        Tenant?      @relation(fields: [tenantId], references: [id])
-  trainerId     String
-  trainer       User         @relation("TrainerCourses", fields: [trainerId], references: [id])
+  instructorId  String
+  instructor    User         @relation("InstructorCourses", fields: [instructorId], references: [id])
   title         String
   slug          String       @unique
   description   String
@@ -99,8 +103,10 @@ model Course {
   ratings       CourseRating[]
   certificates  Certificate[]
   progress      CourseProgress[]
+  qnas          CourseQnA[]
+  coupons       Coupon[]
 
-  @@index([trainerId])
+  @@index([instructorId])
   @@index([isPublished])
   @@index([category])
   @@index([slug])
@@ -128,7 +134,36 @@ model Lesson {
   attachments   Json?       // Array of {name, url}
   isPreview     Boolean     @default(false)
   quiz          Quiz?
+  assignment    Assignment?
   progress      LessonProgress[]
+  qnas          CourseQnA[]
+}
+
+// ─── ASSIGNMENTS ─────────────────────────────────────────
+model Assignment {
+  id          String   @id @default(cuid())
+  lessonId    String   @unique
+  lesson      Lesson   @relation(fields: [lessonId], references: [id])
+  title       String
+  description String?
+  fileTypes   String[] // e.g., ["pdf", "doc", "zip"]
+  deadline    DateTime?
+  submissions AssignmentSubmission[]
+}
+
+model AssignmentSubmission {
+  id           String      @id @default(cuid())
+  assignmentId String
+  assignment   Assignment  @relation(fields: [assignmentId], references: [id])
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  fileUrl      String      // S3 key or URL
+  status       SubmissionStatus @default(PENDING)
+  grade        Float?
+  feedback     String?
+  submittedAt  DateTime    @default(now())
+
+  @@unique([assignmentId, userId])
 }
 
 // ─── QUIZ ────────────────────────────────────────────────
@@ -320,10 +355,10 @@ model Notification {
 
 // ─── ENUMS ────────────────────────────────────────────────
 enum Role {
-  SUPER_ADMIN
-  ADMIN
-  TRAINER
-  LEARNER
+  ADMINISTRATOR
+  INSTRUCTOR
+  STUDENT
+  SUBSCRIBER
 }
 
 enum Plan {
@@ -342,6 +377,7 @@ enum LessonType {
   VIDEO
   ARTICLE
   QUIZ
+  ASSIGNMENT
 }
 
 enum QuestionType {
@@ -374,4 +410,63 @@ enum Priority {
   MEDIUM
   HIGH
   URGENT
+}
+
+enum SubmissionStatus {
+  PENDING
+  GRADED
+  REJECTED
+}
+
+// ─── PAGES (CMS) ──────────────────────────────────────────
+model Page {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  content   String   // Storing raw HTML/Rich Text
+  seoTitle  String?
+  seoDesc   String?
+  isDraft   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Q&A FORUMS ───────────────────────────────────────────
+model CourseQnA {
+  id        String      @id @default(cuid())
+  courseId  String
+  course    Course      @relation(fields: [courseId], references: [id])
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  lessonId  String?
+  lesson    Lesson?     @relation(fields: [lessonId], references: [id])
+  question  String
+  details   String?
+  createdAt DateTime    @default(now())
+  replies   QnaReply[]
+}
+
+model QnaReply {
+  id        String    @id @default(cuid())
+  qnaId     String
+  qna       CourseQnA @relation(fields: [qnaId], references: [id])
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  answer    String
+  isAnswer  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+// ─── COUPONS & DISCOUNTS ──────────────────────────────────
+model Coupon {
+  id                 String   @id @default(cuid())
+  code               String   @unique
+  discountPercentage Float?
+  discountAmount     Float?
+  maxUses            Int?
+  usesCount          Int      @default(0)
+  expiresAt          DateTime?
+  courseId           String?
+  course             Course?  @relation(fields: [courseId], references: [id])
+  createdAt          DateTime @default(now())
 }

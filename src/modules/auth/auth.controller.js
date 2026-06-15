@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../config/database');
 const { sendWelcomeEmail } = require('../../services/email.service');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 
 // Generate JWT and Refresh Token
 const generateTokens = (user) => {
@@ -41,12 +43,12 @@ exports.register = async (req, res) => {
                 email,
                 passwordHash,
                 name,
-                role: role === 'TRAINER' ? 'TRAINER' : 'LEARNER',
+                role: role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'SUBSCRIBER',
             }
         });
 
-        if (user.role === 'TRAINER') {
-            await prisma.trainerProfile.create({ data: { userId: user.id } });
+        if (user.role === 'INSTRUCTOR') {
+            await prisma.instructorProfile.create({ data: { userId: user.id } });
         }
 
         const tokens = generateTokens(user);
@@ -70,7 +72,7 @@ exports.register = async (req, res) => {
         // For browser form submissions, redirect to dashboard
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
-            const dashboard = user.role === 'TRAINER' ? '/trainer/dashboard' : user.role === 'ADMIN' ? '/admin/dashboard' : '/learner/dashboard';
+            const dashboard = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
             return res.redirect(dashboard);
         }
 
@@ -106,6 +108,30 @@ exports.login = async (req, res) => {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
+        // 2FA Verification during Login
+        if (user.twoFactorEnabled) {
+            const { twoFactorCode } = req.body;
+            if (!twoFactorCode) {
+                if (req.accepts('html') && !req.headers['x-requested-with']) {
+                    return res.redirect(`/login-2fa?email=${encodeURIComponent(user.email)}`);
+                }
+                return res.status(200).json({ success: true, requires2FA: true, email: user.email });
+            }
+
+            const verified = speakeasy.totp.verify({
+                secret: user.twoFactorSecret,
+                encoding: 'base32',
+                token: twoFactorCode
+            });
+
+            if (!verified) {
+                if (req.accepts('html') && !req.headers['x-requested-with']) {
+                    return res.redirect(`/login-2fa?email=${encodeURIComponent(user.email)}&error=invalid_code`);
+                }
+                return res.status(401).json({ success: false, message: 'Invalid 2FA code' });
+            }
+        }
+
         const tokens = generateTokens(user);
 
         // Set accessToken cookie so browser page routes work immediately
@@ -126,7 +152,7 @@ exports.login = async (req, res) => {
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
             const next = req.query.next || null;
-            const dashboard = next || (user.role === 'TRAINER' ? '/trainer/dashboard' : user.role === 'ADMIN' ? '/admin/dashboard' : '/learner/dashboard');
+            const dashboard = next || (user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard');
             return res.redirect(dashboard);
         }
 
@@ -139,6 +165,49 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.error('Login error:', error);
         res.status(500).json({ success: false, message: 'Server error during login' });
+    }
+};
+
+// 2FA Setup endpoints
+exports.setup2FA = async (req, res) => {
+    try {
+        const secret = speakeasy.generateSecret({ name: 'Teachures' });
+        
+        await prisma.user.update({
+            where: { id: req.user.id },
+            data: { twoFactorSecret: secret.base32 }
+        });
+
+        const dataUrl = await QRCode.toDataURL(secret.otpauth_url);
+        
+        res.json({ success: true, qrCode: dataUrl, secret: secret.base32 });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error setting up 2FA' });
+    }
+};
+
+exports.verify2FASetup = async (req, res) => {
+    try {
+        const { token } = req.body;
+        const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+        const verified = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token
+        });
+
+        if (verified) {
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { twoFactorEnabled: true }
+            });
+            res.json({ success: true, message: '2FA enabled successfully' });
+        } else {
+            res.status(400).json({ success: false, message: 'Invalid token' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error verifying 2FA' });
     }
 };
 

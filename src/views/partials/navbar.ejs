@@ -11,11 +11,66 @@
         <a href="/about">About</a>
     </nav>
     <div class="auth-buttons">
-        <a href="/login" class="btn btn-outline">Login</a>
-        <a href="/register" class="btn btn-primary">Start for Free</a>
+        <% if (locals.user) { %>
+            <div class="profile-wrapper" style="position: relative;">
+                <button class="profile-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Open user menu" style="background:none; border:none; padding:0; cursor:pointer;">
+                    <img src="<%= user.avatar || 'https://www.gravatar.com/avatar/?d=mp' %>" class="profile-avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover;" alt="<%= user.name %>'s profile picture">
+                </button>
+                <div class="profile-dropdown" role="menu" aria-label="User actions" style="display: none; position: absolute; right: 0; background: #0E0E0E; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1rem; min-width: 200px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    <div class="profile-header" role="presentation" style="display:flex; align-items:center; gap:10px; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <img src="<%= user.avatar || 'https://www.gravatar.com/avatar/?d=mp' %>" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" alt="">
+                        <div>
+                            <strong style="color:#fff;"><%= user.name %></strong><br>
+                            <span class="role-badge" style="font-size:0.75rem; color:#F5C518; text-transform:uppercase;"><%= user.role %></span>
+                        </div>
+                    </div>
+                    <% const dashLink = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : (user.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard') %>
+                    <a href="<%= dashLink %>" class="menu-item" role="menuitem" style="display:block; padding:0.5rem 0; color:#ccc; text-decoration:none;">Dashboard</a>
+                    <a href="<%= dashLink %>/profile" class="menu-item" role="menuitem" style="display:block; padding:0.5rem 0; color:#ccc; text-decoration:none;">My Profile</a>
+                    <a href="/api/v1/auth/logout" class="menu-item logout" role="menuitem" style="display:block; padding:0.5rem 0; color:#F87171; text-decoration:none;">Logout</a>
+                </div>
+            </div>
+            
+            <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const wrapper = document.querySelector(".profile-wrapper");
+                const trigger = document.querySelector(".profile-trigger");
+                const dropdown = document.querySelector(".profile-dropdown");
+                
+                if (wrapper && trigger && dropdown) {
+                    trigger.addEventListener("click", function(e) {
+                        e.stopPropagation();
+                        const isExpanded = trigger.getAttribute("aria-expanded") === "true";
+                        trigger.setAttribute("aria-expanded", !isExpanded);
+                        dropdown.style.display = isExpanded ? "none" : "block";
+                        wrapper.classList.toggle("active");
+                    });
+                    
+                    trigger.addEventListener("keydown", function(e) {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            trigger.click();
+                        }
+                    });
+
+                    document.addEventListener("click", function(e) {
+                        if (!wrapper.contains(e.target)) {
+                            trigger.setAttribute("aria-expanded", "false");
+                            dropdown.style.display = "none";
+                            wrapper.classList.remove("active");
+                        }
+                    });
+                }
+            });
+            </script>
+        <% } else { %>
+            <a href="/login" class="btn btn-outline">Login</a>
+            <a href="/register" class="btn btn-primary">Start for Free</a>
+        <% } %>
         <button class="mobile-menu-btn" id="mobileNavToggle" aria-label="Toggle Navigation">
             <i data-lucide="menu"></i>
         </button>
+    </div>
 </header>
 
 <script>

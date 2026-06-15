@@ -1,0 +1,36 @@
+<div class="card" style="padding: 1.5rem;">
+    <h2 style="margin-bottom: 1.5rem;">User Management</h2>
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                <th style="padding: 1rem 0;">Name</th>
+                <th style="padding: 1rem 0;">Email</th>
+                <th style="padding: 1rem 0;">Role</th>
+                <th style="padding: 1rem 0;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(u => { %>
+                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                    <td style="padding: 1rem 0;"><%= u.name %></td>
+                    <td style="padding: 1rem 0;"><%= u.email %></td>
+                    <td style="padding: 1rem 0;">
+                        <span style="background: rgba(245, 197, 24, 0.1); color: var(--color-primary); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">
+                            <%= u.role %>
+                        </span>
+                    </td>
+                    <td style="padding: 1rem 0;">
+                        <form action="/admin/users/<%= u.id %>/role" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                            <select name="role" class="form-control" style="width: auto; padding: 0.4rem; font-size: 0.85rem;">
+                                <option value="STUDENT" <%= u.role === 'STUDENT' ? 'selected' : '' %>>Student</option>
+                                <option value="INSTRUCTOR" <%= u.role === 'INSTRUCTOR' ? 'selected' : '' %>>Instructor</option>
+                                <option value="ADMINISTRATOR" <%= u.role === 'ADMINISTRATOR' ? 'selected' : '' %>>Admin</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Update</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>

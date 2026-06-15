@@ -3,23 +3,49 @@ const router = express.Router();
 const prisma = require('../config/database');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 
-router.use(requireAuth, requireRole('ADMIN', 'SUPER_ADMIN'));
+router.use(requireAuth, requireRole('ADMINISTRATOR'));
 
 // Admin Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
+        // Compute real Platform MRR from payments in last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const payments = await prisma.payment.findMany({
+            where: { status: 'COMPLETED', createdAt: { gte: thirtyDaysAgo } }
+        });
+        const platformMRR = payments.reduce((sum, p) => sum + p.amount, 0);
+
+        // Compute roles distribution
+        const roleDistribution = await prisma.user.groupBy({
+            by: ['role'],
+            _count: { role: true }
+        });
+
+        // Compute recent enrollments
+        const rawEnrollments = await prisma.enrollment.findMany({
+            take: 5,
+            orderBy: { enrolledAt: 'desc' },
+            include: { user: true, course: true, payment: true }
+        });
+        
+        const recentEnrollments = rawEnrollments.map(e => ({
+            userName: e.user.name,
+            courseTitle: e.course.title,
+            date: e.enrolledAt.toISOString().split('T')[0],
+            amount: e.payment ? e.payment.amount : 0,
+            status: 'Completed'
+        }));
+
         const stats = {
             totalUsers: await prisma.user.count(),
-            platformMRR: 8500,
+            platformMRR,
             totalCourses: await prisma.course.count(),
-            newCoursesThisWeek: 4,
-            openTickets: 12
+            newCoursesThisWeek: await prisma.course.count({ where: { createdAt: { gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } }),
+            openTickets: await prisma.supportTicket.count({ where: { status: 'OPEN' } }),
+            roleDistribution: JSON.stringify(roleDistribution.map(r => ({ label: r.role, value: r._count.role })))
         };
-
-        const recentEnrollments = [
-            { userName: 'John Doe', courseTitle: 'Advanced Node', date: '2023-11-01', amount: 49, status: 'Completed' },
-            { userName: 'Sarah Smith', courseTitle: 'React Basics', date: '2023-10-31', amount: 29, status: 'Completed' }
-        ];
 
         res.render('admin/dashboard', {
             layout: 'layouts/dashboard',
@@ -53,6 +79,124 @@ router.get('/support', async (req, res) => {
             sidebarPartial: '../partials/sidebar-admin',
             tickets
         });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// Admin Pages CMS Management
+router.get('/pages', async (req, res) => {
+    try {
+        const pages = await prisma.page.findMany({ orderBy: { createdAt: 'desc' } });
+        res.render('admin/pages/index', {
+            layout: 'layouts/dashboard',
+            title: 'Manage Pages',
+            path: '/admin/pages',
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-admin',
+            pages
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+router.get('/pages/new', (req, res) => {
+    res.render('admin/pages/edit', {
+        layout: 'layouts/dashboard',
+        title: 'Create Page',
+        path: '/admin/pages',
+        user: req.user,
+        sidebarPartial: '../partials/sidebar-admin',
+        page: null
+    });
+});
+
+router.get('/pages/:id/edit', async (req, res) => {
+    try {
+        const page = await prisma.page.findUnique({ where: { id: req.params.id } });
+        if (!page) return res.status(404).send('Not found');
+        res.render('admin/pages/edit', {
+            layout: 'layouts/dashboard',
+            title: 'Edit Page',
+            path: '/admin/pages',
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-admin',
+            page
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// User Management
+router.get('/users', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+        res.render('admin/users', {
+            layout: 'layouts/dashboard',
+            title: 'User Management',
+            path: '/admin/users',
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-admin',
+            users
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+router.post('/users/:id/role', async (req, res) => {
+    try {
+        const { role } = req.body;
+        await prisma.user.update({
+            where: { id: req.params.id },
+            data: { role }
+        });
+        res.redirect('/admin/users');
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// Content Moderation
+router.get('/moderation', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { isPublished: false },
+            include: { instructor: true },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.render('admin/moderation', {
+            layout: 'layouts/dashboard',
+            title: 'Content Moderation',
+            path: '/admin/moderation',
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-admin',
+            courses
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+router.post('/moderation/:id/approve', async (req, res) => {
+    try {
+        await prisma.course.update({
+            where: { id: req.params.id },
+            data: { isPublished: true }
+        });
+        
+        // Notify instructor
+        const course = await prisma.course.findUnique({ where: { id: req.params.id } });
+        if(course) {
+            const { createNotification } = require('../modules/notifications/notifications.controller');
+            await createNotification(course.instructorId, 'Course Approved! 🎉', `Your course "${course.title}" has been approved and is now live!`, `/courses/${course.slug}`);
+        }
+        
+        res.redirect('/admin/moderation');
     } catch (error) {
         res.status(500).send('Server Error');
     }

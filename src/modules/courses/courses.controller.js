@@ -1,5 +1,4 @@
 const slugify = require('slugify');
-const { uploadFileToS3 } = require('../../services/s3.service');
 
 // --- PUBLIC ---
 
@@ -8,7 +7,7 @@ exports.getAllPublished = async (req, res) => {
         const courses = await prisma.course.findMany({
             where: { isPublished: true },
             include: {
-                trainer: { select: { name: true, avatar: true } },
+                instructor: { select: { name: true, avatar: true } },
             },
             orderBy: { createdAt: 'desc' }
         });
@@ -23,7 +22,7 @@ exports.getBySlug = async (req, res) => {
         const course = await prisma.course.findUnique({
             where: { slug: req.params.slug },
             include: {
-                trainer: { select: { name: true, avatar: true, trainerProfile: true } },
+                instructor: { select: { name: true, avatar: true, instructorProfile: true } },
                 sections: {
                     orderBy: { order: 'asc' },
                     include: {
@@ -46,7 +45,7 @@ exports.getBySlug = async (req, res) => {
 };
 
 
-// --- LEARNER (RATINGS) ---
+// --- STUDENT (RATINGS) ---
 
 exports.rateCourse = async (req, res) => {
     try {
@@ -79,12 +78,12 @@ exports.rateCourse = async (req, res) => {
     }
 };
 
-// --- TRAINER ---
+// --- INSTRUCTOR ---
 
 exports.getMyCourses = async (req, res) => {
     try {
         const courses = await prisma.course.findMany({
-            where: { trainerId: req.user.id },
+            where: { instructorId: req.user.id },
             orderBy: { updatedAt: 'desc' }
         });
         res.json({ success: true, data: courses });
@@ -108,7 +107,7 @@ exports.createCourse = async (req, res) => {
                 level: level || 'BEGINNER',
                 price: parseFloat(price) || 0,
                 isFree: isFree === true || isFree === 'true',
-                trainerId: req.user.id
+                instructorId: req.user.id
             }
         });
 
@@ -125,7 +124,7 @@ exports.updateCourse = async (req, res) => {
         // Authorization check
         const course = await prisma.course.findUnique({ where: { id } });
         if (!course) return res.status(404).json({ success: false, message: 'Not found' });
-        if (course.trainerId !== req.user.id && req.user.role !== 'ADMIN') {
+        if (course.instructorId !== req.user.id && req.user.role !== 'ADMINISTRATOR') {
             return res.status(403).json({ success: false, message: 'Forbidden' });
         }
 
@@ -145,7 +144,7 @@ exports.deleteCourse = async (req, res) => {
         const { id } = req.params;
         const course = await prisma.course.findUnique({ where: { id } });
         if (!course) return res.status(404).json({ success: false, message: 'Not found' });
-        if (course.trainerId !== req.user.id && req.user.role !== 'ADMIN') {
+        if (course.instructorId !== req.user.id && req.user.role !== 'ADMINISTRATOR') {
             return res.status(403).json({ success: false, message: 'Forbidden' });
         }
 
@@ -161,7 +160,7 @@ exports.publishCourse = async (req, res) => {
         const { id } = req.params;
         const course = await prisma.course.findUnique({ where: { id } });
         if (!course) return res.status(404).json({ success: false, message: 'Not found' });
-        if (course.trainerId !== req.user.id) return res.status(403).json({ success: false, message: 'Forbidden' });
+        if (course.instructorId !== req.user.id) return res.status(403).json({ success: false, message: 'Forbidden' });
 
         // Validate if course has content before publishing
         const sectionCount = await prisma.section.count({ where: { courseId: id } });
@@ -248,7 +247,9 @@ exports.createLesson = async (req, res) => {
         let videoUrl = null;
 
         if (req.file) {
-            videoUrl = await uploadFileToS3(req.file.buffer, req.file.originalname, req.file.mimetype, 'lessons');
+            // Local file URL path starting from root, so express.static can serve it
+            const folder = req.file.mimetype.startsWith('video/') ? 'videos' : 'images';
+            videoUrl = `/uploads/${folder}/${req.file.filename}`;
         }
 
         const lesson = await prisma.lesson.create({
@@ -257,7 +258,7 @@ exports.createLesson = async (req, res) => {
                 order: parseInt(order) || 0,
                 type: type || 'VIDEO',
                 content,
-                videoUrl, // Save the S3 key, not the direct URL
+                videoUrl,
                 isPreview: isPreview === true || isPreview === 'true',
                 sectionId
             }
@@ -275,6 +276,11 @@ exports.updateLesson = async (req, res) => {
         const updateData = { ...req.body };
         if (updateData.order) updateData.order = parseInt(updateData.order);
         if (updateData.isPreview) updateData.isPreview = updateData.isPreview === true || updateData.isPreview === 'true';
+
+        if (req.file) {
+            const folder = req.file.mimetype.startsWith('video/') ? 'videos' : 'images';
+            updateData.videoUrl = `/uploads/${folder}/${req.file.filename}`;
+        }
 
         const lesson = await prisma.lesson.update({
             where: { id: lessonId },

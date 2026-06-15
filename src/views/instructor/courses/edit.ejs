@@ -101,13 +101,29 @@
                 </select>
             </div>
 
-            <!-- Logic for video upload / text editor goes here -->
-            <div class="form-group" id="videoZone"
-                style="margin-top: 1rem; border: 2px dashed var(--color-primary); padding: 2rem; text-align: center; border-radius: 4px; cursor: pointer;">
-                <i data-lucide="upload-cloud" class="text-primary"
-                    style="width: 32px; height: 32px; margin-bottom: 0.5rem;"></i>
-                <p class="text-white">Click to upload video</p>
-                <small class="text-muted">Video to S3 integration pending Phase 2</small>
+            <div class="form-group" id="videoUploadGroup" style="margin-top: 1rem;">
+                <label class="form-label">Upload Video File</label>
+                <input type="file" id="lessonVideo" name="video" class="form-control" accept="video/*" style="background: white; color: black; padding: 0.5rem;">
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;">File will be securely uploaded to AWS S3.</small>
+            </div>
+
+            <!-- Quiz Builder Zone -->
+            <div id="quizBuilderZone" style="display: none; margin-top: 1rem; border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+                <h4 style="margin-bottom: 1rem;">Quiz Settings</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label class="form-label">Passing Score (%)</label>
+                        <input type="number" id="quizPassingScore" class="form-control" value="70">
+                    </div>
+                    <div>
+                        <label class="form-label">Time Limit (mins)</label>
+                        <input type="number" id="quizTimeLimit" class="form-control" placeholder="Optional">
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 1rem;">Questions</h4>
+                <div id="questionsContainer"></div>
+                <button type="button" id="addQuestionBtn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">+ Add Question</button>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Save Lesson</button>

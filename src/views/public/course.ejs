@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= course.title %> - Teachures</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background: var(--color-bg); color: var(--color-text);">
+
+    <header style="padding: 2rem; border-bottom: 1px solid var(--color-gray-mid);">
+        <h1 style="margin: 0; font-family: var(--font-display);"><%= course.title %></h1>
+        <p style="color: var(--color-gray-light); margin-top: 0.5rem;"><%= course.description %></p>
+        <p style="margin-top: 1rem; font-weight: 600; color: var(--color-primary);">Price: $<%= course.price %></p>
+        <a href="/courses/<%= course.slug %>/checkout" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-primary); color: #fff; text-decoration: none; border-radius: 4px; margin-top: 1rem; font-weight: 600;">Enroll Now</a>
+    </header>
+
+    <main style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+        <h2 style="font-family: var(--font-display); margin-bottom: 1.5rem;">Student Reviews</h2>
+        
+        <div id="reviews-container">
+            <% if (course.ratings && course.ratings.length > 0) { %>
+                <% course.ratings.forEach(r => { %>
+                    <div style="background: var(--color-card); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--color-gray-mid);">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <strong style="color: var(--color-text);"><%= r.user.name %></strong>
+                            <div style="color: #f59e0b;">
+                                <% for(let i=0; i<5; i++) { %>
+                                    <i data-lucide="star" class="icon-sm" style="<%= i < r.rating ? 'fill: #f59e0b;' : '' %>"></i>
+                                <% } %>
+                            </div>
+                        </div>
+                        <p style="color: var(--color-gray-light); margin-top: 0.5rem;"><%= r.review %></p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p style="color: var(--color-gray-light);">No reviews yet.</p>
+            <% } %>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

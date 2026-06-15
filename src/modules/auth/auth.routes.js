@@ -8,7 +8,11 @@ const passport = require('passport');
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.post('/refresh', authController.refresh);
-router.post('/logout', requireAuth, authController.logout);
+router.post('/logout', authController.logout);
+
+// 2FA Endpoints
+router.post('/2fa/setup', requireAuth, authController.setup2FA);
+router.post('/2fa/verify', requireAuth, authController.verify2FASetup);
 
 // Google OAuth
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -37,5 +41,23 @@ router.get('/google/callback',
 // router.post('/forgot-password', authController.forgotPassword);
 // router.post('/reset-password', authController.resetPassword);
 // router.post('/verify-email', authController.verifyEmail);
+
+const profileController = require('./profile.controller');
+const multer = require('multer');
+const path = require('path');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'src/public/uploads/avatars');
+    },
+    filename: function (req, file, cb) {
+        cb(null, req.user.id + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage: storage });
+
+// Profile
+router.get('/profile', requireAuth, profileController.getProfile);
+router.post('/profile', requireAuth, upload.single('avatar'), profileController.updateProfile);
 
 module.exports = router;

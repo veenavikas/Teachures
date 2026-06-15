@@ -40,6 +40,28 @@ router.get('/register', (req, res) => {
     res.render('auth/register', { layout: 'layouts/auth', title: 'Register' });
 });
 
+router.get('/login-2fa', (req, res) => {
+    res.render('auth/login-2fa', { layout: 'layouts/auth', title: '2FA Verification', email: req.query.email });
+});
+
+router.get('/courses/:slug', async (req, res) => {
+    try {
+        const course = await prisma.course.findUnique({ 
+            where: { slug: req.params.slug },
+            include: { 
+                ratings: { 
+                    include: { user: { select: { name: true, avatar: true } } },
+                    orderBy: { createdAt: 'desc' }
+                } 
+            }
+        });
+        if (!course) return res.status(404).send('Course not found');
+        res.render('public/course', { layout: false, course });
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
 router.get('/courses/:slug/checkout', async (req, res) => {
     try {
         const course = await prisma.course.findUnique({ where: { slug: req.params.slug } });
@@ -51,6 +73,24 @@ router.get('/courses/:slug/checkout', async (req, res) => {
         });
     } catch (error) {
         res.status(500).send('Server error');
+    }
+});
+
+// Dynamic Pages
+router.get('/p/:slug', async (req, res) => {
+    try {
+        const page = await prisma.page.findUnique({ where: { slug: req.params.slug } });
+        if (!page || page.isDraft) {
+            return res.status(404).send('Page not found');
+        }
+        res.render('public/dynamic-page', { 
+            layout: 'layouts/main', 
+            page, 
+            seoTitle: page.seoTitle || page.title, 
+            seoDesc: page.seoDesc 
+        });
+    } catch (error) {
+        res.status(500).send('Server error loading page');
     }
 });
 

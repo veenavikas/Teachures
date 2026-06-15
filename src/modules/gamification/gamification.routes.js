@@ -6,16 +6,16 @@ const { requireAuth, requireRole } = require('../../middleware/auth.middleware')
 router.use(requireAuth);
 
 // --- ADMIN ROUTES ---
-router.post('/badges', requireRole('ADMIN'), gamificationController.createBadge);
-router.put('/badges/:id', requireRole('ADMIN'), gamificationController.updateBadge);
-router.delete('/badges/:id', requireRole('ADMIN'), gamificationController.deleteBadge);
+router.post('/badges', requireRole('ADMINISTRATOR'), gamificationController.createBadge);
+router.put('/badges/:id', requireRole('ADMINISTRATOR'), gamificationController.updateBadge);
+router.delete('/badges/:id', requireRole('ADMINISTRATOR'), gamificationController.deleteBadge);
 
-// --- LEARNER ROUTES ---
+// --- STUDENT ROUTES ---
 // Get all available badges
 router.get('/badges', gamificationController.getAllBadges);
 
 // Get badges earned by current user
-router.get('/my-badges', requireRole('LEARNER'), gamificationController.getMyBadges);
+router.get('/my-badges', requireRole('STUDENT'), gamificationController.getMyBadges);
 
 // Leaderboard
 router.get('/leaderboard', gamificationController.getLeaderboard);

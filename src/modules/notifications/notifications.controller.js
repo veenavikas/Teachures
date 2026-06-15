@@ -53,6 +53,9 @@ exports.markAllAsRead = async (req, res) => {
 // Internal utility to trigger a notification from other modules
 exports.createNotification = async (userId, title, message, link, type = 'SYSTEM') => {
     try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return;
+
         await prisma.notification.create({
             data: {
                 userId,
@@ -62,6 +65,20 @@ exports.createNotification = async (userId, title, message, link, type = 'SYSTEM
                 type
             }
         });
+
+        // Enqueue email notification via BullMQ
+        const { enqueueEmail } = require('../../services/queue.service');
+        const emailHtml = `
+            <div style="font-family: sans-serif; color: #333;">
+                <h2 style="color: #F5C518;">${title}</h2>
+                <p>Hi ${user.name},</p>
+                <p>${message}</p>
+                ${link ? `<p><a href="https://teachures.com${link}">View Details</a></p>` : ''}
+                <p>Best,<br/>The Teachures Team</p>
+            </div>
+        `;
+        await enqueueEmail(user.email, title, message, emailHtml);
+        
     } catch (error) {
         console.error('Failed to create notification:', error);
     }

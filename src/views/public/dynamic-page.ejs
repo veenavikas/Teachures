@@ -1,0 +1,36 @@
+<div class="page-container">
+    <div class="content-wrapper">
+        <h1 class="page-title"><%= page.title %></h1>
+        <div class="dynamic-content prose">
+            <%- page.content %> <!-- Raw HTML output since it's sanitized via DOMPurify on save -->
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 0 2rem;
+    }
+    .page-title {
+        font-family: var(--font-heading, sans-serif);
+        font-size: 3rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--color-gray-mid, #ccc);
+        padding-bottom: 1rem;
+    }
+    .dynamic-content.prose {
+        font-family: var(--font-body, sans-serif);
+        line-height: 1.8;
+        font-size: 1.1rem;
+    }
+    .dynamic-content.prose h2, .dynamic-content.prose h3 {
+        margin-top: 2rem;
+        font-family: var(--font-heading, sans-serif);
+    }
+    .dynamic-content.prose ul, .dynamic-content.prose ol {
+        margin-left: 2rem;
+        margin-bottom: 1rem;
+    }
+</style>

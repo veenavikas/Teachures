@@ -9,7 +9,7 @@ const { createNotification } = require('../notifications/notifications.controlle
 // POST /api/v1/payments/create-order
 router.post('/create-order', requireAuth, async (req, res) => {
     try {
-        const { courseId } = req.body;
+        const { courseId, couponCode } = req.body;
 
         const course = await prisma.course.findUnique({ where: { id: courseId } });
         if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
@@ -21,16 +21,31 @@ router.post('/create-order', requireAuth, async (req, res) => {
         });
         if (existing) return res.status(400).json({ success: false, message: 'Already enrolled' });
 
+        let finalPrice = course.price;
+        let appliedCouponId = null;
+
+        if (couponCode) {
+            const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+            if (coupon && (!coupon.expiresAt || new Date() <= coupon.expiresAt) && (!coupon.maxUses || coupon.usesCount < coupon.maxUses) && (!coupon.courseId || coupon.courseId === courseId)) {
+                if (coupon.discountPercentage) {
+                    finalPrice = finalPrice * (1 - (coupon.discountPercentage / 100));
+                } else if (coupon.discountAmount) {
+                    finalPrice = Math.max(0, finalPrice - coupon.discountAmount);
+                }
+                appliedCouponId = coupon.id;
+            }
+        }
+
         let request = new paypal.orders.OrdersCreateRequest();
         request.requestBody({
             intent: 'CAPTURE',
             purchase_units: [{
                 amount: {
                     currency_code: 'USD',
-                    value: course.price.toString()
+                    value: finalPrice.toFixed(2)
                 },
                 description: `Enrollment in ${course.title}`,
-                custom_id: `${req.user.id}|${courseId}` // Store tracking data
+                custom_id: `${req.user.id}|${courseId}|${appliedCouponId || ''}` // Store tracking data
             }]
         });
 
@@ -65,7 +80,7 @@ router.post('/capture-order', requireAuth, async (req, res) => {
 
         if (capture.result.status === 'COMPLETED') {
             const customId = capture.result.purchase_units[0].custom_id;
-            const [userId, courseId] = customId.split('|');
+            const [userId, courseId, appliedCouponId] = customId.split('|');
 
             // 1. Update Payment Status
             const payment = await prisma.payment.update({
@@ -81,6 +96,13 @@ router.post('/capture-order', requireAuth, async (req, res) => {
                     paymentId: payment.id
                 }
             });
+
+            if (appliedCouponId) {
+                await prisma.coupon.update({
+                    where: { id: appliedCouponId },
+                    data: { usesCount: { increment: 1 } }
+                });
+            }
 
             // 3. Init Course Progress
             await prisma.courseProgress.create({

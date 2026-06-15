@@ -1,0 +1,82 @@
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2><%= page ? 'Edit Page' : 'Create New Page' %></h2>
+    <a href="/admin/pages" class="btn btn-outline">Back</a>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form id="page-form">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="title">Page Title</label>
+            <input type="text" id="title" class="form-control" value="<%= page ? page.title : '' %>" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="slug">Slug (URL)</label>
+            <input type="text" id="slug" class="form-control" value="<%= page ? page.slug : '' %>" placeholder="leave blank to auto-generate">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="content">Content (Rich Text / HTML)</label>
+            <textarea id="content" class="form-control" rows="15" required><%= page ? page.content : '' %></textarea>
+        </div>
+
+        <h4 style="margin-top: 2rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 0.5rem;">SEO Settings</h4>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="seoTitle">SEO Title</label>
+            <input type="text" id="seoTitle" class="form-control" value="<%= page ? page.seoTitle : '' %>">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="seoDesc">SEO Description</label>
+            <textarea id="seoDesc" class="form-control" rows="3"><%= page ? page.seoDesc : '' %></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="isDraft" <%= page && page.isDraft ? 'checked' : '' %>>
+            <label for="isDraft" style="margin: 0;">Save as Draft (Not public)</label>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><%= page ? 'Update Page' : 'Create Page' %></button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('page-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const isEdit = <%= !!page %>;
+        const pageId = '<%= page ? page.id : "" %>';
+        const url = isEdit ? `/api/v1/cms/${pageId}` : `/api/v1/cms`;
+        const method = isEdit ? 'PUT' : 'POST';
+
+        const data = {
+            title: document.getElementById('title').value,
+            slug: document.getElementById('slug').value,
+            content: document.getElementById('content').value,
+            seoTitle: document.getElementById('seoTitle').value,
+            seoDesc: document.getElementById('seoDesc').value,
+            isDraft: document.getElementById('isDraft').checked
+        };
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (result.success) {
+                window.location.href = '/admin/pages';
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save page.');
+        }
+    });
+</script>

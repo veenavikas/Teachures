@@ -7,23 +7,23 @@ const { requireAuth, requireRole } = require('../../middleware/auth.middleware')
 
 router.use(requireAuth);
 
-// --- TRAINER ROUTES ---
-router.post('/lessons/:lessonId/quiz', requireRole('TRAINER'), quizzesController.createQuiz);
-router.put('/:id', requireRole('TRAINER'), quizzesController.updateQuiz);
-router.delete('/:id', requireRole('TRAINER'), quizzesController.deleteQuiz);
+// --- INSTRUCTOR ROUTES ---
+router.post('/lessons/:lessonId/quiz', requireRole('INSTRUCTOR'), quizzesController.createQuiz);
+router.put('/:id', requireRole('INSTRUCTOR'), quizzesController.updateQuiz);
+router.delete('/:id', requireRole('INSTRUCTOR'), quizzesController.deleteQuiz);
 
-router.post('/:id/questions', requireRole('TRAINER'), quizzesController.addQuestion);
-router.put('/questions/:questionId', requireRole('TRAINER'), quizzesController.updateQuestion);
-router.delete('/questions/:questionId', requireRole('TRAINER'), quizzesController.deleteQuestion);
+router.post('/:id/questions', requireRole('INSTRUCTOR'), quizzesController.addQuestion);
+router.put('/questions/:questionId', requireRole('INSTRUCTOR'), quizzesController.updateQuestion);
+router.delete('/questions/:questionId', requireRole('INSTRUCTOR'), quizzesController.deleteQuestion);
 
-// --- LEARNER ROUTES ---
+// --- STUDENT ROUTES ---
 // Get quiz configuration and questions (without answers if possible, but for simplicity returning all here)
-router.get('/:id', requireRole('LEARNER', 'TRAINER', 'ADMIN'), quizzesController.getQuiz);
+router.get('/:id', requireRole('STUDENT', 'INSTRUCTOR', 'ADMINISTRATOR'), quizzesController.getQuiz);
 
 // Submit quiz attempt
-router.post('/:id/attempt', requireRole('LEARNER'), quizzesController.submitAttempt);
+router.post('/:id/attempt', requireRole('STUDENT'), quizzesController.submitAttempt);
 
 // Get my attempts for a quiz
-router.get('/:id/attempts', requireRole('LEARNER'), quizzesController.getMyAttempts);
+router.get('/:id/attempts', requireRole('STUDENT'), quizzesController.getMyAttempts);
 
 module.exports = router;

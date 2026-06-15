@@ -21,7 +21,7 @@ passport.use(new GoogleStrategy({
                         oauthProvider: 'google',
                         oauthId: profile.id,
                         avatar: profile.photos[0]?.value,
-                        role: 'LEARNER',
+                        role: 'STUDENT',
                         isVerified: true
                     }
                 });

@@ -8,6 +8,12 @@
         <%= typeof title !=='undefined' ? title + ' | Dashboard' : 'Dashboard' %>
     </title>
 
+    <meta property="og:title" content="<%= typeof title !=='undefined' ? title + ' | Dashboard' : 'Dashboard' %>">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://teachures.com/images/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= typeof title !=='undefined' ? title + ' | Dashboard' : 'Dashboard' %>">
+
     <link
         href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
         rel="stylesheet">
@@ -207,6 +213,30 @@
     <script src="/js/main.js"></script>
     <script>
         lucide.createIcons();
+
+        // -----------------------------
+        // Session Inactivity Timeout (15m)
+        // -----------------------------
+        let inactivityTime = function () {
+            let time;
+            const timeoutDuration = 15 * 60 * 1000; // 15 minutes
+            
+            function logout() {
+                alert("Your session has expired due to inactivity. You will be logged out securely.");
+                window.location.href = '/api/v1/auth/logout';
+            }
+            function resetTimer() {
+                clearTimeout(time);
+                time = setTimeout(logout, timeoutDuration);
+            }
+
+            window.onload = resetTimer;
+            document.onmousemove = resetTimer;
+            document.onkeypress = resetTimer;
+            document.onclick = resetTimer;
+            document.onscroll = resetTimer;
+        };
+        inactivityTime();
 
         // -----------------------------
         // Mobile Sidebar Toggle

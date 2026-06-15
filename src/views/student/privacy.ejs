@@ -323,7 +323,7 @@
             analytics: document.getElementById('prefAnalytics').checked,
             marketing: document.getElementById('prefMarketing').checked
         };
-        fetch('/api/v1/compliance/consent', {
+        fetch(window.location.pathname + '/consent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ preferences: prefs })

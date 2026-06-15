@@ -46,7 +46,7 @@
         margin-bottom: 0.5rem;
     }
 
-    .my-course-trainer {
+    .my-course-instructor {
         font-size: 0.8rem;
         color: rgba(255, 255, 255, 0.3);
         margin-bottom: 1rem;
@@ -139,7 +139,7 @@
                         <div class="my-course-title">
                             <%= course.title %>
                         </div>
-                        <div class="my-course-trainer">By <%= course.trainer ? course.trainer.name : 'Instructor' %>
+                        <div class="my-course-instructor">By <%= course.instructor ? course.instructor.name : 'Instructor' %>
                         </div>
                         <div class="pct-label">
                             <span style="color:rgba(255,255,255,0.35);">Progress</span>
@@ -154,7 +154,7 @@
                             </div>
                         </div>
                         <div class="my-course-actions">
-                            <a href="/learner/courses/<%= course.slug %>/learn" class="btn-continue">
+                            <a href="/student/courses/<%= course.slug %>/learn" class="btn-continue">
                                 <%= Math.round(course.progress)>= 100 ? 'Review' : 'Continue' %> →
                             </a>
                         </div>

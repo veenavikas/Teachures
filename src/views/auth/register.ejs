@@ -23,17 +23,17 @@
         <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
             <label
                 style="flex:1; padding: 0.9rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); transition: all 0.2s;"
-                id="label-learner">
-                <input type="radio" name="role" value="LEARNER" checked style="accent-color: #F5C518; display:none;"
-                    id="role-learner">
+                id="label-student">
+                <input type="radio" name="role" value="STUDENT" checked style="accent-color: #F5C518; display:none;"
+                    id="role-student">
                 <span style="font-size:1.2rem;">🎓</span>
                 <span style="color:#FFFFFF; font-weight:500; font-size:0.9rem;">Learn</span>
             </label>
             <label
                 style="flex:1; padding: 0.9rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); transition: all 0.2s;"
-                id="label-trainer">
-                <input type="radio" name="role" value="TRAINER" style="accent-color: #F5C518; display:none;"
-                    id="role-trainer">
+                id="label-instructor">
+                <input type="radio" name="role" value="INSTRUCTOR" style="accent-color: #F5C518; display:none;"
+                    id="role-instructor">
                 <span style="font-size:1.2rem;">🧑‍🏫</span>
                 <span style="color:#FFFFFF; font-weight:500; font-size:0.9rem;">Teach</span>
             </label>
@@ -62,19 +62,19 @@
 <p class="form-footer">Already have an account? <a href="/login">Log in</a></p>
 
 <script>
-    const labelLearner = document.getElementById('label-learner');
-    const labelTrainer = document.getElementById('label-trainer');
-    const roleLearner = document.getElementById('role-learner');
-    const roleTrainer = document.getElementById('role-trainer');
+    const labelStudent = document.getElementById('label-student');
+    const labelInstructor = document.getElementById('label-instructor');
+    const roleStudent = document.getElementById('role-student');
+    const roleInstructor = document.getElementById('role-instructor');
 
     function updateSelection() {
-        labelLearner.style.borderColor = roleLearner.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
-        labelLearner.style.background = roleLearner.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
-        labelTrainer.style.borderColor = roleTrainer.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
-        labelTrainer.style.background = roleTrainer.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
+        labelStudent.style.borderColor = roleStudent.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
+        labelStudent.style.background = roleStudent.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
+        labelInstructor.style.borderColor = roleInstructor.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
+        labelInstructor.style.background = roleInstructor.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
     }
 
-    labelLearner.addEventListener('click', () => { roleLearner.checked = true; updateSelection(); });
-    labelTrainer.addEventListener('click', () => { roleTrainer.checked = true; updateSelection(); });
+    labelStudent.addEventListener('click', () => { roleStudent.checked = true; updateSelection(); });
+    labelInstructor.addEventListener('click', () => { roleInstructor.checked = true; updateSelection(); });
     updateSelection();
 </script>

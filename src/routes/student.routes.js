@@ -3,10 +3,11 @@ const router = express.Router();
 const prisma = require('../config/database');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
 const { generateSignedUrl } = require('../services/s3.service');
+const { awardPoints } = require('../modules/gamification/gamification.controller');
 
-router.use(requireAuth, requireRole('LEARNER'));
+router.use(requireAuth, requireRole('STUDENT'));
 
-// Learner Dashboard
+// Student Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
         const myCourses = await prisma.course.findMany({
@@ -16,7 +17,7 @@ router.get('/dashboard', async (req, res) => {
             title: c.title,
             slug: c.slug,
             thumbnailUrl: c.thumbnailUrl || '/images/default-course.jpg',
-            trainerName: 'Jane Doe',
+            instructorName: 'Jane Doe',
             progress: Math.floor(Math.random() * 100)
         })));
 
@@ -27,12 +28,12 @@ router.get('/dashboard', async (req, res) => {
             { name: 'Charlie', points: 190 }
         ];
 
-        res.render('learner/dashboard', {
+        res.render('student/dashboard', {
             layout: 'layouts/dashboard',
-            title: 'Learner Dashboard',
+            title: 'Student Dashboard',
             path: req.originalUrl,
             user: req.user,
-            sidebarPartial: '../partials/sidebar-learner',
+            sidebarPartial: '../partials/sidebar-student',
             myCourses,
             badges,
             leaders
@@ -51,18 +52,18 @@ router.get('/gamification', async (req, res) => {
         });
 
         const leaderboard = await prisma.user.findMany({
-            where: { role: 'LEARNER' },
+            where: { role: 'STUDENT' },
             orderBy: { points: 'desc' },
             take: 10,
             select: { id: true, name: true, points: true }
         });
 
-        res.render('learner/gamification', {
+        res.render('student/gamification', {
             layout: 'layouts/dashboard',
             title: 'Achievements & Leaderboard',
             path: req.originalUrl,
             user: req.user,
-            sidebarPartial: '../partials/sidebar-learner',
+            sidebarPartial: '../partials/sidebar-student',
             badges: userBadges,
             leaders: leaderboard.map(u => ({ ...u, isYou: u.id === req.user.id }))
         });
@@ -80,12 +81,12 @@ router.get('/certificates', async (req, res) => {
             orderBy: { issuedAt: 'desc' }
         });
 
-        res.render('learner/certificates', {
+        res.render('student/certificates', {
             layout: 'layouts/dashboard',
             title: 'My Certificates',
             path: req.originalUrl,
             user: req.user,
-            sidebarPartial: '../partials/sidebar-learner',
+            sidebarPartial: '../partials/sidebar-student',
             certificates
         });
     } catch (error) {
@@ -101,12 +102,12 @@ router.get('/support', async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        res.render('learner/support', {
+        res.render('student/support', {
             layout: 'layouts/dashboard',
             title: 'Support Center',
             path: req.originalUrl,
             user: req.user,
-            sidebarPartial: '../partials/sidebar-learner',
+            sidebarPartial: '../partials/sidebar-student',
             tickets
         });
     } catch (error) {
@@ -121,7 +122,7 @@ router.post('/support', async (req, res) => {
         await prisma.supportTicket.create({
             data: { userId: req.user.id, subject, description, priority: priority || 'MEDIUM' }
         });
-        res.redirect('/learner/support');
+        res.redirect('/student/support');
     } catch (error) {
         res.status(500).send('Server Error: ' + error.message);
     }
@@ -137,7 +138,7 @@ router.get('/quiz/:quizId', async (req, res) => {
 
         if (!quiz) return res.status(404).send('Quiz not found');
 
-        res.render('learner/quiz-player', {
+        res.render('student/quiz-player', {
             layout: false,
             quiz,
             user: req.user
@@ -155,7 +156,7 @@ router.get('/my-courses', async (req, res) => {
             include: {
                 course: {
                     include: {
-                        trainer: { select: { name: true } },
+                        instructor: { select: { name: true } },
                         _count: { select: { sections: true } }
                     }
                 }
@@ -172,12 +173,12 @@ router.get('/my-courses', async (req, res) => {
             progress: progress.find(p => p.courseId === e.course.id)?.percentComplete || 0
         }));
 
-        res.render('learner/my-courses', {
+        res.render('student/my-courses', {
             layout: 'layouts/dashboard',
             title: 'My Learning',
             path: req.originalUrl,
             user: req.user,
-            sidebarPartial: '../partials/sidebar-learner',
+            sidebarPartial: '../partials/sidebar-student',
             courses
         });
     } catch (error) {
@@ -217,7 +218,7 @@ router.get('/courses/:slug/learn', async (req, res) => {
             }
         }
 
-        res.render('learner/course-player', {
+        res.render('student/course-player', {
             layout: false,
             title: course.title,
             course,
@@ -261,6 +262,9 @@ router.post('/courses/:courseId/progress', async (req, res) => {
             create: { userId: req.user.id, courseId, completedLessons: 1, percentComplete: totalLessons > 0 ? (1 / totalLessons) * 100 : 100 }
         });
 
+        // Award 10 points for completing a lesson
+        await awardPoints(req.user.id, 10);
+
         res.json({ success: true, percentComplete: percent });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -282,17 +286,50 @@ router.get('/privacy', async (req, res) => {
         }
         if (found.size >= 3) break;
     }
-    res.render('learner/privacy', {
+    res.render('student/privacy', {
         layout: 'layouts/dashboard',
         title: 'Privacy Settings',
         path: req.originalUrl,
         user: req.user,
-        sidebarPartial: '../partials/sidebar-learner',
+        sidebarPartial: '../partials/sidebar-student',
         consent
     });
 });
 
+router.post('/privacy/consent', async (req, res) => {
+    try {
+        const { preferences } = req.body;
+        if (!preferences) return res.status(400).json({ success: false, message: 'Preferences required' });
+        
+        for (const [key, val] of Object.entries(preferences)) {
+            await prisma.consentLog.create({
+                data: {
+                    userId: req.user.id,
+                    type: key,
+                    accepted: val === true || val === 'true',
+                    ipAddress: req.ip || '0.0.0.0',
+                    userAgent: req.headers['user-agent'] || 'Unknown'
+                }
+            });
+        }
+        res.json({ success: true, message: 'Consent updated' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // Support Center
-router.get('/support', requireAuth, require('../../modules/support/support.controller').getMyTickets);
+router.get('/support', requireAuth, require('../modules/support/support.controller').getMyTickets);
+
+// User Profile
+router.get('/profile', (req, res) => {
+    res.render('student/profile', {
+        layout: 'layouts/dashboard',
+        title: 'My Profile',
+        path: req.originalUrl,
+        user: req.user,
+        sidebarPartial: '../partials/sidebar-student'
+    });
+});
 
 module.exports = router;

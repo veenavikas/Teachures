@@ -9,7 +9,7 @@
 
     <% if (continueCourse) { %>
         <div class="card" style="display: flex; cursor: pointer; border-left: 4px solid var(--color-primary);"
-            onclick="window.location.href='/learner/courses/<%= continueCourse.slug %>/learn'">
+            onclick="window.location.href='/student/courses/<%= continueCourse.slug %>/learn'">
             <div
                 style="width: 250px; background-image: url('<%= continueCourse.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; background-position: center;">
             </div>
@@ -53,7 +53,7 @@
             <h3
                 style="font-size: 1.1rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
                 My Courses</h3>
-            <a href="/learner/my-courses" class="text-primary" style="font-size: 0.9rem;">View All</a>
+            <a href="/student/my-courses" class="text-primary" style="font-size: 0.9rem;">View All</a>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
@@ -69,7 +69,7 @@
                                 <%= course.title %>
                             </h4>
                             <p class="text-muted" style="font-size: 0.85rem;">
-                                <%= course.trainerName %>
+                                <%= course.instructorName %>
                             </p>
                             <div
                                 style="margin-top: 1rem; height: 4px; background-color: var(--color-gray-mid); border-radius: 2px;">
@@ -78,7 +78,7 @@
                                 </div>
                             </div>
                         </div>
-                        <a href="/learner/courses/<%= course.slug %>/learn"
+                        <a href="/student/courses/<%= course.slug %>/learn"
                             style="position: absolute; top:0; left:0; width:100%; height:100%;"></a>
                     </div>
                     <% }) %>
@@ -120,7 +120,7 @@
             <div
                 style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-gray-mid);">
                 <h3 style="font-size: 1.1rem; margin: 0;">Top Learners</h3>
-                <a href="/learner/leaderboard" class="text-primary" style="font-size: 0.9rem;">Full Board</a>
+                <a href="/student/leaderboard" class="text-primary" style="font-size: 0.9rem;">Full Board</a>
             </div>
             <ul style="list-style: none; padding: 0; margin: 0;">
                 <% if (leaders && leaders.length) { %>

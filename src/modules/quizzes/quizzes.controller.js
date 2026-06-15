@@ -1,6 +1,7 @@
 const prisma = require('../../config/database');
+const { awardPoints } = require('../gamification/gamification.controller');
 
-// --- TRAINER ---
+// --- INSTRUCTOR ---
 
 exports.createQuiz = async (req, res) => {
     try {
@@ -105,7 +106,7 @@ exports.deleteQuestion = async (req, res) => {
 };
 
 
-// --- LEARNER ---
+// --- STUDENT ---
 
 exports.getQuiz = async (req, res) => {
     try {
@@ -120,7 +121,7 @@ exports.getQuiz = async (req, res) => {
 
         if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
 
-        // In a strict environment, we'd strip 'isCorrect' from options for learners here.
+        // In a strict environment, we'd strip 'isCorrect' from options for students here.
         // For MVP, returning full object to let frontend grade or backend grade.
         // Real implementation should only grade on backend.
 
@@ -171,7 +172,9 @@ exports.submitAttempt = async (req, res) => {
 
         // Event Hook for Gamification (Badge check)
         if (passed) {
-            // Check/assign badges...
+            // Award points for passing
+            const pointsToAward = 50; 
+            await awardPoints(req.user.id, pointsToAward);
         }
 
         res.status(201).json({

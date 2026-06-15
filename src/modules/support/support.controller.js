@@ -40,7 +40,7 @@ exports.getTicket = async (req, res) => {
         if (!ticket) return res.status(404).json({ success: false, message: 'Ticket not found' });
 
         // Security check: Only owners or Admins can view
-        if (ticket.userId !== req.user.id && req.user.role !== 'ADMIN') {
+        if (ticket.userId !== req.user.id && req.user.role !== 'ADMINISTRATOR') {
             return res.status(403).json({ success: false, message: 'Forbidden' });
         }
 
@@ -87,7 +87,7 @@ exports.addMessage = async (req, res) => {
         const ticket = await prisma.supportTicket.findUnique({ where: { id } });
         if (!ticket) return res.status(404).json({ success: false, message: 'Ticket not found' });
 
-        if (ticket.userId !== req.user.id && req.user.role !== 'ADMIN') {
+        if (ticket.userId !== req.user.id && req.user.role !== 'ADMINISTRATOR') {
             return res.status(403).json({ success: false, message: 'Forbidden' });
         }
 

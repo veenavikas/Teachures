@@ -1,0 +1,55 @@
+<div class="auth-box">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 0.5rem;">Two-Factor Authentication</h2>
+        <p class="text-muted">Enter the 6-digit code from your authenticator app.</p>
+    </div>
+
+    <form id="login2faForm">
+        <input type="hidden" id="email" value="<%= email %>">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label for="twoFactorCode" style="font-weight: 500; display: block; margin-bottom: 0.5rem;">6-Digit Code</label>
+            <input type="text" id="twoFactorCode" name="twoFactorCode" class="form-control" placeholder="123456" required autocomplete="off" style="width: 100%; letter-spacing: 0.2rem; font-size: 1.2rem; text-align: center;">
+        </div>
+        
+        <!-- Assuming we use the same password from the previous step. Wait, the API requires email+password+code. 
+             If we don't have the password anymore, we need the user to enter it again or we should have issued a pre-auth token.
+             Since this is MVP, we will ask them to re-enter password. -->
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label for="password" style="font-weight: 500; display: block; margin-bottom: 0.5rem;">Verify Password</label>
+            <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required style="width: 100%;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700;">Verify & Login</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('login2faForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const twoFactorCode = document.getElementById('twoFactorCode').value;
+
+        try {
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, twoFactorCode })
+            });
+            const data = await res.json();
+            
+            if (data.success && !data.requires2FA) {
+                // Determine dashboard based on role
+                const role = data.data.user.role;
+                if (role === 'INSTRUCTOR') window.location.href = '/instructor/dashboard';
+                else if (role === 'ADMINISTRATOR') window.location.href = '/admin/dashboard';
+                else window.location.href = '/student/dashboard';
+            } else {
+                alert(data.message || 'Verification failed');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred');
+        }
+    });
+</script>

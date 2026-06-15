@@ -18,7 +18,7 @@ router.post('/', supportController.createTicket);
 // Add a message to an existing ticket
 router.post('/:id/messages', supportController.addMessage);
 
-// Admin / Trainer actions
-router.put('/:id/status', requireRole('ADMIN', 'TRAINER'), supportController.updateTicketStatus);
+// Admin / Instructor actions
+router.put('/:id/status', requireRole('ADMINISTRATOR', 'INSTRUCTOR'), supportController.updateTicketStatus);
 
 module.exports = router;

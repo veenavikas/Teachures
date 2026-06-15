@@ -1,0 +1,35 @@
+<div class="card" style="padding: 1.5rem;">
+    <h2 style="margin-bottom: 1.5rem;">Content Moderation</h2>
+    <p class="text-muted" style="margin-bottom: 2rem;">Review and approve courses submitted by instructors before they go live on the platform.</p>
+    
+    <div style="display: grid; gap: 1.5rem;">
+        <% if (courses && courses.length > 0) { %>
+            <% courses.forEach(course => { %>
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); padding: 1.5rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;"><%= course.title %></h3>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.5rem;"><%= course.description %></p>
+                        <div style="font-size: 0.85rem; color: var(--color-gray-light);">
+                            <strong>Instructor:</strong> <%= course.instructor ? course.instructor.name : 'Unknown' %> | <strong>Price:</strong> $<%= course.price %>
+                        </div>
+                    </div>
+                    <div>
+                        <form action="/admin/moderation/<%= course.id %>/approve" method="POST">
+                            <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="check-circle" class="icon-sm"></i> Approve Course
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div style="text-align: center; padding: 3rem; background: rgba(255, 255, 255, 0.02); border-radius: 8px;">
+                <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--color-gray-light); margin-bottom: 1rem;"></i>
+                <h3 style="color: var(--color-gray-light);">All Caught Up!</h3>
+                <p class="text-muted">There are no pending courses awaiting moderation.</p>
+            </div>
+        <% } %>
+    </div>
+</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>

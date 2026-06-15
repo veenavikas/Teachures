@@ -1,16 +1,16 @@
 const prisma = require('../../config/database');
 
-// --- TRAINER ---
+// --- INSTRUCTOR ---
 
-exports.getTrainerOverview = async (req, res) => {
+exports.getInstructorOverview = async (req, res) => {
     try {
-        const trainerId = req.user.id;
+        const instructorId = req.user.id;
 
-        // Sum revenue from payments linked to trainer's courses
+        // Sum revenue from payments linked to instructor's courses
         // Note: For MVP, we'll do a simple approximation by getting courses, then enrollments
 
         const courses = await prisma.course.findMany({
-            where: { trainerId },
+            where: { instructorId },
             include: {
                 _count: {
                     select: { enrollments: true, ratings: true }
@@ -54,9 +54,9 @@ exports.getCourseAnalytics = async (req, res) => {
     try {
         const { courseId } = req.params;
 
-        // Ensure trainer owns course
+        // Ensure instructor owns course
         const course = await prisma.course.findUnique({ where: { id: courseId } });
-        if (!course || course.trainerId !== req.user.id) {
+        if (!course || course.instructorId !== req.user.id) {
             return res.status(403).json({ success: false, message: 'Forbidden' });
         }
 
@@ -97,7 +97,7 @@ exports.getCourseAnalytics = async (req, res) => {
 exports.getPlatformAnalytics = async (req, res) => {
     try {
         const totalUsers = await prisma.user.count();
-        const totalTrainers = await prisma.user.count({ where: { role: 'TRAINER' } });
+        const totalInstructors = await prisma.user.count({ where: { role: 'INSTRUCTOR' } });
         const totalCourses = await prisma.course.count();
         const totalEnrollments = await prisma.enrollment.count();
 
@@ -113,7 +113,7 @@ exports.getPlatformAnalytics = async (req, res) => {
             success: true,
             data: {
                 totalUsers,
-                totalTrainers,
+                totalInstructors,
                 totalCourses,
                 totalEnrollments,
                 newUsersLast30Days: newUsers

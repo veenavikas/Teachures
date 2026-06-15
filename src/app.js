@@ -9,6 +9,13 @@ const hpp = require('hpp');
 const compression = require('compression');
 const passport = require('./config/passport');
 
+// Connect to database
+require('./config/database');
+
+// Initialize Cron Jobs
+const { initCronJobs } = require('./services/cron.service');
+initCronJobs();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -72,6 +79,10 @@ app.set('views', './src/views');
 app.use(expressLayouts);
 app.set('layout', 'layouts/main'); // default layout
 
+// Apply optional auth globally for view templates
+const { optionalAuth } = require('./middleware/auth.middleware');
+app.use(optionalAuth);
+
 // Healthcheck route
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
@@ -81,8 +92,8 @@ app.get('/health', (req, res) => {
 const authRoutes = require('./modules/auth/auth.routes');
 const publicRoutes = require('./routes/public.routes');
 const coursesRoutes = require('./modules/courses/courses.routes');
-const trainerRoutes = require('./routes/trainer.routes');
-const learnerRoutes = require('./routes/learner.routes');
+const instructorRoutes = require('./routes/instructor.routes');
+const studentRoutes = require('./routes/student.routes');
 const adminRoutes = require('./routes/admin.routes');
 const paymentsRoutes = require('./modules/payments/payments.routes');
 const quizzesRoutes = require('./modules/quizzes/quizzes.routes');
@@ -91,6 +102,8 @@ const analyticsRoutes = require('./modules/analytics/analytics.routes');
 const complianceRoutes = require('./modules/compliance/compliance.routes');
 const supportRoutes = require('./modules/support/support.routes');
 const notificationsRoutes = require('./modules/notifications/notifications.routes');
+const cmsRoutes = require('./modules/cms/cms.routes');
+const aiRoutes = require('./modules/ai/ai.routes');
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', coursesRoutes);
@@ -101,8 +114,10 @@ app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/compliance', complianceRoutes);
 app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/notifications', notificationsRoutes);
-app.use('/trainer', trainerRoutes);
-app.use('/learner', learnerRoutes);
+app.use('/api/v1/cms', cmsRoutes);
+app.use('/api/v1/ai', aiRoutes);
+app.use('/instructor', instructorRoutes);
+app.use('/student', studentRoutes);
 app.use('/admin', adminRoutes);
 app.use('/', publicRoutes);
 

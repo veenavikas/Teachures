@@ -1,6 +1,6 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h2 class="auth-title" style="margin: 0;">My Courses</h2>
-    <a href="/trainer/courses/create" class="btn btn-primary"><i data-lucide="plus" style="margin-right: 8px;"></i>
+    <a href="/instructor/courses/create" class="btn btn-primary"><i data-lucide="plus" style="margin-right: 8px;"></i>
         Create Course</a>
 </div>
 
@@ -33,7 +33,7 @@
                         <div style="font-family: var(--font-mono); font-weight: 700;">$<%= course.price %>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <a href="/trainer/courses/<%= course.id %>/edit" class="btn btn-outline"
+                            <a href="/instructor/courses/<%= course.id %>/edit" class="btn btn-outline"
                                 style="padding: 0.5rem; border: none; color: var(--color-gray-light);"><i
                                     data-lucide="edit-2" class="icon-sm"></i></a>
                         </div>
@@ -49,7 +49,7 @@
                         <h3 style="margin-bottom: 0.5rem;">No courses yet</h3>
                         <p class="text-muted" style="margin-bottom: 1.5rem;">Start building your first curriculum today.
                         </p>
-                        <a href="/trainer/courses/create" class="btn btn-primary">Create Course</a>
+                        <a href="/instructor/courses/create" class="btn btn-primary">Create Course</a>
                     </div>
                     <% } %>
 </div>

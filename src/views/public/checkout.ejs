@@ -78,11 +78,22 @@
                     </div>
                 </div>
 
+                <div style="margin-top: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Have a Promo Code?</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" id="promoCodeInput" placeholder="Enter code" style="flex: 1; padding: 0.75rem; border: 1px solid var(--color-gray-mid); border-radius: 4px; background: rgba(255,255,255,0.05); color: white;">
+                        <button onclick="applyPromoCode()" class="btn btn-outline" style="padding: 0.75rem 1rem;">Apply</button>
+                    </div>
+                    <p id="promoMessage" style="font-size: 0.85rem; margin-top: 0.5rem;"></p>
+                </div>
+
                 <div
                     style="display: flex; justify-content: space-between; border-top: 1px solid var(--color-gray-mid); padding-top: 1rem; margin-top: 1rem;">
                     <span style="font-weight: 600;">Total Amount</span>
-                    <span style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-primary);">$<%=
-                            course.price %></span>
+                    <div>
+                        <span id="originalPrice" style="font-family: var(--font-display); font-size: 1.2rem; color: var(--color-gray-light); text-decoration: line-through; display: none; margin-right: 0.5rem;">$<%= course.price %></span>
+                        <span id="finalPrice" style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-primary);">$<%= course.price %></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,7 +114,7 @@
                     style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
                 <h3 style="margin-bottom: 1rem;">Payment Successful!</h3>
                 <p class="text-muted" style="margin-bottom: 1.5rem;">You have been enrolled in the course.</p>
-                <a href="/learner/courses/<%= course.slug %>/learn" class="btn btn-primary" style="width: 100%;">Start
+                <a href="/student/courses/<%= course.slug %>/learn" class="btn btn-primary" style="width: 100%;">Start
                     Learning</a>
             </div>
         </div>
@@ -112,6 +123,51 @@
 
     <script>
         lucide.createIcons();
+        
+        let appliedCouponCode = null;
+
+        async function applyPromoCode() {
+            const code = document.getElementById('promoCodeInput').value;
+            const msgEl = document.getElementById('promoMessage');
+            
+            if (!code) return;
+
+            try {
+                const res = await fetch('/api/v1/courses/coupons/validate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, courseId: '<%= course.id %>' })
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    appliedCouponCode = code;
+                    msgEl.textContent = 'Promo code applied!';
+                    msgEl.style.color = 'var(--color-success)';
+                    
+                    const originalPrice = parseFloat('<%= course.price %>');
+                    let newPrice = originalPrice;
+                    
+                    if (data.data.discountPercentage) {
+                        newPrice = originalPrice * (1 - (data.data.discountPercentage / 100));
+                    } else if (data.data.discountAmount) {
+                        newPrice = Math.max(0, originalPrice - data.data.discountAmount);
+                    }
+                    
+                    document.getElementById('originalPrice').style.display = 'inline-block';
+                    document.getElementById('finalPrice').textContent = '$' + newPrice.toFixed(2);
+                } else {
+                    appliedCouponCode = null;
+                    msgEl.textContent = data.message;
+                    msgEl.style.color = 'var(--color-danger)';
+                    document.getElementById('originalPrice').style.display = 'none';
+                    document.getElementById('finalPrice').textContent = '$<%= course.price %>';
+                }
+            } catch (err) {
+                msgEl.textContent = 'Error validating code';
+                msgEl.style.color = 'var(--color-danger)';
+            }
+        }
 
         // PayPal JS SDK Integration
         paypal.Buttons({
@@ -121,7 +177,10 @@
                     const res = await fetch('/api/v1/payments/create-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ courseId: '<%= course.id %>' })
+                        body: JSON.stringify({ 
+                            courseId: '<%= course.id %>',
+                            couponCode: appliedCouponCode 
+                        })
                     });
                     const orderData = await res.json();
                     if (!orderData.success) throw new Error(orderData.message);
@@ -137,7 +196,7 @@
                     const res = await fetch('/api/v1/payments/capture-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ orderID: data.orderID })
+                        body: JSON.stringify({ orderID: data.orderID, couponCode: appliedCouponCode })
                     });
                     const captureData = await res.json();
                     if (captureData.success) {

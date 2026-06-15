@@ -1,5 +1,5 @@
 <div style="max-width: 600px; margin: 0 auto; padding: 2rem 0;">
-    <a href="/trainer/courses" class="text-muted"
+    <a href="/instructor/courses" class="text-muted"
         style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.9rem;">
         <i data-lucide="arrow-left" class="icon-sm"></i> Back to Courses
     </a>
@@ -36,7 +36,7 @@
         <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 2rem 0;">
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-            <a href="/trainer/courses" class="btn btn-outline" style="border: none;">Cancel</a>
+            <a href="/instructor/courses" class="btn btn-outline" style="border: none;">Cancel</a>
             <button type="submit" class="btn btn-primary">Create & Proceed</button>
         </div>
     </form>
@@ -59,7 +59,7 @@
 
             const data = await res.json();
             if (data.success) {
-                window.location.href = `/trainer/courses/${data.data.id}/edit`;
+                window.location.href = `/instructor/courses/${data.data.id}/edit`;
             } else {
                 alert(data.message || 'Error creating course');
             }

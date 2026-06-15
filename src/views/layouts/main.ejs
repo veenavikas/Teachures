@@ -5,8 +5,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>
-    <%= typeof title !=='undefined' ? title + ' | Teachures' : 'Teachures | SaaS LMS' %>
+    <%= typeof seoTitle !== 'undefined' && seoTitle ? seoTitle : (typeof title !== 'undefined' ? title + ' | Teachures' : 'Teachures | SaaS LMS') %>
   </title>
+  <% if (typeof seoDesc !== 'undefined' && seoDesc) { %>
+    <meta name="description" content="<%= seoDesc %>">
+    <meta property="og:description" content="<%= seoDesc %>">
+    <meta name="twitter:description" content="<%= seoDesc %>">
+  <% } else { %>
+    <meta name="description" content="Teachures - The premier SaaS LMS platform.">
+    <meta property="og:description" content="Teachures - The premier SaaS LMS platform.">
+    <meta name="twitter:description" content="Teachures - The premier SaaS LMS platform.">
+  <% } %>
+
+  <!-- Open Graph & Twitter Card Data -->
+  <meta property="og:title" content="<%= typeof seoTitle !== 'undefined' && seoTitle ? seoTitle : (typeof title !== 'undefined' ? title + ' | Teachures' : 'Teachures | SaaS LMS') %>">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://teachures.com/images/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= typeof seoTitle !== 'undefined' && seoTitle ? seoTitle : (typeof title !== 'undefined' ? title + ' | Teachures' : 'Teachures | SaaS LMS') %>">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
