@@ -1,4 +1,5 @@
 const slugify = require('slugify');
+const prisma = require('../../config/database');
 
 // --- PUBLIC ---
 

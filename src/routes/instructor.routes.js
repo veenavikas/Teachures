@@ -209,6 +209,47 @@ router.get('/analytics', async (req, res) => {
     }
 });
 
+router.get('/earnings', async (req, res) => {
+    try {
+        const payments = await prisma.payment.findMany({
+            where: { status: 'COMPLETED' },
+            include: {
+                enrollments: { include: { course: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        let totalEarnings = 0;
+        let recentTransactions = [];
+
+        payments.forEach(p => {
+            if (p.enrollments && p.enrollments.length > 0 && p.enrollments[0].course) {
+                if (p.enrollments[0].course.instructorId === req.user.id) {
+                    // Instructor takes 90%
+                    const payout = p.amount * 0.90;
+                    totalEarnings += payout;
+                    recentTransactions.push({
+                        course: p.enrollments[0].course.title,
+                        date: p.createdAt.toLocaleDateString(),
+                        amount: payout
+                    });
+                }
+            }
+        });
+
+        res.render('instructor/earnings', {
+            layout: 'layouts/dashboard',
+            title: 'Earnings',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            earnings: { totalEarnings, recentTransactions }
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
+    }
+});
+
 router.get('/privacy', async (req, res) => {
     const logs = await prisma.consentLog.findMany({
         where: { userId: req.user.id },
