@@ -88,6 +88,15 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
 });
 
+// Temporary Env Test Route
+app.get('/test-env', (req, res) => {
+  const dbUrl = process.env.DATABASE_URL || 'NOT_SET';
+  res.status(200).json({ 
+    dbUrl: dbUrl.substring(0, 50) + '...',
+    isDotenvLoaded: !!process.env.PORT
+  });
+});
+
 // API Routes
 const authRoutes = require('./modules/auth/auth.routes');
 const publicRoutes = require('./routes/public.routes');
