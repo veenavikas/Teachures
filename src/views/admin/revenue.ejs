@@ -1,0 +1,91 @@
+<div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Gross Volume -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Gross Volume</p>
+                <h2 style="font-size: 2rem; margin: 0; color: var(--color-white);">$<%= financials.grossVolume.toFixed(2) %></h2>
+            </div>
+            <div style="background: rgba(var(--color-primary-rgb), 0.1); padding: 0.75rem; border-radius: 8px; color: var(--color-primary);">
+                <i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i>
+            </div>
+        </div>
+        <p class="text-muted" style="font-size: 0.85rem; margin: 0;">Total payments processed</p>
+    </div>
+
+    <!-- Platform Fee -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Platform Earnings</p>
+                <h2 style="font-size: 2rem; margin: 0; color: var(--color-success);">$<%= financials.platformFee.toFixed(2) %></h2>
+            </div>
+            <div style="background: rgba(var(--color-success-rgb), 0.1); padding: 0.75rem; border-radius: 8px; color: var(--color-success);">
+                <i data-lucide="trending-up" style="width: 24px; height: 24px;"></i>
+            </div>
+        </div>
+        <p class="text-muted" style="font-size: 0.85rem; margin: 0;">Teachures 10% commission</p>
+    </div>
+
+    <!-- Total Owed to Trainers -->
+    <div class="card" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <div>
+                <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Pending Payouts</p>
+                <% let totalPayouts = financials.trainerPayouts.reduce((sum, t) => sum + t.totalOwed, 0); %>
+                <h2 style="font-size: 2rem; margin: 0; color: var(--color-warning);">$<%= totalPayouts.toFixed(2) %></h2>
+            </div>
+            <div style="background: rgba(var(--color-warning-rgb), 0.1); padding: 0.75rem; border-radius: 8px; color: var(--color-warning);">
+                <i data-lucide="credit-card" style="width: 24px; height: 24px;"></i>
+            </div>
+        </div>
+        <p class="text-muted" style="font-size: 0.85rem; margin: 0;">Owed to trainers (90%)</p>
+    </div>
+</div>
+
+<div class="card" style="padding: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Instructor Payouts</h3>
+
+    <% if (financials.trainerPayouts.length === 0) { %>
+        <p class="text-muted">No payouts required yet.</p>
+    <% } else { %>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                        <th style="padding: 1rem;">Instructor</th>
+                        <th style="padding: 1rem;">PayPal Account</th>
+                        <th style="padding: 1rem;">Amount Owed</th>
+                        <th style="padding: 1rem;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% financials.trainerPayouts.forEach(trainer => { %>
+                        <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                            <td style="padding: 1rem;">
+                                <strong><%= trainer.name %></strong><br>
+                                <small class="text-muted"><%= trainer.email %></small>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <code style="background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px;"><%= trainer.paypal %></code>
+                            </td>
+                            <td style="padding: 1rem; color: var(--color-warning); font-weight: 600;">
+                                $<%= trainer.totalOwed.toFixed(2) %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <% if (trainer.totalOwed > 0) { %>
+                                    <a href="https://paypal.com/myaccount/transfer/homepage" target="_blank" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                        <i data-lucide="external-link" class="icon-sm"></i> Pay via PayPal
+                                    </a>
+                                <% } else { %>
+                                    <span class="text-muted">Paid</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+        <p class="text-muted" style="margin-top: 1.5rem; font-size: 0.85rem;">* Note: This is a manual payout report. To process a payout, log into your PayPal account and send the owed amount to the instructor's PayPal email.</p>
+    <% } %>
+</div>

@@ -202,26 +202,115 @@ router.post('/moderation/:id/approve', async (req, res) => {
     }
 });
 
-// Placeholder Routes for missing tabs
-router.get('/instructors', (req, res) => {
-    res.render('admin/coming-soon', {
-        layout: 'layouts/dashboard', title: 'Instructors', path: '/wp-admin/instructors', user: req.user, sidebarPartial: '../partials/sidebar-admin'
-    });
+// Instructor Management
+router.get('/instructors', async (req, res) => {
+    try {
+        const instructors = await prisma.user.findMany({
+            where: { role: 'INSTRUCTOR' },
+            include: { instructorProfile: true },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.render('admin/instructors', {
+            layout: 'layouts/dashboard', title: 'Instructors', path: '/wp-admin/instructors', user: req.user, sidebarPartial: '../partials/sidebar-admin', instructors
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
 });
-router.get('/courses', (req, res) => {
-    res.render('admin/coming-soon', {
-        layout: 'layouts/dashboard', title: 'Courses', path: '/wp-admin/courses', user: req.user, sidebarPartial: '../partials/sidebar-admin'
-    });
+
+router.post('/instructors/:id/approve', async (req, res) => {
+    try {
+        await prisma.instructorProfile.update({
+            where: { userId: req.params.id },
+            data: { isApproved: true }
+        });
+        res.redirect('/wp-admin/instructors');
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
 });
-router.get('/revenue', (req, res) => {
-    res.render('admin/coming-soon', {
-        layout: 'layouts/dashboard', title: 'Revenue', path: '/wp-admin/revenue', user: req.user, sidebarPartial: '../partials/sidebar-admin'
-    });
+// Courses Management
+router.get('/courses', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            include: { 
+                instructor: { select: { name: true, email: true } },
+                _count: { select: { enrollments: true, lessons: true } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+        res.render('admin/courses', {
+            layout: 'layouts/dashboard', title: 'Courses Management', path: '/wp-admin/courses', user: req.user, sidebarPartial: '../partials/sidebar-admin', courses
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
 });
+// Financials & Revenue
+router.get('/revenue', async (req, res) => {
+    try {
+        const payments = await prisma.payment.findMany({
+            where: { status: 'COMPLETED' },
+            include: {
+                enrollments: { include: { course: { include: { instructor: { include: { instructorProfile: true } } } } } }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        let grossVolume = 0;
+        let platformFee = 0;
+        let trainerPayouts = {};
+
+        payments.forEach(p => {
+            grossVolume += p.amount;
+            
+            // Assume 10% platform fee
+            const fee = p.amount * 0.10;
+            const payout = p.amount - fee;
+            platformFee += fee;
+
+            if (p.enrollments && p.enrollments.length > 0 && p.enrollments[0].course) {
+                const instructor = p.enrollments[0].course.instructor;
+                if (!trainerPayouts[instructor.id]) {
+                    trainerPayouts[instructor.id] = {
+                        name: instructor.name,
+                        email: instructor.email,
+                        paypal: instructor.instructorProfile?.paypalAccountId || 'Not setup',
+                        totalOwed: 0
+                    };
+                }
+                trainerPayouts[instructor.id].totalOwed += payout;
+            }
+        });
+
+        res.render('admin/revenue', {
+            layout: 'layouts/dashboard', title: 'Revenue & Payouts', path: '/wp-admin/revenue', user: req.user, sidebarPartial: '../partials/sidebar-admin',
+            financials: { grossVolume, platformFee, trainerPayouts: Object.values(trainerPayouts), payments }
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+// Platform Settings
 router.get('/settings', (req, res) => {
-    res.render('admin/coming-soon', {
-        layout: 'layouts/dashboard', title: 'Settings', path: '/wp-admin/settings', user: req.user, sidebarPartial: '../partials/sidebar-admin'
+    // Mock settings object (in a real app, fetch from a GlobalSettings table)
+    const settings = {
+        platformName: 'Teachures',
+        supportEmail: 'support@teachures.com',
+        platformFeePercentage: 10,
+        currency: 'USD',
+        allowPublicRegistration: true
+    };
+
+    res.render('admin/settings', {
+        layout: 'layouts/dashboard', title: 'Platform Settings', path: '/wp-admin/settings', user: req.user, sidebarPartial: '../partials/sidebar-admin', settings
     });
+});
+
+router.post('/settings', (req, res) => {
+    // In a real app, save to GlobalSettings table here.
+    // For now, we mock the success response.
+    res.redirect('/wp-admin/settings?success=1');
 });
 
 module.exports = router;

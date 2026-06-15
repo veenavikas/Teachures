@@ -1,0 +1,57 @@
+<div class="card" style="padding: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Instructor Approvals</h3>
+
+    <% if (instructors.length === 0) { %>
+        <p class="text-muted">No instructors found.</p>
+    <% } else { %>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                        <th style="padding: 1rem;">Name</th>
+                        <th style="padding: 1rem;">Email</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% instructors.forEach(instructor => { %>
+                        <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                            <td style="padding: 1rem; display: flex; align-items: center; gap: 10px;">
+                                <% if (instructor.avatar) { %>
+                                    <img src="<%= instructor.avatar %>" style="width: 40px; height: 40px; border-radius: 50%;">
+                                <% } else { %>
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                        <%= instructor.name.charAt(0).toUpperCase() %>
+                                    </div>
+                                <% } %>
+                                <div>
+                                    <strong><%= instructor.name %></strong>
+                                    <br>
+                                    <small class="text-muted">Joined <%= new Date(instructor.createdAt).toLocaleDateString() %></small>
+                                </div>
+                            </td>
+                            <td style="padding: 1rem;"><%= instructor.email %></td>
+                            <td style="padding: 1rem;">
+                                <% if (instructor.instructorProfile?.isApproved) { %>
+                                    <span style="background: rgba(var(--color-success-rgb), 0.1); color: var(--color-success); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Approved</span>
+                                <% } else { %>
+                                    <span style="background: rgba(var(--color-warning-rgb), 0.1); color: var(--color-warning); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; font-weight: 600;">Pending</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <% if (!instructor.instructorProfile?.isApproved) { %>
+                                    <form action="/wp-admin/instructors/<%= instructor.id %>/approve" method="POST" style="display:inline;">
+                                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Approve</button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="text-muted">No actions needed</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>
