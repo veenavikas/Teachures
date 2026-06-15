@@ -36,14 +36,14 @@
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dim) 100%);
-    color: var(--color-black);
-    box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2);
+    background: linear-gradient(135deg, #FFFFFF 0%, #F5C518 100%);
+    color: #0F172A;
+    box-shadow: 0 4px 15px rgba(245, 197, 24, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(245, 197, 24, 0.4);
+    box-shadow: 0 8px 25px rgba(245, 197, 24, 0.5);
 }
 
 .btn-outline {
@@ -89,8 +89,8 @@
 
 .card:hover {
     transform: translateY(-10px);
-    border-color: rgba(245, 197, 24, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 197, 24, 0.1);
+    border-color: rgba(245, 197, 24, 0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 20px rgba(245, 197, 24, 0.2);
 }
 
 .card-content {
@@ -266,8 +266,8 @@
 .step-icon {
     width: 90px;
     height: 90px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dim) 100%);
-    color: var(--color-black);
+    background: linear-gradient(135deg, #FFFFFF 0%, #F5C518 100%);
+    color: #0F172A;
     border-radius: 24px;
     /* Squircle */
     display: flex;
@@ -305,7 +305,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 4rem;
-    background: rgba(5, 5, 5, 0.8);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
@@ -356,7 +356,7 @@ footer {
     display: flex;
     justify-content: space-between;
     margin-top: 6rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 1), transparent);
+    background: linear-gradient(to top, rgba(255, 249, 214, 1), transparent);
 }
 
 /* ==================================================

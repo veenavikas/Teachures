@@ -1,17 +1,17 @@
 /* /src/public/css/base.css */
 
 :root {
-  --color-primary: #F5C518;
+  --color-primary: #D4AA00;
   --color-primary-glow: rgba(245, 197, 24, 0.4);
-  --color-primary-dim: #D4AA00;
+  --color-primary-dim: #F5C518;
 
-  --color-black: #050505;
-  --color-bg-mesh: #0A0A0A;
+  --color-black: #FFFFFF;
+  --color-bg-mesh: #FFF9D6;
 
-  --color-white: #FFFFFF;
-  --color-gray-light: #A1A1AA;
-  --color-gray-mid: #27272A;
-  --color-gray-dark: #18181B;
+  --color-white: #0F172A;
+  --color-gray-light: #475569;
+  --color-gray-mid: #94A3B8;
+  --color-gray-dark: #E2E8F0;
 
   --color-danger: #EF4444;
   --color-success: #10B981;
@@ -22,9 +22,9 @@
   --font-mono: 'JetBrains Mono', monospace;
 
   --shadow-glow: 0 0 20px var(--color-primary-glow);
-  --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
-  --glass-bg: rgba(24, 24, 27, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  --shadow-card: 0 10px 40px -10px rgba(245, 197, 24, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(245, 197, 24, 0.3);
 }
 
 * {
@@ -34,10 +34,10 @@
 }
 
 body {
-  background-color: var(--color-black);
+  background-color: #FFFFFF;
   background-image:
-    radial-gradient(circle at 15% 50%, rgba(245, 197, 24, 0.05), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(245, 197, 24, 0.04), transparent 30%);
+    radial-gradient(circle at 15% 50%, rgba(245, 197, 24, 0.2), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(245, 197, 24, 0.15), transparent 40%);
   color: var(--color-gray-light);
   font-family: var(--font-body);
   line-height: 1.6;
@@ -67,14 +67,14 @@ h1.display {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, var(--color-white) 0%, var(--color-gray-light) 100%);
+  background: linear-gradient(135deg, #0F172A 0%, #475569 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #FFD700 100%);
+  background: linear-gradient(135deg, #D4AA00 0%, #B45309 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
