@@ -135,5 +135,70 @@
 <script src="/js/curriculum.js"></script>
 <script>
     window.COURSE_ID = '<%= course.id %>';
-    // Logic to fetch sections / initialize SortableJS rests in curriculum.js
+    
+    // Save Course Settings
+    document.getElementById('courseSettingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Saving...';
+        
+        const payload = {
+            title: document.getElementById('courseTitle').value,
+            description: document.getElementById('courseDesc').value,
+            thumbnailUrl: document.getElementById('courseThumb').value,
+            price: parseFloat(document.getElementById('coursePrice').value) || 0,
+            level: document.getElementById('courseLevel').value
+        };
+
+        try {
+            const res = await fetch(`/api/v1/courses/${window.COURSE_ID}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            
+            if(data.success) {
+                alert('Course settings saved successfully!');
+            } else {
+                alert(data.message || 'Failed to save course settings');
+            }
+        } catch(err) {
+            alert('An error occurred while saving.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Save Changes';
+        }
+    });
+
+    // Publish Course
+    const publishBtn = document.getElementById('publishBtn');
+    if(publishBtn) {
+        publishBtn.addEventListener('click', async () => {
+            if(!confirm('Are you sure you want to publish this course? It will be visible to students.')) return;
+            
+            publishBtn.disabled = true;
+            publishBtn.innerHTML = 'Publishing...';
+            
+            try {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/publish`, {
+                    method: 'POST'
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    alert('Course published successfully!');
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Failed to publish course. Ensure you have added lessons first.');
+                }
+            } catch(err) {
+                alert('An error occurred while publishing.');
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.innerHTML = 'Publish Course';
+            }
+        });
+    }
 </script>
