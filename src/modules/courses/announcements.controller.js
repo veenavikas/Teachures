@@ -1,5 +1,5 @@
 const prisma = require('../../config/database');
-const mailer = require('../../utils/mailer');
+const { enqueueEmail } = require('../../services/queue.service');
 
 exports.createAnnouncement = async (req, res) => {
     try {
@@ -42,8 +42,10 @@ exports.createAnnouncement = async (req, res) => {
             `;
             
             // In a real production app, we would queue this.
-            mailer.sendMail(emails.join(','), emailSubject, emailHtml)
-                .catch(err => console.error("Broadcast email failed:", err));
+            for (const email of emails) {
+                enqueueEmail(email, emailSubject, '', emailHtml)
+                    .catch(err => console.error("Broadcast email failed:", err));
+            }
         }
 
         res.status(201).json({ success: true, data: announcement });
