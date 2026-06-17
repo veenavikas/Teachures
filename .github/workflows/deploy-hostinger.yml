@@ -18,8 +18,9 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
             cd /var/www/teachures
-            # Pull the latest changes from the main branch
-            git pull origin main
+            # Force update from main branch to prevent merge conflicts
+            git fetch origin main
+            git reset --hard origin/main
             
             # Rebuild and restart the Docker containers in detached mode
             docker-compose -f docker-compose.yml up -d --build
