@@ -17,13 +17,14 @@ jobs:
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            cd /var/www/teachures
+            cd /home/u853354115/domains/lavenderblush-jellyfish-375463.hostingersite.com/nodejs
+            
             # Force update from main branch to prevent merge conflicts
             git fetch origin main
             git reset --hard origin/main
             
-            # Rebuild and restart the Docker containers in detached mode
-            docker-compose -f docker-compose.yml up -d --build
+            # Install new packages
+            npm install
             
-            # Optional: Clean up dangling images to save space
-            docker image prune -f
+            # Restart the server (this varies depending on Hostinger setup, assuming PM2 is used if SSH is available)
+            pm2 restart all || true
