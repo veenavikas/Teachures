@@ -60,3 +60,22 @@ exports.validateCoupon = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+exports.deleteCoupon = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const coupon = await prisma.coupon.findUnique({ where: { id }, include: { course: true } });
+        if (!coupon) return res.status(404).json({ success: false, message: 'Not found' });
+
+        // If coupon has a courseId, verify instructor ownership.
+        if (req.user.role === 'INSTRUCTOR' && coupon.courseId && coupon.course.instructorId !== req.user.id) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        await prisma.coupon.delete({ where: { id } });
+        res.json({ success: true, message: 'Deleted' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

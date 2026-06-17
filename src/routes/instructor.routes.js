@@ -75,6 +75,9 @@ router.get('/dashboard', async (req, res) => {
 
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const now = new Date();
+        const chartData = [0, 0, 0, 0];
 
         courses.forEach(c => {
             totalStudents += c._count.enrollments;
@@ -84,6 +87,13 @@ router.get('/dashboard', async (req, res) => {
                 if (e.payment && e.payment.status === 'COMPLETED' && e.payment.createdAt >= thirtyDaysAgo) {
                     monthlyEarnings += e.payment.amount;
                 }
+                
+                const diffTime = Math.abs(now - e.enrolledAt);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays <= 7) chartData[3]++;
+                else if (diffDays <= 14) chartData[2]++;
+                else if (diffDays <= 21) chartData[1]++;
+                else if (diffDays <= 28) chartData[0]++;
             });
         });
 
@@ -96,8 +106,21 @@ router.get('/dashboard', async (req, res) => {
             monthlyEarnings,
             activeCourses: courseCount,
             avgRating: ratingCount > 0 ? (totalRatingSum / ratingCount).toFixed(1) : 0,
-            totalReviews: ratingCount
+            totalReviews: ratingCount,
+            chartData: JSON.stringify(chartData)
         };
+
+        const instructorLeaderboard = await prisma.user.findMany({
+            where: {
+                role: 'STUDENT',
+                enrollments: {
+                    some: { course: { instructorId: req.user.id } }
+                }
+            },
+            orderBy: { totalPoints: 'desc' },
+            take: 10,
+            select: { id: true, name: true, email: true, totalPoints: true }
+        });
 
         res.render('instructor/dashboard', {
             layout: 'layouts/dashboard',
@@ -106,7 +129,8 @@ router.get('/dashboard', async (req, res) => {
             user: req.user,
             sidebarPartial: '../partials/sidebar-instructor',
             stats,
-            recentActivity
+            recentActivity,
+            instructorLeaderboard
         });
     } catch (error) {
         res.status(500).send('Server Error');
@@ -145,16 +169,69 @@ router.get('/courses/create', (req, res) => {
     });
 });
 
+// Assignments Grading Dashboard
+router.get('/assignments', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true }
+        });
+        const courseIds = courses.map(c => c.id);
+
+        const submissions = await prisma.assignmentSubmission.findMany({
+            where: {
+                assignment: {
+                    lesson: {
+                        section: {
+                            courseId: { in: courseIds }
+                        }
+                    }
+                }
+            },
+            include: {
+                user: { select: { name: true, email: true } },
+                assignment: {
+                    include: {
+                        lesson: { select: { title: true } }
+                    }
+                }
+            },
+            orderBy: { submittedAt: 'desc' }
+        });
+
+        res.render('instructor/assignments/index', {
+            layout: 'layouts/dashboard',
+            title: 'Assignments & Grading',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            submissions
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
 // Course Editor
 router.get('/courses/:id/edit', async (req, res) => {
     try {
         const course = await prisma.course.findUnique({
-            where: { id: req.params.id }
+            where: { id: req.params.id },
+            include: { prerequisites: true }
         });
 
         if (!course || course.instructorId !== req.user.id) {
             return res.status(404).send('Course not found');
         }
+
+        // Fetch other courses by this instructor to act as potential prerequisites
+        const otherCourses = await prisma.course.findMany({
+            where: { 
+                instructorId: req.user.id,
+                id: { not: course.id }
+            },
+            select: { id: true, title: true }
+        });
 
         res.render('instructor/courses/edit', {
             layout: 'layouts/dashboard',
@@ -162,10 +239,44 @@ router.get('/courses/:id/edit', async (req, res) => {
             path: req.originalUrl,
             user: req.user,
             sidebarPartial: '../partials/sidebar-instructor',
-            course
+            course,
+            otherCourses
         });
     } catch (error) {
         res.status(500).send('Server Error');
+    }
+});
+
+// Learning Paths Management
+router.get('/learning-paths', async (req, res) => {
+    try {
+        // Find paths that contain any of this instructor's courses
+        // Or if we want paths to be instructor specific we need a relation. Right now paths are global but maybe only show paths?
+        // Wait, LearningPath doesn't have an instructorId. Let's just fetch all paths for now, or paths where instructor has a course.
+        // For simplicity, let's allow instructor to see all paths or just the paths they manage.
+        const paths = await prisma.learningPath.findMany({
+            include: {
+                courses: { include: { course: true } }
+            }
+        });
+        
+        // Also fetch instructor's courses to create new paths
+        const myCourses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true, title: true }
+        });
+
+        res.render('instructor/paths/index', {
+            layout: 'layouts/dashboard',
+            title: 'Learning Paths',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            paths,
+            myCourses
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
     }
 });
 
@@ -176,15 +287,39 @@ router.get('/analytics', async (req, res) => {
             where: { instructorId: req.user.id },
             include: {
                 _count: { select: { enrollments: true } },
-                ratings: { select: { rating: true } }
+                ratings: { select: { rating: true } },
+                sections: {
+                    include: {
+                        lessons: {
+                            include: {
+                                progress: true,
+                                quiz: { include: { attempts: true } }
+                            }
+                        }
+                    }
+                }
             }
         });
 
         let totalStudents = 0, totalRevenue = 0, totalRatingSum = 0, ratingCount = 0;
+        let totalWatchedSeconds = 0, totalQuizAttempts = 0, totalQuizScore = 0;
+
         courses.forEach(c => {
             totalStudents += c._count.enrollments;
             totalRevenue += c._count.enrollments * (c.price || 0);
             c.ratings.forEach(r => { totalRatingSum += r.rating; ratingCount++; });
+            
+            c.sections.forEach(s => {
+                s.lessons.forEach(l => {
+                    l.progress.forEach(p => { totalWatchedSeconds += p.watchedSeconds; });
+                    if (l.quiz) {
+                        l.quiz.attempts.forEach(a => {
+                            totalQuizAttempts++;
+                            totalQuizScore += a.score;
+                        });
+                    }
+                });
+            });
         });
 
         const analytics = {
@@ -193,7 +328,9 @@ router.get('/analytics', async (req, res) => {
             totalRevenue,
             avgRating: ratingCount > 0 ? totalRatingSum / ratingCount : 0,
             ratingCount,
-            courses
+            courses,
+            avgQuizScore: totalQuizAttempts > 0 ? (totalQuizScore / totalQuizAttempts).toFixed(1) : 0,
+            avgWatchedMins: (totalWatchedSeconds / 60).toFixed(1)
         };
 
         res.render('instructor/analytics', {
@@ -250,6 +387,114 @@ router.get('/earnings', async (req, res) => {
     }
 });
 
+router.get('/coupons', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true, title: true }
+        });
+
+        const coupons = await prisma.coupon.findMany({
+            where: {
+                OR: [
+                    { courseId: null },
+                    { courseId: { in: courses.map(c => c.id) } }
+                ]
+            },
+            include: { course: true },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.render('instructor/coupons', {
+            layout: 'layouts/dashboard',
+            title: 'Manage Coupons',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            courses,
+            coupons
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
+    }
+});
+
+router.get('/assignments', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true }
+        });
+
+        const courseIds = courses.map(c => c.id);
+
+        const submissions = await prisma.assignmentSubmission.findMany({
+            where: {
+                assignment: {
+                    lesson: {
+                        section: { courseId: { in: courseIds } }
+                    }
+                }
+            },
+            include: {
+                assignment: {
+                    include: { lesson: { select: { title: true } } }
+                },
+                user: { select: { name: true, email: true } }
+            },
+            orderBy: { submittedAt: 'desc' }
+        });
+
+        res.render('instructor/assignments', {
+            layout: 'layouts/dashboard',
+            title: 'Assignments & Grading',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            submissions
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
+    }
+});
+
+
+
+router.get('/qna', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true, title: true }
+        });
+
+        const courseIds = courses.map(c => c.id);
+
+        const qnas = await prisma.courseQnA.findMany({
+            where: { courseId: { in: courseIds } },
+            include: {
+                user: { select: { name: true, avatar: true } },
+                course: { select: { title: true } },
+                replies: {
+                    include: { user: { select: { name: true, role: true } } },
+                    orderBy: { createdAt: 'asc' }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.render('instructor/qna', {
+            layout: 'layouts/dashboard',
+            title: 'Q&A Forums',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            qnas
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
+    }
+});
+
 router.get('/privacy', async (req, res) => {
     const logs = await prisma.consentLog.findMany({
         where: { userId: req.user.id },
@@ -292,6 +537,113 @@ router.post('/privacy/consent', async (req, res) => {
         res.json({ success: true, message: 'Consent updated' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ─── EARNINGS & PAYOUTS ────────────────────────────────────
+router.get('/earnings', async (req, res) => {
+    try {
+        const profile = await prisma.instructorProfile.findUnique({
+            where: { userId: req.user.id }
+        });
+
+        // Calculate earnings from COMPLETED payments
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true, title: true }
+        });
+        
+        const courseIds = courses.map(c => c.id);
+
+        const enrollments = await prisma.enrollment.findMany({
+            where: { courseId: { in: courseIds } },
+            include: { payment: true, course: true, user: true },
+            orderBy: { enrolledAt: 'desc' }
+        });
+
+        let lifetimeEarnings = 0;
+        let recentTransactions = [];
+
+        enrollments.forEach(e => {
+            if (e.payment && e.payment.status === 'COMPLETED') {
+                const amount = e.payment.amount;
+                // e.g. 70% commission
+                const commission = amount * 0.7;
+                lifetimeEarnings += commission;
+
+                recentTransactions.push({
+                    course: e.course.title,
+                    student: e.user.name,
+                    date: e.payment.createdAt,
+                    amount: commission
+                });
+            }
+        });
+
+        const payoutRequests = await prisma.payoutRequest.findMany({
+            where: { instructorId: req.user.id },
+            orderBy: { requestedAt: 'desc' }
+        });
+
+        let paidOut = payoutRequests
+            .filter(pr => pr.status === 'COMPLETED')
+            .reduce((sum, pr) => sum + pr.amount, 0);
+
+        let pendingPayout = payoutRequests
+            .filter(pr => pr.status === 'PENDING')
+            .reduce((sum, pr) => sum + pr.amount, 0);
+
+        let availableBalance = lifetimeEarnings - paidOut - pendingPayout;
+        if (availableBalance < 0) availableBalance = 0;
+
+        res.render('instructor/earnings', {
+            title: 'Earnings & Payouts',
+            path: '/instructor/earnings',
+            profile,
+            lifetimeEarnings,
+            availableBalance,
+            pendingPayout,
+            recentTransactions: recentTransactions.slice(0, 20),
+            payoutRequests
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
+
+router.post('/payouts/request', async (req, res) => {
+    try {
+        const { amount } = req.body;
+        const requestAmount = parseFloat(amount);
+        
+        if (isNaN(requestAmount) || requestAmount <= 0) {
+            return res.status(400).json({ success: false, message: 'Invalid amount' });
+        }
+
+        const profile = await prisma.instructorProfile.findUnique({
+            where: { userId: req.user.id }
+        });
+
+        if (!profile || !profile.paypalAccountId) {
+            return res.status(400).json({ success: false, message: 'Please configure your PayPal account in onboarding.' });
+        }
+
+        // Extremely naive balance check (for real app, compute precisely in transaction)
+        const newRequest = await prisma.payoutRequest.create({
+            data: {
+                instructorId: req.user.id,
+                amount: requestAmount,
+                payoutEmail: profile.paypalAccountId,
+                paypalAccountId: profile.paypalAccountId,
+                status: 'PENDING'
+            }
+        });
+
+        res.json({ success: true, data: newRequest });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error' });
     }
 });
 

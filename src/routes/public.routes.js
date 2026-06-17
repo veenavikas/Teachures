@@ -7,10 +7,6 @@ router.get('/', (req, res) => {
     res.render('public/index', { layout: false });
 });
 
-router.get('/pricing', (req, res) => {
-    res.render('public/pricing', { layout: false });
-});
-
 router.get('/courses', async (req, res) => {
     try {
         const courses = await prisma.course.findMany({
@@ -30,6 +26,14 @@ router.get('/courses', async (req, res) => {
 
 router.get('/about', (req, res) => {
     res.render('public/about', { layout: false });
+});
+
+router.get('/privacy-policy', (req, res) => {
+    res.render('public/privacy', { layout: false });
+});
+
+router.get('/terms', (req, res) => {
+    res.render('public/terms', { layout: false });
 });
 
 router.get('/login', (req, res) => {
@@ -52,11 +56,44 @@ router.get('/courses/:slug', async (req, res) => {
                 ratings: { 
                     include: { user: { select: { name: true, avatar: true } } },
                     orderBy: { createdAt: 'desc' }
-                } 
+                },
+                prerequisites: {
+                    include: { prerequisite: true }
+                },
+                announcements: {
+                    orderBy: { createdAt: 'desc' }
+                }
             }
         });
         if (!course) return res.status(404).send('Course not found');
-        res.render('public/course', { layout: false, course });
+
+        let prereqsMet = true;
+        let pendingPrereqs = [];
+
+        if (course.prerequisites && course.prerequisites.length > 0) {
+            if (!req.user) {
+                prereqsMet = false;
+                pendingPrereqs = course.prerequisites.map(p => p.prerequisite);
+            } else {
+                // Check user's progress for each prerequisite course
+                const progressRecords = await prisma.courseProgress.findMany({
+                    where: {
+                        userId: req.user.id,
+                        courseId: { in: course.prerequisites.map(p => p.prerequisiteId) }
+                    }
+                });
+                
+                for (const prereq of course.prerequisites) {
+                    const prog = progressRecords.find(p => p.courseId === prereq.prerequisiteId);
+                    if (!prog || prog.percentComplete < 100) {
+                        prereqsMet = false;
+                        pendingPrereqs.push(prereq.prerequisite);
+                    }
+                }
+            }
+        }
+        
+        res.render('public/course', { layout: false, course, prerequisites: course.prerequisites, prereqsMet, pendingPrereqs, announcements: course.announcements });
     } catch (error) {
         res.status(500).send('Server error');
     }
@@ -64,8 +101,39 @@ router.get('/courses/:slug', async (req, res) => {
 
 router.get('/courses/:slug/checkout', async (req, res) => {
     try {
-        const course = await prisma.course.findUnique({ where: { slug: req.params.slug } });
+        const course = await prisma.course.findUnique({ 
+            where: { slug: req.params.slug },
+            include: {
+                prerequisites: { include: { prerequisite: true } }
+            }
+        });
         if (!course) return res.status(404).send('Course not found');
+
+        let prereqsMet = true;
+        if (course.prerequisites && course.prerequisites.length > 0) {
+            if (!req.user) {
+                prereqsMet = false;
+            } else {
+                const progressRecords = await prisma.courseProgress.findMany({
+                    where: {
+                        userId: req.user.id,
+                        courseId: { in: course.prerequisites.map(p => p.prerequisiteId) }
+                    }
+                });
+                for (const prereq of course.prerequisites) {
+                    const prog = progressRecords.find(p => p.courseId === prereq.prerequisiteId);
+                    if (!prog || prog.percentComplete < 100) {
+                        prereqsMet = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!prereqsMet) {
+            return res.status(403).send('You have not completed the prerequisites for this course.');
+        }
+
         res.render('public/checkout', {
             layout: false,
             course,

@@ -38,14 +38,34 @@ router.get('/dashboard', async (req, res) => {
             status: 'Completed'
         }));
 
+        // Calculate revenue for the last 4 weeks
+        const revenueData = [0, 0, 0, 0];
+        const now = new Date();
+        payments.forEach(p => {
+            const diffTime = Math.abs(now - p.createdAt);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays <= 7) revenueData[3] += p.amount;
+            else if (diffDays <= 14) revenueData[2] += p.amount;
+            else if (diffDays <= 21) revenueData[1] += p.amount;
+            else if (diffDays <= 28) revenueData[0] += p.amount;
+        });
+
         const stats = {
             totalUsers: await prisma.user.count(),
             platformMRR,
             totalCourses: await prisma.course.count(),
             newCoursesThisWeek: await prisma.course.count({ where: { createdAt: { gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } } }),
             openTickets: await prisma.supportTicket.count({ where: { status: 'OPEN' } }),
-            roleDistribution: JSON.stringify(roleDistribution.map(r => ({ label: r.role, value: r._count.role })))
+            roleDistribution: JSON.stringify(roleDistribution.map(r => ({ label: r.role, value: r._count.role }))),
+            revenueData: JSON.stringify(revenueData)
         };
+
+        const globalLeaderboard = await prisma.user.findMany({
+            where: { role: 'STUDENT' },
+            orderBy: { totalPoints: 'desc' },
+            take: 10,
+            select: { id: true, name: true, email: true, totalPoints: true }
+        });
 
         res.render('admin/dashboard', {
             layout: 'layouts/dashboard',
@@ -54,7 +74,8 @@ router.get('/dashboard', async (req, res) => {
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             stats,
-            recentEnrollments
+            recentEnrollments,
+            globalLeaderboard
         });
     } catch (error) {
         res.status(500).send('Server Error');

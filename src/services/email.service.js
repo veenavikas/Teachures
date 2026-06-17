@@ -1,68 +1,71 @@
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
+const ejs = require('ejs');
+const path = require('path');
 
-// Set the SendGrid API Key from environment variables
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || 'dummy_api_key');
+// Configure Nodemailer Transport
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
+    }
+});
 
 /**
- * Send an email using SendGrid
- * @param {string} to - Recipient email address
- * @param {string} subject - Email subject
- * @param {string} text - Plain text body
- * @param {string} html - HTML body (optional)
+ * Render EJS template and send email
  */
-exports.sendEmail = async (to, subject, text, html) => {
-    const msg = {
-        to,
-        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@teachures.com', // Change to your verified sender
-        subject,
-        text,
-        html: html || text, // Fallback to text if html is not provided
-    };
-
+const sendHtmlEmail = async (to, subject, templateName, context) => {
     try {
-        await sgMail.send(msg);
-        console.log(`Email sent to ${to}`);
+        const templatePath = path.join(__dirname, '../views/emails', `${templateName}.ejs`);
+        const layoutPath = path.join(__dirname, '../views/emails', 'layout.ejs');
+
+        // Render inner content
+        const bodyContent = await ejs.renderFile(templatePath, context);
+        
+        // Render layout with inner content
+        const html = await ejs.renderFile(layoutPath, { body: bodyContent });
+
+        const mailOptions = {
+            from: process.env.SMTP_FROM || '"Teachures" <noreply@teachures.com>',
+            to,
+            subject,
+            html
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`Email sent to ${to}: ${info.messageId}`);
         return true;
     } catch (error) {
-        console.error('SendGrid Error:', error);
-        if (error.response) {
-            console.error(error.response.body);
-        }
+        console.error('Email send error:', error);
         return false;
     }
 };
 
-/**
- * Template: Welcome Email
- */
 exports.sendWelcomeEmail = async (to, name) => {
-    const subject = 'Welcome to Teachures!';
-    const text = `Hi ${name},\n\nWelcome to Teachures. We are excited to have you on board!`;
-    const html = `
-    <div style="font-family: sans-serif; color: #333;">
-      <h2 style="color: #F5C518;">Welcome to Teachures!</h2>
-      <p>Hi ${name},</p>
-      <p>Welcome to Teachures. We are excited to have you on board to start learning or teaching.</p>
-      <p>Best,<br/>The Teachures Team</p>
-    </div>
-  `;
-    return await this.sendEmail(to, subject, text, html);
+    const context = { name, url: process.env.APP_URL || 'http://localhost:3000' };
+    return await sendHtmlEmail(to, 'Welcome to Teachures!', 'welcome', context);
 };
 
-/**
- * Template: Course Enrollment Receipt
- */
 exports.sendEnrollmentEmail = async (to, name, courseTitle, amount) => {
-    const subject = `Enrollment Confirmed: ${courseTitle}`;
-    const text = `Hi ${name},\n\nYou have successfully enrolled in ${courseTitle} for $${amount}.\nEnjoy learning!`;
-    const html = `
-    <div style="font-family: sans-serif; color: #333;">
-      <h2 style="color: #F5C518;">Enrollment Confirmed</h2>
-      <p>Hi ${name},</p>
-      <p>You have successfully enrolled in <strong>${courseTitle}</strong> for $${amount}.</p>
-      <p>Click <a href="http://localhost:3000/learner/dashboard">here</a> to start learning.</p>
-      <p>Best,<br/>The Teachures Team</p>
-    </div>
-  `;
-    return await this.sendEmail(to, subject, text, html);
+    const context = { name, courseTitle, amount, url: process.env.APP_URL || 'http://localhost:3000' };
+    return await sendHtmlEmail(to, `Enrollment Confirmed: ${courseTitle}`, 'enrollment', context);
+};
+
+exports.sendForgotPasswordEmail = async (to, name, resetToken) => {
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const context = { name, resetUrl: `${baseUrl}/reset-password?token=${resetToken}` };
+    return await sendHtmlEmail(to, 'Password Reset Request', 'forgot-password', context);
+};
+
+exports.sendResetSuccessEmail = async (to, name) => {
+    const context = { name, url: process.env.APP_URL || 'http://localhost:3000' };
+    return await sendHtmlEmail(to, 'Password Reset Successful', 'reset-success', context);
+};
+
+exports.sendVerifyEmail = async (to, name, verifyToken) => {
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const context = { name, verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}` };
+    return await sendHtmlEmail(to, 'Verify Your Email Address', 'verify-email', context);
 };

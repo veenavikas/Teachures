@@ -1,0 +1,151 @@
+<h2 style="font-family: var(--font-heading); margin-bottom: 2rem;">Manage Coupons</h2>
+
+<div class="card" style="padding: 2rem; margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1.5rem;">Create New Coupon</h3>
+    <form id="createCouponForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; align-items: end;">
+        
+        <div class="form-group">
+            <label class="form-label">Coupon Code</label>
+            <input type="text" id="couponCode" class="form-control" placeholder="e.g., SUMMER50" required style="text-transform: uppercase;">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Discount Percentage (%)</label>
+            <input type="number" id="discountPercentage" class="form-control" min="1" max="100" placeholder="Optional">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Or Discount Amount ($)</label>
+            <input type="number" id="discountAmount" class="form-control" min="1" placeholder="Optional">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Max Uses</label>
+            <input type="number" id="maxUses" class="form-control" min="1" placeholder="Unlimited if blank">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Specific Course (Optional)</label>
+            <select id="courseId" class="form-control" style="appearance: none; background: white;">
+                <option value="">All My Courses</option>
+                <% if(courses && courses.length) { %>
+                    <% courses.forEach(c => { %>
+                        <option value="<%= c.id %>"><%= c.title %></option>
+                    <% }) %>
+                <% } %>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="height: 48px;">Create</button>
+    </form>
+    <p id="couponError" class="text-danger" style="margin-top: 1rem; display: none;"></p>
+</div>
+
+<div class="card" style="padding: 2rem;">
+    <h3 style="margin-bottom: 1.5rem;">Active Coupons</h3>
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid var(--color-gray-mid); text-align: left;">
+                    <th style="padding: 1rem;">Code</th>
+                    <th style="padding: 1rem;">Discount</th>
+                    <th style="padding: 1rem;">Target</th>
+                    <th style="padding: 1rem;">Uses</th>
+                    <th style="padding: 1rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (coupons && coupons.length) { %>
+                    <% coupons.forEach(coupon => { %>
+                        <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                            <td style="padding: 1rem; font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">
+                                <%= coupon.code %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <% if(coupon.discountPercentage) { %>
+                                    <%= coupon.discountPercentage %>% OFF
+                                <% } else if(coupon.discountAmount) { %>
+                                    $<%= coupon.discountAmount %> OFF
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <%= coupon.course ? coupon.course.title : 'All Courses' %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <%= coupon.usesCount %> / <%= coupon.maxUses ? coupon.maxUses : '∞' %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <button class="btn btn-outline text-danger delete-coupon-btn" data-id="<%= coupon.id %>" style="padding: 0.25rem 0.5rem; border-color: var(--color-danger);">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted" style="padding: 2rem;">No coupons created yet.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('createCouponForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const errorEl = document.getElementById('couponError');
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+
+    const payload = {
+        code: document.getElementById('couponCode').value.trim().toUpperCase(),
+        discountPercentage: document.getElementById('discountPercentage').value,
+        discountAmount: document.getElementById('discountAmount').value,
+        maxUses: document.getElementById('maxUses').value,
+        courseId: document.getElementById('courseId').value || null
+    };
+
+    if(!payload.discountPercentage && !payload.discountAmount) {
+        errorEl.textContent = 'Please specify either a percentage or an amount discount.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/v1/courses/coupons', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.success) {
+            window.location.reload();
+        } else {
+            errorEl.textContent = data.message;
+            errorEl.style.display = 'block';
+            btn.disabled = false;
+        }
+    } catch(err) {
+        errorEl.textContent = 'An error occurred';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+    }
+});
+
+document.querySelectorAll('.delete-coupon-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        if(!confirm('Delete this coupon?')) return;
+        const id = e.target.closest('button').dataset.id;
+        
+        try {
+            const res = await fetch(`/api/v1/courses/coupons/${id}`, { method: 'DELETE' });
+            if(res.ok) window.location.reload();
+        } catch(err) {
+            alert('Failed to delete coupon');
+        }
+    });
+});
+</script>

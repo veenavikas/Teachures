@@ -60,6 +60,7 @@
             Revenue (Last 30 Days)</h3>
         <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
             <canvas id="revenueChart"></canvas>
+            <script id="revenueData" type="application/json"><%- stats.revenueData || '[0,0,0,0]' %></script>
         </div>
     </div>
 
@@ -94,7 +95,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Revenue Chart (Placeholder data but real implementation)
+    // Revenue Chart (Dynamic implementation)
+    const revenueData = JSON.parse(document.getElementById('revenueData').textContent);
     if(document.getElementById('revenueChart')) {
         new Chart(document.getElementById('revenueChart'), {
             type: 'line',
@@ -102,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                 datasets: [{
                     label: 'Revenue',
-                    data: [1200, 1900, 3000, 2400], // To be fully dynamic later
+                    data: revenueData,
                     borderColor: '#10b981',
                     tension: 0.1
                 }]
@@ -162,6 +164,46 @@ document.addEventListener('DOMContentLoaded', function() {
                                     enrollments.</td>
                             </tr>
                             <% } %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Global Leaderboard Table -->
+<div class="card" style="margin-top: 1.5rem; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; margin: 0;">Global Student Leaderboard</h3>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase;">
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Rank</th>
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Learner Name</th>
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Total Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (globalLeaderboard && globalLeaderboard.length > 0) { %>
+                <% globalLeaderboard.forEach((user, idx) => { %>
+                    <tr>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid); font-weight: bold; color: var(--color-primary);">
+                            #<%= idx + 1 %>
+                        </td>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                            <%= user.name %>
+                        </td>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                            <span style="background: rgba(245, 197, 24, 0.1); color: var(--color-primary); border-radius: 4px; padding: 4px 8px; font-weight: 600;">
+                                <%= user.totalPoints %> XP
+                            </span>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-muted text-center" style="padding: 2rem 0;">No learners found.</td>
+                </tr>
+            <% } %>
         </tbody>
     </table>
 </div>

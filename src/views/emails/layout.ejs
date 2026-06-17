@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #0A0A0A;
+      color: #E0E0E0;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #1A1A1A;
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .header {
+      background-color: #F5C518;
+      padding: 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      color: #0A0A0A;
+      font-size: 24px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .content {
+      padding: 32px;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    .content h2 {
+      color: #F5C518;
+      margin-top: 0;
+    }
+    .footer {
+      background-color: #0A0A0A;
+      padding: 24px;
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      border-top: 1px solid #333;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #F5C518;
+      color: #0A0A0A;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-top: 24px;
+    }
+    a {
+      color: #F5C518;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>Teachures</h1>
+    </div>
+    <div class="content">
+      <%- body %>
+    </div>
+    <div class="footer">
+      <p>&copy; <%= new Date().getFullYear() %> Teachures Academy. All rights reserved.</p>
+      <p>If you have any questions, please reply to this email.</p>
+    </div>
+  </div>
+</body>
+</html>

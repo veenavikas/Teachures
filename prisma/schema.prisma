@@ -17,8 +17,10 @@ model Tenant {
   plan        Plan     @default(FREE)
   logoUrl     String?
   createdAt   DateTime @default(now())
-  users       User[]
-  courses     Course[]
+  users         User[]
+  courses       Course[]
+  learningPaths LearningPath[]
+  communityCategories CommunityCategory[]
 }
 
 // ─── USER ────────────────────────────────────────────────
@@ -40,6 +42,12 @@ model User {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
+  // Auth tokens
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  verifyEmailToken     String?
+  verifyEmailExpires   DateTime?
+
   // Relations
   instructorProfile InstructorProfile?
   enrollments     Enrollment[]
@@ -56,6 +64,11 @@ model User {
   assignmentSubmissions AssignmentSubmission[]
   qnas            CourseQnA[]
   qnaReplies      QnaReply[]
+  notes           Note[]
+  payoutRequests  PayoutRequest[]
+  communityTopics CommunityTopic[]
+  communityReplies CommunityReply[]
+  peerReviews     PeerReview[]
 
   @@index([email])
   @@index([role])
@@ -105,6 +118,13 @@ model Course {
   progress      CourseProgress[]
   qnas          CourseQnA[]
   coupons       Coupon[]
+  announcements Announcement[]
+  questions     Question[]
+  cohorts       Cohort[]
+
+  prerequisites CoursePrerequisite[] @relation("CourseHasPrerequisites")
+  prerequisiteFor CoursePrerequisite[] @relation("CourseIsPrerequisiteFor")
+  learningPaths LearningPathCourse[]
 
   @@index([instructorId])
   @@index([isPublished])
@@ -130,6 +150,9 @@ model Lesson {
   type          LessonType  @default(VIDEO)
   videoUrl      String?     // S3 key (NOT direct URL)
   videoDuration Int?        // seconds
+  liveUrl       String?     // For Zoom/Meet
+  liveStartTime DateTime?
+  dripDays      Int         @default(0) // Unlock X days after enrollment
   content       String?     // Rich text / markdown
   attachments   Json?       // Array of {name, url}
   isPreview     Boolean     @default(false)
@@ -137,6 +160,7 @@ model Lesson {
   assignment    Assignment?
   progress      LessonProgress[]
   qnas          CourseQnA[]
+  notes         Note[]
 }
 
 // ─── ASSIGNMENTS ─────────────────────────────────────────
@@ -151,6 +175,32 @@ model Assignment {
   submissions AssignmentSubmission[]
 }
 
+model Announcement {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  
+  @@index([courseId])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  content   String
+  timestamp Int?     // seconds in the video
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([lessonId])
+}
+
 model AssignmentSubmission {
   id           String      @id @default(cuid())
   assignmentId String
@@ -162,8 +212,24 @@ model AssignmentSubmission {
   grade        Float?
   feedback     String?
   submittedAt  DateTime    @default(now())
+  peerReviews  PeerReview[]
 
   @@unique([assignmentId, userId])
+}
+
+model PeerReview {
+  id           String               @id @default(cuid())
+  submissionId String
+  submission   AssignmentSubmission @relation(fields: [submissionId], references: [id])
+  reviewerId   String
+  reviewer     User                 @relation(fields: [reviewerId], references: [id])
+  grade        Float?
+  feedback     String?
+  status       SubmissionStatus     @default(PENDING) // PENDING or GRADED
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@unique([submissionId, reviewerId])
 }
 
 // ─── QUIZ ────────────────────────────────────────────────
@@ -174,14 +240,19 @@ model Quiz {
   title        String
   passingScore Int           @default(70) // percentage
   timeLimit    Int?          // seconds
+  maxAttempts  Int           @default(3)
+  pointsAwarded Int          @default(10)
+  pullRandomCount Int?       // If set, pulls random questions from Course Question Bank
   questions    Question[]
   attempts     QuizAttempt[]
 }
 
 model Question {
   id        String   @id @default(cuid())
-  quizId    String
-  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  quizId    String?
+  quiz      Quiz?    @relation(fields: [quizId], references: [id])
+  courseId  String?
+  course    Course?  @relation(fields: [courseId], references: [id])
   text      String
   type      QuestionType @default(MCQ)
   options   Json     // [{id, text, isCorrect}]
@@ -211,6 +282,8 @@ model Enrollment {
   enrolledAt  DateTime         @default(now())
   paymentId   String?
   payment     Payment?         @relation(fields: [paymentId], references: [id])
+  cohortId    String?
+  cohort      Cohort?          @relation(fields: [cohortId], references: [id])
   
   @@unique([userId, courseId])
   @@index([userId])
@@ -378,6 +451,7 @@ enum LessonType {
   ARTICLE
   QUIZ
   ASSIGNMENT
+  LIVE
 }
 
 enum QuestionType {
@@ -469,4 +543,102 @@ model Coupon {
   courseId           String?
   course             Course?  @relation(fields: [courseId], references: [id])
   createdAt          DateTime @default(now())
+}
+
+// ─── LEARNING PATHS & PREREQUISITES ───────────────────────
+model CoursePrerequisite {
+  id             String @id @default(cuid())
+  courseId       String // The course that is locked
+  course         Course @relation("CourseHasPrerequisites", fields: [courseId], references: [id])
+  prerequisiteId String // The course that must be completed
+  prerequisite   Course @relation("CourseIsPrerequisiteFor", fields: [prerequisiteId], references: [id])
+
+  @@unique([courseId, prerequisiteId])
+}
+
+model LearningPath {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  courses     LearningPathCourse[]
+}
+
+model LearningPathCourse {
+  id             String       @id @default(cuid())
+  learningPathId String
+  learningPath   LearningPath @relation(fields: [learningPathId], references: [id])
+  courseId       String
+  course         Course       @relation(fields: [courseId], references: [id])
+  order          Int
+  
+  @@unique([learningPathId, courseId])
+}
+
+// ─── PAYOUTS ─────────────────────────────────────────────
+model PayoutRequest {
+  id           String   @id @default(cuid())
+  instructorId String
+  instructor   User     @relation(fields: [instructorId], references: [id])
+  amount       Float
+  status       PaymentStatus @default(PENDING) // Reuse PaymentStatus for simplicity
+  payoutEmail  String?
+  paypalAccountId String?
+  requestedAt  DateTime @default(now())
+  processedAt  DateTime?
+}
+
+// ─── COHORTS ─────────────────────────────────────────────
+model Cohort {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id])
+  name        String
+  startDate   DateTime
+  endDate     DateTime?
+  capacity    Int?
+  createdAt   DateTime @default(now())
+  enrollments Enrollment[]
+
+  @@index([courseId])
+}
+
+// ─── COMMUNITY ───────────────────────────────────────────
+model CommunityCategory {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+  name        String
+  description String?
+  topics      CommunityTopic[]
+}
+
+model CommunityTopic {
+  id          String   @id @default(cuid())
+  categoryId  String
+  category    CommunityCategory @relation(fields: [categoryId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  title       String
+  content     String
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  replies     CommunityReply[]
+}
+
+model CommunityReply {
+  id          String   @id @default(cuid())
+  topicId     String
+  topic       CommunityTopic @relation(fields: [topicId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  content     String
+  isAccepted  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -1,0 +1,111 @@
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 style="font-family: var(--font-display); margin: 0;">Learning Paths</h1>
+    <button class="btn btn-primary" onclick="document.getElementById('createPathModal').style.display='flex'">+ New Path</button>
+</div>
+
+<div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    <% if (paths.length === 0) { %>
+        <div style="grid-column: 1 / -1; padding: 2rem; text-align: center; background: var(--color-card); border-radius: 8px; border: 1px dashed var(--color-gray-mid);">
+            <p class="text-muted">No learning paths created yet.</p>
+        </div>
+    <% } else { %>
+        <% paths.forEach(path => { %>
+            <div class="card" style="padding: 1.5rem;">
+                <h3 style="margin-bottom: 0.5rem;"><%= path.title %></h3>
+                <p style="color: var(--color-gray-light); font-size: 0.9rem; margin-bottom: 1rem;"><%= path.description %></p>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+                    <% path.courses.forEach((pc, idx) => { %>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--color-gray-light);">
+                            <span style="background: var(--color-primary); color: #fff; width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;"><%= idx + 1 %></span>
+                            <%= pc.course.title %>
+                        </div>
+                    <% }) %>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-outline" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;" onclick="deletePath('<%= path.id %>')">Delete</button>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- Create Modal -->
+<div id="createPathModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 2rem; position: relative;">
+        <button onclick="document.getElementById('createPathModal').style.display='none'" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+        <h3 style="margin-bottom: 1.5rem;">Create Learning Path</h3>
+        <form id="createPathForm">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" id="pathTitle" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea id="pathDesc" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Courses (in order, hold Cmd/Ctrl)</label>
+                <select id="pathCourses" class="form-control" multiple style="height: 150px; background: white; color: black; padding: 0.5rem;" required>
+                    <% myCourses.forEach(c => { %>
+                        <option value="<%= c.id %>"><%= c.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Path</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    document.getElementById('createPathForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Creating...';
+
+        const selectedCourses = Array.from(document.getElementById('pathCourses').selectedOptions).map(opt => opt.value);
+
+        try {
+            const res = await fetch('/api/v1/paths', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: document.getElementById('pathTitle').value,
+                    description: document.getElementById('pathDesc').value,
+                    courseIds: selectedCourses
+                })
+            });
+            const data = await res.json();
+            if(data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error creating path');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Create Path';
+            }
+        } catch(err) {
+            alert('Error creating path');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Create Path';
+        }
+    });
+
+    async function deletePath(id) {
+        if(!confirm('Are you sure you want to delete this learning path?')) return;
+        try {
+            const res = await fetch(`/api/v1/paths/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if(data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error deleting path');
+            }
+        } catch(err) {
+            alert('Error deleting path');
+        }
+    }
+</script>

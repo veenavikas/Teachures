@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const compression = require('compression');
-const passport = require('./config/passport');
 
 // Connect to database
 require('./config/database');
@@ -62,7 +61,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Initialize Passport
-app.use(passport.initialize());
 
 // Logger
 app.use(morgan('dev'));
@@ -104,6 +102,8 @@ const supportRoutes = require('./modules/support/support.routes');
 const notificationsRoutes = require('./modules/notifications/notifications.routes');
 const cmsRoutes = require('./modules/cms/cms.routes');
 const aiRoutes = require('./modules/ai/ai.routes');
+const pathsRoutes = require('./modules/paths/paths.routes');
+const communityRoutes = require('./modules/community/community.routes');
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/courses', coursesRoutes);
@@ -116,6 +116,8 @@ app.use('/api/v1/support', supportRoutes);
 app.use('/api/v1/notifications', notificationsRoutes);
 app.use('/api/v1/cms', cmsRoutes);
 app.use('/api/v1/ai', aiRoutes);
+app.use('/api/v1/paths', pathsRoutes);
+app.use('/api/v1/community', communityRoutes);
 app.use('/instructor', instructorRoutes);
 app.use('/student', studentRoutes);
 app.use('/wp-admin', adminRoutes);

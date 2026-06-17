@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Completion | <%= course.title %></title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto:wght@300;400;500&display=swap');
+
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .certificate {
+            background-color: white;
+            width: 800px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+            border: 10px solid #2C3E50;
+        }
+
+        .inner-border {
+            border: 2px solid #E67E22;
+            padding: 40px;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #2C3E50;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: #E67E22;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .presented-to {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .student-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: #2C3E50;
+            border-bottom: 2px solid #bdc3c7;
+            display: inline-block;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            min-width: 400px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: #34495e;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .course-name {
+            font-weight: 700;
+            color: #2C3E50;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 50px;
+            padding: 0 20px;
+        }
+
+        .signature {
+            text-align: center;
+            border-top: 1px solid #7f8c8d;
+            padding-top: 10px;
+            width: 200px;
+        }
+
+        .signature img {
+            max-height: 60px;
+            margin-bottom: 10px;
+        }
+
+        .signature p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #2C3E50;
+            font-weight: 500;
+        }
+
+        .seal {
+            width: 100px;
+            height: 100px;
+            background: #E67E22;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            box-shadow: 0 4px 10px rgba(230,126,34,0.3);
+        }
+
+        .verify-info {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 0.75rem;
+            color: #95a5a6;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+            .certificate {
+                box-shadow: none;
+                width: 100%;
+                border: 10px solid #2C3E50;
+                padding: 20px;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2C3E50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .print-btn:hover {
+            background: #1a252f;
+        }
+    </style>
+</head>
+<body>
+
+    <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+
+    <div class="certificate">
+        <div class="inner-border">
+            <h1>Certificate</h1>
+            <h2>of Completion</h2>
+
+            <div class="presented-to">This is proudly presented to</div>
+
+            <div class="student-name"><%= user.name %></div>
+
+            <div class="description">
+                For successfully completing the comprehensive program<br>
+                <span class="course-name"><%= course.title %></span><br>
+                demonstrating dedication, skill, and mastery of the subject matter.
+            </div>
+
+            <div class="footer">
+                <div class="signature">
+                    <!-- Placeholder signature -->
+                    <div style="font-family: 'Playfair Display', serif; font-size: 24px; font-style: italic; margin-bottom: 5px; color: #34495e;">
+                        <%= course.instructor.name %>
+                    </div>
+                    <p><%= course.instructor.name %></p>
+                    <p style="font-size: 0.8rem; color: #7f8c8d;">Lead Instructor</p>
+                </div>
+
+                <div class="seal">
+                    Teachures<br>Certified
+                </div>
+
+                <div class="signature">
+                    <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: #34495e;">
+                        <%= new Date(certificate.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    </div>
+                    <p>Date of Issue</p>
+                </div>
+            </div>
+        </div>
+        <div class="verify-info">
+            Certificate ID: <%= certificate.verifyCode %>
+        </div>
+    </div>
+
+</body>
+</html>

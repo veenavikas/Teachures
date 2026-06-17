@@ -1,0 +1,71 @@
+<div class="card" style="padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 2rem;">
+        <div>
+            <a href="/student/community" style="color: var(--color-gray-light); text-decoration: none; font-size: 0.9rem;">&larr; Back to Categories</a>
+            <h2 style="margin-top: 0.5rem;"><%= category.name %></h2>
+        </div>
+        <button class="btn btn-primary" onclick="document.getElementById('newTopicForm').style.display='block'">New Topic</button>
+    </div>
+
+    <form id="newTopicForm" style="display: none; background: rgba(255,255,255,0.02); padding: 1.5rem; border: 1px solid var(--color-gray-mid); border-radius: 8px; margin-bottom: 2rem;">
+        <h4 style="margin-bottom: 1rem;">Create a New Topic</h4>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Title</label>
+            <input type="text" id="topicTitle" class="form-control" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Content</label>
+            <textarea id="topicContent" class="form-control" rows="4" required></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary">Post Topic</button>
+            <button type="button" class="btn btn-outline" onclick="document.getElementById('newTopicForm').style.display='none'">Cancel</button>
+        </div>
+    </form>
+
+    <% if (topics.length === 0) { %>
+        <p class="text-muted">No topics in this category yet. Be the first to start a discussion!</p>
+    <% } else { %>
+        <div style="display: grid; gap: 0.5rem;">
+            <% topics.forEach(topic => { %>
+                <a href="/student/community/topics/<%= topic.id %>" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--color-gray-mid); border-radius: 8px; text-decoration: none; color: white; background: rgba(255,255,255,0.01);">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0;"><%= topic.title %></h4>
+                        <div style="font-size: 0.85rem; color: var(--color-gray-light);">
+                            Posted by <%= topic.author.name %> • Last updated: <%= topic.updatedAt.toLocaleDateString() %>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="badge" style="background: rgba(255,255,255,0.1); color: var(--color-gray-light);">
+                            <%= topic._count.replies %> replies
+                        </span>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
+
+<script>
+document.getElementById('newTopicForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('topicTitle').value;
+    const content = document.getElementById('topicContent').value;
+    
+    try {
+        const res = await fetch('/api/v1/community/topics', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ categoryId: '<%= category.id %>', title, content })
+        });
+        const data = await res.json();
+        if(data.success) {
+            window.location.reload();
+        } else {
+            alert('Failed to post topic: ' + data.message);
+        }
+    } catch(err) {
+        alert('Server error');
+    }
+});
+</script>

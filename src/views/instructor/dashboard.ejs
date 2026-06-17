@@ -56,9 +56,9 @@
         <h3
             style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
             Enrollments & Views</h3>
-        <div
-            style="height: 300px; width: 100%; border: 1px dashed var(--color-gray-mid); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-light);">
-            [Chart.js Line Chart Placeholder]
+        <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
+            <canvas id="enrollmentsChart"></canvas>
+            <script id="chartData" type="application/json"><%- stats.chartData || '[0,0,0,0]' %></script>
         </div>
     </div>
 
@@ -91,4 +91,66 @@
                     <% } %>
         </div>
     </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartData = JSON.parse(document.getElementById('chartData').textContent);
+    if(document.getElementById('enrollmentsChart')) {
+        new Chart(document.getElementById('enrollmentsChart'), {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Enrollments',
+                    data: chartData,
+                    borderColor: '#3b82f6',
+                    tension: 0.1
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+});
+</script>
+
+<!-- Instructor Student Leaderboard Table -->
+<div class="card" style="margin-top: 1.5rem; padding: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; margin: 0;">My Students Leaderboard</h3>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase;">
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Rank</th>
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Learner Name</th>
+                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Total Points</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (instructorLeaderboard && instructorLeaderboard.length > 0) { %>
+                <% instructorLeaderboard.forEach((user, idx) => { %>
+                    <tr>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid); font-weight: bold; color: var(--color-primary);">
+                            #<%= idx + 1 %>
+                        </td>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                            <%= user.name %>
+                        </td>
+                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                            <span style="background: rgba(245, 197, 24, 0.1); color: var(--color-primary); border-radius: 4px; padding: 4px 8px; font-weight: 600;">
+                                <%= user.totalPoints %> XP
+                            </span>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="3" class="text-muted text-center" style="padding: 2rem 0;">No learners enrolled yet.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </div>

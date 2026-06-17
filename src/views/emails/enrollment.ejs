@@ -1,0 +1,10 @@
+<h2>Enrollment Confirmed</h2>
+<p>Hi <%= name %>,</p>
+<p>You have successfully enrolled in <strong><%= courseTitle %></strong>.</p>
+<% if (amount > 0) { %>
+<p>Your payment of <strong>$<%= amount.toFixed(2) %></strong> has been processed.</p>
+<% } %>
+<center>
+  <a href="<%= url %>/student/dashboard" class="btn">Start Learning Now</a>
+</center>
+<p style="margin-top: 24px;">Enjoy the course!<br>The Teachures Team</p>

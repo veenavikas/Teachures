@@ -1,0 +1,141 @@
+<div class="card" style="padding: 2rem;">
+    <h2 style="margin-bottom: 1.5rem;">Assignments & Grading</h2>
+    <p style="color: var(--color-gray-light); margin-bottom: 2rem;">Review and grade assignments submitted by your students.</p>
+
+    <% if (submissions.length === 0) { %>
+        <div style="text-align: center; padding: 4rem; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px dashed var(--color-gray-mid);">
+            <i data-lucide="inbox" style="width: 48px; height: 48px; color: var(--color-gray-mid); margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--color-gray-light);">No submissions yet</h3>
+            <p style="color: var(--color-gray-mid); margin-top: 0.5rem;">When students submit their assignments, they will appear here.</p>
+        </div>
+    <% } else { %>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                        <th style="padding: 1rem; color: var(--color-gray-light);">Student</th>
+                        <th style="padding: 1rem; color: var(--color-gray-light);">Course / Lesson</th>
+                        <th style="padding: 1rem; color: var(--color-gray-light);">Status</th>
+                        <th style="padding: 1rem; color: var(--color-gray-light);">Submitted At</th>
+                        <th style="padding: 1rem; color: var(--color-gray-light);">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% submissions.forEach(sub => { %>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 1rem;">
+                                <div style="font-weight: 600;"><%= sub.user.name %></div>
+                                <div style="font-size: 0.85rem; color: var(--color-gray-light);"><%= sub.user.email %></div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <div><%= sub.assignment.lesson.title %></div>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <% if (sub.status === 'PENDING') { %>
+                                    <span style="display: inline-block; padding: 0.25rem 0.5rem; background: rgba(234, 179, 8, 0.1); color: var(--color-warning); border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Pending</span>
+                                <% } else if (sub.status === 'GRADED') { %>
+                                    <span style="display: inline-block; padding: 0.25rem 0.5rem; background: rgba(16, 185, 129, 0.1); color: var(--color-success); border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Graded (<%= sub.grade %>%)</span>
+                                <% } else { %>
+                                    <span style="display: inline-block; padding: 0.25rem 0.5rem; background: rgba(239, 68, 68, 0.1); color: var(--color-danger); border-radius: 4px; font-size: 0.8rem; font-weight: 600;">Rejected</span>
+                                <% } %>
+                            </td>
+                            <td style="padding: 1rem; color: var(--color-gray-light);">
+                                <%= new Date(sub.submittedAt).toLocaleDateString() %>
+                            </td>
+                            <td style="padding: 1rem;">
+                                <a href="<%= sub.fileUrl %>" target="_blank" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">
+                                    <i data-lucide="eye" style="width: 14px; margin-right: 5px;"></i> View
+                                </a>
+                                <button class="btn btn-primary" onclick="openGradeModal('<%= sub.id %>', '<%= sub.user.name %>', '<%= sub.status %>', <%= sub.grade || 0 %>, '<%= sub.feedback ? sub.feedback.replace(/'/g, \'\\'\') : \'\' %>')" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                                    <i data-lucide="check-circle" style="width: 14px; margin-right: 5px;"></i> Grade
+                                </button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
+</div>
+
+<!-- Grading Modal -->
+<div id="gradeModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 2rem; position: relative;">
+        <button onclick="document.getElementById('gradeModal').style.display='none'" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-gray-light); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+
+        <h3 style="margin-bottom: 0.5rem;">Grade Assignment</h3>
+        <p style="color: var(--color-gray-light); margin-bottom: 1.5rem;" id="gradeStudentName">Student Name</p>
+
+        <form id="gradeForm">
+            <input type="hidden" id="gradeSubmissionId">
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Status</label>
+                <select id="gradeStatus" class="form-control" style="background: var(--color-black); color: white;">
+                    <option value="GRADED">Accept & Graded</option>
+                    <option value="REJECTED">Reject (Needs Resubmission)</option>
+                    <option value="PENDING">Pending (Reset)</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Grade (0 - 100)</label>
+                <input type="number" id="gradeValue" class="form-control" min="0" max="100" placeholder="e.g. 85">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label class="form-label">Feedback (Optional)</label>
+                <textarea id="gradeFeedback" class="form-control" rows="4" placeholder="Great job! One thing to improve..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;" id="saveGradeBtn">Save Grade</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openGradeModal(id, name, status, grade, feedback) {
+        document.getElementById('gradeSubmissionId').value = id;
+        document.getElementById('gradeStudentName').innerText = 'Student: ' + name;
+        document.getElementById('gradeStatus').value = status || 'GRADED';
+        document.getElementById('gradeValue').value = grade;
+        document.getElementById('gradeFeedback').value = feedback;
+        
+        document.getElementById('gradeModal').style.display = 'flex';
+    }
+
+    document.getElementById('gradeForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('gradeSubmissionId').value;
+        const status = document.getElementById('gradeStatus').value;
+        const grade = parseFloat(document.getElementById('gradeValue').value) || 0;
+        const feedback = document.getElementById('gradeFeedback').value;
+        const btn = document.getElementById('saveGradeBtn');
+        
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+
+        try {
+            const res = await fetch(`/api/v1/courses/assignments/submissions/${id}/grade`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status, grade, feedback })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Error saving grade');
+                btn.disabled = false;
+                btn.innerText = 'Save Grade';
+            }
+        } catch (err) {
+            alert('Network error');
+            btn.disabled = false;
+            btn.innerText = 'Save Grade';
+        }
+    });
+</script>

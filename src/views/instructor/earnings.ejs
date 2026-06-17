@@ -1,44 +1,120 @@
-<div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-    <!-- Total Earnings -->
-    <div class="card" style="padding: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-            <div>
-                <p class="text-muted" style="margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Earnings</p>
-                <h2 style="font-size: 2rem; margin: 0; color: var(--color-success);">$<%= earnings.totalEarnings.toFixed(2) %></h2>
-            </div>
-            <div style="background: rgba(var(--color-success-rgb), 0.1); padding: 0.75rem; border-radius: 8px; color: var(--color-success);">
-                <i data-lucide="dollar-sign" style="width: 24px; height: 24px;"></i>
+<div class="grid-2" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    <!-- Left Col: Balances & Actions -->
+    <div>
+        <div class="card" style="padding: 2rem; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: white; text-align: center; border-radius: 8px;">
+            <p style="opacity: 0.8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Available for Payout</p>
+            <h2 style="font-size: 3rem; margin-bottom: 0;">$<%= availableBalance.toFixed(2) %></h2>
+            
+            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 1.5rem 0;">
+            
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                <div>
+                    <span style="opacity: 0.8;">Lifetime Earnings</span><br>
+                    <strong>$<%= lifetimeEarnings.toFixed(2) %></strong>
+                </div>
+                <div>
+                    <span style="opacity: 0.8;">Pending Payout</span><br>
+                    <strong>$<%= pendingPayout.toFixed(2) %></strong>
+                </div>
             </div>
         </div>
-        <p class="text-muted" style="font-size: 0.85rem; margin: 0;">Lifetime revenue (90% cut)</p>
+
+        <div class="card" style="padding: 2rem; margin-top: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">Request Payout</h3>
+            <% if (!profile || !profile.paypalAccountId) { %>
+                <div class="alert" style="background: rgba(var(--color-warning-rgb), 0.1); color: var(--color-warning); padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                    You must link a PayPal account in your <a href="/instructor/onboarding" style="text-decoration: underline;">Onboarding settings</a> before requesting a payout.
+                </div>
+            <% } else { %>
+                <form id="payoutForm">
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label class="form-label">Amount ($)</label>
+                        <input type="number" id="payoutAmount" class="form-control" max="<%= availableBalance %>" step="0.01" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label class="form-label">Payout Method</label>
+                        <input type="text" class="form-control" value="PayPal (<%= profile.paypalAccountId %>)" disabled>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;" <%= availableBalance <= 0 ? 'disabled' : '' %>>Request Withdrawal</button>
+                </form>
+            <% } %>
+        </div>
+
+        <!-- Payout History -->
+        <div class="card" style="padding: 2rem; margin-top: 2rem;">
+            <h3 style="margin-bottom: 1.5rem;">Payout History</h3>
+            <% if (payoutRequests.length === 0) { %>
+                <p class="text-muted">No payout requests yet.</p>
+            <% } else { %>
+                <ul style="list-style: none; padding: 0;">
+                    <% payoutRequests.forEach(req => { %>
+                        <li style="padding: 1rem; border: 1px solid var(--color-gray-mid); border-radius: 4px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>$<%= req.amount.toFixed(2) %></strong><br>
+                                <small class="text-muted"><%= req.requestedAt.toLocaleDateString() %></small>
+                            </div>
+                            <span class="badge" style="background: <%= req.status === 'COMPLETED' ? 'var(--color-success)' : 'var(--color-warning)' %>; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">
+                                <%= req.status %>
+                            </span>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Right Col: Recent Transactions -->
+    <div class="card" style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem;">Recent Transactions</h3>
+        <% if (recentTransactions.length === 0) { %>
+            <p class="text-muted">No earnings yet.</p>
+        <% } else { %>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                            <th style="padding: 1rem 0.5rem; color: var(--color-gray-light); font-weight: 500;">Date</th>
+                            <th style="padding: 1rem 0.5rem; color: var(--color-gray-light); font-weight: 500;">Student</th>
+                            <th style="padding: 1rem 0.5rem; color: var(--color-gray-light); font-weight: 500;">Course</th>
+                            <th style="padding: 1rem 0.5rem; color: var(--color-gray-light); font-weight: 500; text-align: right;">Your Cut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% recentTransactions.forEach(tx => { %>
+                            <tr style="border-bottom: 1px solid var(--color-gray-mid);">
+                                <td style="padding: 1rem 0.5rem;"><%= tx.date.toLocaleDateString() %></td>
+                                <td style="padding: 1rem 0.5rem;"><%= tx.student %></td>
+                                <td style="padding: 1rem 0.5rem;"><%= tx.course %></td>
+                                <td style="padding: 1rem 0.5rem; text-align: right; color: var(--color-success); font-weight: 600;">+$<%= tx.amount.toFixed(2) %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
     </div>
 </div>
 
-<div class="card" style="padding: 2rem;">
-    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Recent Transactions</h3>
-
-    <% if (earnings.recentTransactions.length === 0) { %>
-        <p class="text-muted">No transactions found yet. Keep marketing your courses!</p>
-    <% } else { %>
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="border-bottom: 1px solid var(--color-gray-mid);">
-                        <th style="padding: 1rem;">Date</th>
-                        <th style="padding: 1rem;">Course</th>
-                        <th style="padding: 1rem;">Your Earnings</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% earnings.recentTransactions.forEach(tx => { %>
-                        <tr style="border-bottom: 1px solid var(--color-gray-mid);">
-                            <td style="padding: 1rem; color: var(--color-gray-light);"><%= tx.date %></td>
-                            <td style="padding: 1rem; font-weight: 600;"><%= tx.course %></td>
-                            <td style="padding: 1rem; color: var(--color-success);">+$<%= tx.amount.toFixed(2) %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
-    <% } %>
-</div>
+<script>
+document.getElementById('payoutForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const amount = document.getElementById('payoutAmount').value;
+    
+    try {
+        const res = await fetch('/instructor/payouts/request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if(data.success) {
+            alert('Payout request submitted successfully!');
+            window.location.reload();
+        } else {
+            alert(data.message);
+        }
+    } catch (err) {
+        alert('Server Error');
+    }
+});
+</script>

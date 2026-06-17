@@ -181,6 +181,30 @@ exports.publishCourse = async (req, res) => {
 };
 
 
+exports.updatePrerequisites = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { prerequisiteIds } = req.body; // Expecting an array of course IDs
+
+        // Clear existing prerequisites
+        await prisma.coursePrerequisite.deleteMany({
+            where: { courseId: id }
+        });
+
+        if (prerequisiteIds && Array.isArray(prerequisiteIds) && prerequisiteIds.length > 0) {
+            const data = prerequisiteIds.map(prereqId => ({
+                courseId: id,
+                prerequisiteId: prereqId
+            }));
+            await prisma.coursePrerequisite.createMany({ data });
+        }
+
+        res.json({ success: true, message: 'Prerequisites updated successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 // --- SECTIONS ---
 
 exports.getSections = async (req, res) => {
@@ -244,7 +268,7 @@ exports.deleteSection = async (req, res) => {
 exports.createLesson = async (req, res) => {
     try {
         const { sectionId } = req.params;
-        const { title, order, type, content, isPreview } = req.body;
+        const { title, order, type, content, isPreview, dripDays, liveUrl, liveStartTime, assignmentDescription, assignmentDeadline } = req.body;
         let videoUrl = null;
 
         if (req.file) {
@@ -260,10 +284,25 @@ exports.createLesson = async (req, res) => {
                 type: type || 'VIDEO',
                 content,
                 videoUrl,
+                attachments: req.body.attachments ? JSON.parse(req.body.attachments) : null,
                 isPreview: isPreview === true || isPreview === 'true',
+                dripDays: parseInt(dripDays) || 0,
+                liveUrl: liveUrl || null,
+                liveStartTime: liveStartTime ? new Date(liveStartTime) : null,
                 sectionId
             }
         });
+
+        if (type === 'ASSIGNMENT') {
+            await prisma.assignment.create({
+                data: {
+                    lessonId: lesson.id,
+                    title: lesson.title,
+                    description: assignmentDescription || '',
+                    deadline: assignmentDeadline ? new Date(assignmentDeadline) : null
+                }
+            });
+        }
 
         res.status(201).json({ success: true, data: lesson });
     } catch (error) {
@@ -277,6 +316,19 @@ exports.updateLesson = async (req, res) => {
         const updateData = { ...req.body };
         if (updateData.order) updateData.order = parseInt(updateData.order);
         if (updateData.isPreview) updateData.isPreview = updateData.isPreview === true || updateData.isPreview === 'true';
+        if (updateData.dripDays) updateData.dripDays = parseInt(updateData.dripDays);
+        if (updateData.liveStartTime) updateData.liveStartTime = new Date(updateData.liveStartTime);
+
+        const assignmentDescription = updateData.assignmentDescription;
+        const assignmentDeadline = updateData.assignmentDeadline;
+        delete updateData.assignmentDescription;
+        delete updateData.assignmentDeadline;
+
+        if (updateData.attachments) {
+            updateData.attachments = JSON.parse(updateData.attachments);
+        } else if (updateData.attachments === '') {
+            updateData.attachments = null;
+        }
 
         if (req.file) {
             const folder = req.file.mimetype.startsWith('video/') ? 'videos' : 'images';
@@ -287,6 +339,25 @@ exports.updateLesson = async (req, res) => {
             where: { id: lessonId },
             data: updateData
         });
+
+        if (updateData.type === 'ASSIGNMENT' || lesson.type === 'ASSIGNMENT') {
+            const assignData = {};
+            if (updateData.title) assignData.title = updateData.title;
+            if (assignmentDescription !== undefined) assignData.description = assignmentDescription;
+            if (assignmentDeadline !== undefined) assignData.deadline = assignmentDeadline ? new Date(assignmentDeadline) : null;
+            
+            await prisma.assignment.upsert({
+                where: { lessonId },
+                create: {
+                    lessonId,
+                    title: updateData.title || lesson.title,
+                    description: assignmentDescription || '',
+                    deadline: assignmentDeadline ? new Date(assignmentDeadline) : null
+                },
+                update: assignData
+            });
+        }
+
         res.json({ success: true, data: lesson });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

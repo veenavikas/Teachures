@@ -163,16 +163,13 @@
                         Issued <%= new Date(cert.issuedAt).toLocaleDateString('en-US', {year:'numeric', month:'long',
                             day:'numeric'}) %>
                             · Code: <span style="font-family:monospace; color:rgba(255,255,255,0.5);">
-                                <%= cert.verificationCode.slice(0,12) %>...
+                                <%= cert.verifyCode.slice(0,12) %>...
                             </span>
                     </div>
                     <div class="cert-actions">
-                        <a href="/api/v1/certificates/<%= cert.id %>/download" class="btn-cert-download"
+                        <a href="/student/certificates/<%= cert.id %>/view" class="btn-cert-download"
                             target="_blank">
-                            <i data-lucide="download" style="width:15px;height:15px;"></i> Download PDF
-                        </a>
-                        <a href="/verify/<%= cert.verificationCode %>" class="btn-cert-verify" target="_blank">
-                            <i data-lucide="external-link" style="width:15px;height:15px;"></i> Verify
+                            <i data-lucide="eye" style="width:15px;height:15px;"></i> View Certificate
                         </a>
                     </div>
                 </div>

@@ -163,6 +163,10 @@
             </div>
             <span class="text-white" style="font-size: 0.85rem; font-weight: 700; margin-right: 1rem;">12%
                 Complete</span>
+            <button class="btn btn-outline" onclick="toggleWhiteboard()"
+                style="padding: 0.5rem 1rem; font-size: 0.8rem; margin-right: 0.5rem;">
+                <i data-lucide="pen-tool" style="width: 14px; margin-right: 5px;"></i> Whiteboard
+            </button>
             <button class="btn btn-outline" onclick="openReviewModal()"
                 style="padding: 0.5rem 1rem; font-size: 0.8rem;">
                 <i data-lucide="star" style="width: 14px; margin-right: 5px;"></i> Leave Review
@@ -174,9 +178,102 @@
 
         <div class="video-area">
             <div class="video-container">
-                <!-- Secure Video Player Container -->
+                <!-- Main Player Area -->
                 <div class="vjs-custom" id="videoWrapper">
-                    [Video.js Player Zone for S3 Signed URLs]
+                    <% if (activeLesson && activeLesson.isLocked) { %>
+                        <div style="text-align: center; color: var(--color-gray-mid);">
+                            <% if (activeLesson.lockReason === 'drip_locked') { %>
+                                <i data-lucide="clock" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                                <h3>Available Soon</h3>
+                                <p>This content unlocks on <%= new Date(activeLesson.unlockDate).toLocaleDateString() %></p>
+                            <% } else { %>
+                                <i data-lucide="lock" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                                <h3>Content Locked</h3>
+                                <p>Please complete previous lessons to unlock.</p>
+                            <% } %>
+                        </div>
+                    <% } else if (activeLesson && activeLesson.type === 'LIVE') { %>
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; color: var(--color-white); padding: 2rem;">
+                            <i data-lucide="radio" style="width: 64px; height: 64px; margin-bottom: 1rem; color: var(--color-primary);"></i>
+                            <h2 style="margin-bottom: 0.5rem;">Live Session</h2>
+                            <p style="color: var(--color-gray-light); margin-bottom: 2rem; max-width: 500px;">
+                                This lesson is a live session. Please join at the scheduled time using the link below.
+                            </p>
+                            
+                            <% if (activeLesson.liveStartTime) { %>
+                                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--color-gray-mid);">
+                                    <p style="margin: 0; font-size: 0.9rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Scheduled Start Time</p>
+                                    <h3 style="margin: 0; font-family: var(--font-mono); color: var(--color-primary);">
+                                        <%= new Date(activeLesson.liveStartTime).toLocaleString() %>
+                                    </h3>
+                                </div>
+                            <% } %>
+                            
+                            <% if (activeLesson.liveUrl) { %>
+                                <a href="<%= activeLesson.liveUrl %>" target="_blank" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem; display: inline-flex; align-items: center; gap: 10px;">
+                                    <i data-lucide="external-link"></i> Join Live Meeting
+                                </a>
+                                <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--color-gray-mid);">
+                                    Clicking the button will open Zoom, Meet, or the designated platform in a new tab.
+                                </p>
+                            <% } else { %>
+                                <p class="text-danger">Live meeting link has not been provided by the instructor yet.</p>
+                            <% } %>
+
+                            <button id="markCompleteLiveBtn" class="btn btn-outline" style="margin-top: 3rem; color: var(--color-success); border-color: var(--color-success);" onclick="markActiveLessonComplete()">
+                                <i data-lucide="check-circle" style="margin-right: 8px;"></i> Mark as Complete
+                            </button>
+                        </div>
+                    <% } else if (activeLesson && activeLesson.type === 'ASSIGNMENT') { %>
+                        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%; color: var(--color-white); padding: 2rem;">
+                            <i data-lucide="clipboard" style="width: 64px; height: 64px; margin-bottom: 1rem; color: var(--color-primary);"></i>
+                            <h2 style="margin-bottom: 0.5rem;">Assignment</h2>
+                            <% if (activeLesson.assignment) { %>
+                                <p style="color: var(--color-gray-light); margin-bottom: 2rem; max-width: 600px; text-align: left;">
+                                    <%= activeLesson.assignment.description %>
+                                </p>
+                                <% if (activeLesson.assignment.deadline) { %>
+                                    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid var(--color-gray-mid);">
+                                        <p style="margin: 0; font-size: 0.9rem; color: var(--color-warning);">Deadline: <%= new Date(activeLesson.assignment.deadline).toLocaleString() %></p>
+                                    </div>
+                                <% } %>
+
+                                <% const submission = activeLesson.assignment.submissions && activeLesson.assignment.submissions[0]; %>
+                                <% if (submission) { %>
+                                    <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--color-success); margin-bottom: 1rem;">
+                                        <h3 style="color: var(--color-success); margin-bottom: 0.5rem;">Assignment Submitted</h3>
+                                        <p>Status: <%= submission.status %></p>
+                                        <% if (submission.grade !== null) { %>
+                                            <p>Grade: <%= submission.grade %>%</p>
+                                        <% } %>
+                                        <% if (submission.feedback) { %>
+                                            <p style="margin-top: 0.5rem; font-style: italic;">Feedback: <%= submission.feedback %></p>
+                                        <% } %>
+                                        <a href="<%= submission.fileUrl %>" target="_blank" class="text-primary" style="margin-top: 1rem; display: inline-block;">View Submitted File</a>
+                                    </div>
+                                <% } else { %>
+                                    <div style="width: 100%; max-width: 500px; background: var(--color-black); padding: 2rem; border-radius: 8px; border: 1px solid var(--color-gray-mid); text-align: left;">
+                                        <h3 style="margin-bottom: 1rem;">Submit Your Assignment</h3>
+                                        <form id="assignmentSubmitForm">
+                                            <input type="hidden" id="assignId" value="<%= activeLesson.assignment.id %>">
+                                            <div class="form-group" style="margin-bottom: 1rem;">
+                                                <label class="form-label" style="display:block; margin-bottom: 0.5rem;">Upload File (PDF, DOCX, ZIP)</label>
+                                                <input type="file" id="assignFile" class="form-control" required style="background: white; color: black; padding: 0.5rem;">
+                                            </div>
+                                            <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Assignment</button>
+                                        </form>
+                                    </div>
+                                <% } %>
+                            <% } else { %>
+                                <p class="text-danger">Assignment details are missing.</p>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        [Video.js Player Zone for S3 Signed URLs]
+                        <% if (preSignedVideoUrl) { %>
+                           <!-- Inject Video -->
+                        <% } %>
+                    <% } %>
                 </div>
             </div>
 
@@ -190,14 +287,22 @@
                         style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem; cursor: pointer;">Q&A</button>
                     <button onclick="switchTab('ai')" id="btn-ai"
                         style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem; cursor: pointer;"><i data-lucide="bot" style="width: 18px; margin-bottom: -3px;"></i> AI Tutor</button>
-                    <button id="btn-resources"
+                    <button onclick="switchTab('notes')" id="btn-notes"
+                        style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem; cursor: pointer;">Notes</button>
+                    <button onclick="switchTab('resources')" id="btn-resources"
                         style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem; cursor: pointer;">Resources</button>
+                    <button onclick="switchTab('announcements')" id="btn-announcements"
+                        style="background:none; border:none; color: var(--color-gray-light); font-family: var(--font-heading); font-weight: 600; font-size: 1.1rem; padding-bottom: 0.5rem; cursor: pointer;">Announcements</button>
+                    <% if (activeLesson && !activeLesson.isLocked && !activeLesson.isCompleted) { %>
+                        <button id="markCompleteBtn" onclick="markLessonComplete('<%= activeLesson.id %>')" class="btn btn-primary" style="display: none; margin-left: auto; font-size: 0.9rem; padding: 0.4rem 1rem;">Mark as Complete</button>
+                    <% } else if (activeLesson && activeLesson.isCompleted) { %>
+                        <div style="margin-left: auto; color: #10B981; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="check-circle" style="width: 20px;"></i> Completed</div>
+                    <% } %>
                 </div>
 
                 <div id="tab-overview">
-                    <p class="text-white" style="line-height: 1.8;">
-                        Welcome to the beginning of your journey. In this lesson, we will cover the foundational concepts
-                        and set up your learning environment...
+                    <p class="text-white" style="line-height: 1.8; white-space: pre-wrap;">
+                        <%= activeLesson ? (activeLesson.content || 'No content provided.') : 'Select a lesson to view.' %>
                     </p>
                 </div>
 
@@ -230,6 +335,84 @@
                         <button type="submit" class="btn btn-primary" id="aiSubmitBtn" style="white-space: nowrap;">Send</button>
                     </form>
                 </div>
+
+                <div id="tab-notes" style="display: none;">
+                    <h3 style="color: white; margin-bottom: 1rem;">My Notes</h3>
+                    <form id="noteForm" style="margin-bottom: 2rem;">
+                        <textarea id="noteContent" rows="3" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--color-gray-mid); color: white; padding: 0.75rem; border-radius: 4px; margin-bottom: 0.5rem;" placeholder="Type your note here..." required></textarea>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <button type="button" class="btn btn-outline" id="captureTimeBtn" style="display: <%= activeLesson && activeLesson.type === 'VIDEO' ? 'inline-block' : 'none' %>;">
+                                <i data-lucide="clock" class="icon-sm"></i> Capture Video Time
+                            </button>
+                            <span id="noteTimeDisplay" style="color: var(--color-primary); font-weight: bold; display: none;"></span>
+                            <button type="submit" class="btn btn-primary" style="margin-left: auto;">Save Note</button>
+                        </div>
+                    </form>
+                    <div id="notesList" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <% if (notes && notes.length > 0) { %>
+                            <% notes.forEach(n => { %>
+                                <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border: 1px solid var(--color-gray-mid); position: relative;">
+                                    <button class="btn-delete-note" onclick="deleteNote('<%= n.id %>')" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #ef4444; cursor: pointer;">
+                                        <i data-lucide="trash-2" class="icon-sm"></i>
+                                    </button>
+                                    <% if (n.timestamp !== null) { %>
+                                        <button class="btn-seek" onclick="seekVideo(<%= n.timestamp %>)" style="background: rgba(37, 99, 235, 0.2); border: none; color: var(--color-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; cursor: pointer; margin-bottom: 0.5rem; display: inline-block;">
+                                            <i data-lucide="play-circle" class="icon-sm" style="vertical-align: middle;"></i> 
+                                            <%= Math.floor(n.timestamp / 60) %>:<%= (n.timestamp % 60).toString().padStart(2, '0') %>
+                                        </button>
+                                    <% } %>
+                                    <p style="color: white; margin: 0; white-space: pre-wrap;"><%= n.content %></p>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p style="color: var(--color-gray-light);">No notes taken yet for this lesson.</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div id="tab-resources" style="display: none;">
+                    <h3 style="color: white; margin-bottom: 1rem;">Lesson Resources</h3>
+                    <% 
+                       let attachments = [];
+                       if (activeLesson && activeLesson.attachments) {
+                           try { attachments = typeof activeLesson.attachments === 'string' ? JSON.parse(activeLesson.attachments) : activeLesson.attachments; } catch(e) {}
+                       }
+                    %>
+                    <% if (attachments && attachments.length > 0) { %>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <% attachments.forEach(att => { %>
+                                <a href="<%= att.url %>" target="_blank" style="display: flex; align-items: center; padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid var(--color-gray-mid); border-radius: 8px; text-decoration: none; color: white;">
+                                    <div style="background: rgba(37, 99, 235, 0.2); color: var(--color-primary); padding: 0.5rem; border-radius: 4px; margin-right: 1rem;">
+                                        <i data-lucide="file-down"></i>
+                                    </div>
+                                    <div>
+                                        <strong style="display: block;"><%= att.name || 'Download File' %></strong>
+                                        <span style="color: var(--color-gray-light); font-size: 0.85rem;">Click to download</span>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p style="color: var(--color-gray-light);">No additional resources provided for this lesson.</p>
+                    <% } %>
+                </div>
+
+                <div id="tab-announcements" style="display: none;">
+                    <h3 style="color: white; margin-bottom: 1rem;">Course Announcements</h3>
+                    <% if (announcements && announcements.length > 0) { %>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <% announcements.forEach(ann => { %>
+                                <div style="background: rgba(37, 99, 235, 0.1); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--color-primary);">
+                                    <h4 style="margin-bottom: 0.5rem; color: var(--color-primary);"><%= ann.title %></h4>
+                                    <p style="color: white; margin: 0; white-space: pre-wrap;"><%= ann.content %></p>
+                                    <small style="color: var(--color-gray-light); display: block; margin-top: 1rem;"><%= new Date(ann.createdAt).toLocaleDateString() %></small>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p style="color: var(--color-gray-light);">No announcements yet.</p>
+                    <% } %>
+                </div>
             </div>
         </div>
 
@@ -249,17 +432,29 @@
                         <div class="section-body">
                             <% if(section.lessons && section.lessons.length> 0) { %>
                                 <% section.lessons.forEach((lesson, lIdx)=> { %>
-                                    <div class="lesson-item <%= (sIdx === 0 && lIdx === 0) ? 'active' : '' %>">
-                                        <% if((sIdx===0 && lIdx===0)) { %>
-                                            <i data-lucide="play-circle" class="text-primary lesson-icon"></i>
+                                    <% const isActive = activeLesson && activeLesson.id === lesson.id; %>
+                                    <div class="lesson-item <%= isActive ? 'active' : '' %>"
+                                         style="<%= lesson.isLocked ? 'cursor: not-allowed; opacity: 0.6;' : 'cursor: pointer;' %>"
+                                         <% if (!lesson.isLocked) { %> onclick="window.location.href='?lessonId=<%= lesson.id %>'" <% } %>>
+                                        <% if (lesson.isLocked) { %>
+                                            <% if (lesson.lockReason === 'drip_locked') { %>
+                                                <i data-lucide="clock" class="text-muted lesson-icon" title="Unlocks <%= new Date(lesson.unlockDate).toLocaleDateString() %>"></i>
                                             <% } else { %>
-                                                <i data-lucide="circle" class="text-muted lesson-icon"></i>
-                                                <% } %>
-                                                    <span
-                                                        class="<%= (sIdx === 0 && lIdx === 0) ? 'text-white' : 'text-muted' %>"
-                                                        style="font-size: 0.9rem;">
-                                                        <%= lIdx + 1 %>. <%= lesson.title %>
-                                                    </span>
+                                                <i data-lucide="lock" class="text-muted lesson-icon"></i>
+                                            <% } %>
+                                        <% } else if (lesson.isCompleted) { %>
+                                            <i data-lucide="check-circle" class="text-success lesson-icon" style="color: #10B981;"></i>
+                                        <% } else if (isActive) { %>
+                                            <i data-lucide="play-circle" class="text-primary lesson-icon"></i>
+                                        <% } else { %>
+                                            <i data-lucide="circle" class="text-muted lesson-icon"></i>
+                                        <% } %>
+                                        <span class="<%= isActive ? 'text-white' : 'text-muted' %>" style="font-size: 0.9rem; display: flex; flex-direction: column;">
+                                            <span><%= lIdx + 1 %>. <%= lesson.title %></span>
+                                            <% if (lesson.lockReason === 'drip_locked') { %>
+                                                <small style="color: var(--color-gray-mid); font-size: 0.75rem;">Unlocks <%= new Date(lesson.unlockDate).toLocaleDateString() %></small>
+                                            <% } %>
+                                        </span>
                                     </div>
                                     <% }) %>
                                         <% } %>
@@ -311,24 +506,77 @@
         </div>
     </div>
 
+    <!-- Floating Whiteboard -->
+    <div id="whiteboardPanel" class="card"
+        style="display: none; position: fixed; top: 100px; right: 50px; width: 600px; height: 450px; background: rgba(15, 15, 15, 0.95); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 10000; flex-direction: column; border-radius: 12px; overflow: hidden; backdrop-filter: blur(10px);">
+        <!-- Whiteboard Header (Draggable) -->
+        <div id="whiteboardHeader" style="padding: 0.75rem 1rem; background: rgba(255,255,255,0.05); border-bottom: 1px solid var(--color-gray-mid); display: flex; justify-content: space-between; align-items: center; cursor: grab;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="pen-tool" class="text-primary"></i>
+                <span style="font-weight: 600; color: white;">Scratchpad</span>
+            </div>
+            <button onclick="toggleWhiteboard()" style="background: none; border: none; color: var(--color-gray-light); cursor: pointer;">
+                <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+            </button>
+        </div>
+        
+        <!-- Whiteboard Toolbar -->
+        <div style="padding: 0.5rem 1rem; background: #111; border-bottom: 1px solid var(--color-gray-mid); display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="wb-tool active" data-tool="pen" style="background: var(--color-primary); color: black; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;" title="Pen">
+                    <i data-lucide="edit-3" style="width: 16px;"></i> Pen
+                </button>
+                <button class="wb-tool" data-tool="eraser" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; display: flex; align-items: center; gap: 5px;" title="Eraser">
+                    <i data-lucide="eraser" style="width: 16px;"></i> Eraser
+                </button>
+            </div>
+            
+            <div style="width: 1px; height: 20px; background: var(--color-gray-mid);"></div>
+            
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="color" id="wbColor" value="#00e5ff" style="cursor: pointer; width: 30px; height: 30px; border: none; border-radius: 50%; overflow: hidden; padding: 0; background: transparent;">
+                <input type="range" id="wbSize" min="1" max="20" value="3" style="width: 80px; cursor: pointer;">
+            </div>
+            
+            <div style="flex: 1;"></div>
+            
+            <div style="display: flex; gap: 0.5rem;">
+                <button onclick="clearWhiteboard()" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;" title="Clear All">
+                    <i data-lucide="trash-2" style="width: 16px;"></i>
+                </button>
+                <button onclick="downloadWhiteboard()" style="background: rgba(255,255,255,0.1); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer;" title="Download as Image">
+                    <i data-lucide="download" style="width: 16px;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div style="flex: 1; position: relative; background: #1a1a1a; cursor: crosshair;" id="wbCanvasContainer">
+            <canvas id="wbCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; touch-action: none;"></canvas>
+        </div>
+    </div>
+
     <script>
         lucide.createIcons();
         const courseId = '<%= course.id %>';
 
         // --- Tabs Logic ---
         function switchTab(tabName) {
-            document.getElementById('tab-overview').style.display = tabName === 'overview' ? 'block' : 'none';
-            document.getElementById('tab-qna').style.display = tabName === 'qna' ? 'block' : 'none';
-            document.getElementById('tab-ai').style.display = tabName === 'ai' ? 'block' : 'none';
+            const tabs = ['overview', 'qna', 'ai', 'notes', 'resources', 'announcements'];
             
-            document.getElementById('btn-overview').style.color = tabName === 'overview' ? 'var(--color-primary)' : 'var(--color-gray-light)';
-            document.getElementById('btn-overview').style.borderBottom = tabName === 'overview' ? '2px solid var(--color-primary)' : 'none';
-            
-            document.getElementById('btn-qna').style.color = tabName === 'qna' ? 'var(--color-primary)' : 'var(--color-gray-light)';
-            document.getElementById('btn-qna').style.borderBottom = tabName === 'qna' ? '2px solid var(--color-primary)' : 'none';
-
-            document.getElementById('btn-ai').style.color = tabName === 'ai' ? 'var(--color-primary)' : 'var(--color-gray-light)';
-            document.getElementById('btn-ai').style.borderBottom = tabName === 'ai' ? '2px solid var(--color-primary)' : 'none';
+            tabs.forEach(tab => {
+                const tabEl = document.getElementById(`tab-${tab}`);
+                const btnEl = document.getElementById(`btn-${tab}`);
+                
+                if (tabEl) {
+                    tabEl.style.display = tabName === tab ? 'block' : 'none';
+                }
+                
+                if (btnEl) {
+                    btnEl.style.color = tabName === tab ? 'var(--color-primary)' : 'var(--color-gray-light)';
+                    btnEl.style.borderBottom = tabName === tab ? '2px solid var(--color-primary)' : 'none';
+                }
+            });
         }
 
         // --- QnA Logic ---
@@ -360,6 +608,177 @@
                 document.getElementById('qnaQuestion').value = '';
                 loadQnA();
             }
+        });
+
+        // --- Whiteboard Logic ---
+        const wbPanel = document.getElementById('whiteboardPanel');
+        const wbHeader = document.getElementById('whiteboardHeader');
+        const wbCanvas = document.getElementById('wbCanvas');
+        const wbCtx = wbCanvas ? wbCanvas.getContext('2d') : null;
+        let isDrawing = false;
+        let currentTool = 'pen';
+        let currentColor = '#00e5ff';
+        let currentSize = 3;
+
+        function toggleWhiteboard() {
+            if (wbPanel.style.display === 'none') {
+                wbPanel.style.display = 'flex';
+                initWhiteboard();
+            } else {
+                wbPanel.style.display = 'none';
+            }
+        }
+
+        function initWhiteboard() {
+            const container = document.getElementById('wbCanvasContainer');
+            wbCanvas.width = container.clientWidth;
+            wbCanvas.height = container.clientHeight;
+            wbCtx.lineCap = 'round';
+            wbCtx.lineJoin = 'round';
+            
+            // Set default background (dark)
+            wbCtx.fillStyle = '#1a1a1a';
+            wbCtx.fillRect(0, 0, wbCanvas.width, wbCanvas.height);
+        }
+
+        if (wbCanvas) {
+            wbCanvas.addEventListener('mousedown', startDrawing);
+            wbCanvas.addEventListener('mousemove', draw);
+            wbCanvas.addEventListener('mouseup', stopDrawing);
+            wbCanvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch support
+            wbCanvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                wbCanvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            wbCanvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                wbCanvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            wbCanvas.addEventListener('touchend', (e) => {
+                const mouseEvent = new MouseEvent('mouseup', {});
+                wbCanvas.dispatchEvent(mouseEvent);
+            });
+        }
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getMousePos(wbCanvas, e);
+            wbCtx.beginPath();
+            wbCtx.moveTo(pos.x, pos.y);
+            
+            wbCtx.strokeStyle = currentTool === 'eraser' ? '#1a1a1a' : currentColor;
+            wbCtx.lineWidth = currentTool === 'eraser' ? currentSize * 4 : currentSize;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getMousePos(wbCanvas, e);
+            wbCtx.lineTo(pos.x, pos.y);
+            wbCtx.stroke();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearWhiteboard() {
+            if (confirm('Clear the entire whiteboard?')) {
+                wbCtx.fillStyle = '#1a1a1a';
+                wbCtx.fillRect(0, 0, wbCanvas.width, wbCanvas.height);
+            }
+        }
+
+        function downloadWhiteboard() {
+            const link = document.createElement('a');
+            link.download = `Whiteboard_${new Date().toISOString().split('T')[0]}.png`;
+            link.href = wbCanvas.toDataURL();
+            link.click();
+        }
+
+        // Toolbar Tools
+        document.querySelectorAll('.wb-tool').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.wb-tool').forEach(b => {
+                    b.classList.remove('active');
+                    b.style.background = 'rgba(255,255,255,0.1)';
+                    b.style.color = 'white';
+                });
+                const target = e.currentTarget;
+                target.classList.add('active');
+                target.style.background = 'var(--color-primary)';
+                target.style.color = 'black';
+                currentTool = target.dataset.tool;
+            });
+        });
+
+        document.getElementById('wbColor')?.addEventListener('input', (e) => {
+            currentColor = e.target.value;
+            if(currentTool === 'eraser') {
+                document.querySelector('.wb-tool[data-tool="pen"]').click();
+            }
+        });
+
+        document.getElementById('wbSize')?.addEventListener('input', (e) => {
+            currentSize = parseInt(e.target.value);
+        });
+
+        // Make draggable
+        let isDraggingWb = false;
+        let wbOffset = { x: 0, y: 0 };
+
+        wbHeader?.addEventListener('mousedown', (e) => {
+            isDraggingWb = true;
+            wbOffset = {
+                x: e.clientX - wbPanel.getBoundingClientRect().left,
+                y: e.clientY - wbPanel.getBoundingClientRect().top
+            };
+            wbHeader.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDraggingWb) return;
+            
+            // Constrain to window
+            let newX = e.clientX - wbOffset.x;
+            let newY = e.clientY - wbOffset.y;
+            
+            const maxW = window.innerWidth - wbPanel.offsetWidth;
+            const maxH = window.innerHeight - wbPanel.offsetHeight;
+            
+            newX = Math.max(0, Math.min(newX, maxW));
+            newY = Math.max(0, Math.min(newY, maxH));
+            
+            wbPanel.style.left = newX + 'px';
+            wbPanel.style.top = newY + 'px';
+            // Remove right property since we are using left
+            wbPanel.style.right = 'auto';
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingWb = false;
+            if(wbHeader) wbHeader.style.cursor = 'grab';
         });
 
         // --- AI Tutor Logic ---
@@ -533,7 +952,55 @@
             // Update text every second, move every 10 seconds
             setInterval(updateWatermarkText, 1000);
             setInterval(moveWatermark, 10000);
+    const assignForm = document.getElementById('assignmentSubmitForm');
+    if (assignForm) {
+        assignForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = assignForm.querySelector('button');
+            const fileInput = document.getElementById('assignFile');
+            const assignId = document.getElementById('assignId').value;
+            
+            if (!fileInput.files[0]) {
+                return alert('Please select a file to upload.');
+            }
 
+            btn.disabled = true;
+            btn.innerText = 'Uploading...';
+
+            try {
+                // Upload logic simulation or actual
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                const uploadRes = await fetch('/api/v1/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+                
+                if (!uploadData.success) {
+                    throw new Error(uploadData.message || 'Upload failed');
+                }
+
+                const submitRes = await fetch('/api/v1/courses/assignments/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assignmentId: assignId, fileUrl: uploadData.url })
+                });
+                const submitData = await submitRes.json();
+                
+                if (submitData.success) {
+                    window.location.reload();
+                } else {
+                    throw new Error(submitData.message || 'Submission failed');
+                }
+            } catch (error) {
+                alert(error.message);
+                btn.disabled = false;
+                btn.innerText = 'Submit Assignment';
+            }
+        });
+    }
             // Tamper Protection (MutationObserver)
             // If the user tries to delete the watermark or hide it via DevTools, we recreate it.
             const observer = new MutationObserver((mutations) => {
@@ -597,6 +1064,48 @@
                 }
             });
         })();
+
+        // Progress Tracking
+        async function markLessonComplete(lessonId) {
+            try {
+                const res = await fetch(`/student/courses/${courseId}/progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lessonId })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Error marking complete');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Module Completion Logic
+        const markCompleteBtn = document.getElementById('markCompleteBtn');
+        if (markCompleteBtn) {
+            // In a production environment with Video.js, this would be:
+            // player.on('ended', function() { markCompleteBtn.style.display = 'block'; });
+            
+            // Simulating video completion after 5 seconds for demonstration
+            setTimeout(() => {
+                markCompleteBtn.style.display = 'block';
+            }, 5000);
+
+            // Simulating watched seconds tracking
+            let watchedSeconds = 0;
+            setInterval(() => {
+                watchedSeconds += 5;
+                fetch(`/student/courses/${courseId}/progress`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lessonId: '<%= activeLesson ? activeLesson.id : "" %>', watchedSeconds })
+                }).catch(e => console.error(e));
+            }, 5000);
+        }
     </script>
 </body>
 

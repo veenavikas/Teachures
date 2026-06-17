@@ -107,6 +107,14 @@
 
                 <!-- PayPal Button Container -->
                 <div id="paypal-button-container"></div>
+                
+                <div style="margin: 1.5rem 0; text-align: center; color: var(--color-gray-light); font-size: 0.9rem;">
+                    &mdash; OR &mdash;
+                </div>
+                
+                <button onclick="processMockCheckout()" class="btn btn-primary" style="width: 100%; background-color: var(--color-secondary);">
+                    Pay (Mock Checkout)
+                </button>
             </div>
 
             <div id="success-screen" class="summary-card" style="display: none; text-align: center;">
@@ -210,6 +218,28 @@
                 }
             }
         }).render('#paypal-button-container');
+
+        async function processMockCheckout() {
+            try {
+                const res = await fetch('/api/v1/payments/mock-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        courseId: '<%= course.id %>',
+                        couponCode: appliedCouponCode 
+                    })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('payment-container').style.display = 'none';
+                    document.getElementById('success-screen').style.display = 'block';
+                } else {
+                    alert('Mock checkout failed: ' + data.message);
+                }
+            } catch(err) {
+                alert('Server error during mock checkout');
+            }
+        }
     </script>
 </body>
 

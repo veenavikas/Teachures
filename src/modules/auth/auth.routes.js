@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('./auth.controller');
 const { requireAuth } = require('../../middleware/auth.middleware');
 
-const passport = require('passport');
+const supabase = require('../../config/supabase');
 
 router.post('/register', authController.register);
 router.post('/login', authController.login);
@@ -14,17 +14,64 @@ router.post('/logout', authController.logout);
 router.post('/2fa/setup', requireAuth, authController.setup2FA);
 router.post('/2fa/verify', requireAuth, authController.verify2FASetup);
 
-// Google OAuth
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+// Supabase OAuth Initiation
+router.get('/google', async (req, res) => {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${process.env.APP_URL}/api/v1/auth/supabase/callback`
+        }
+    });
 
-router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login', session: false }),
-    (req, res) => {
-        // Generate tokens for OAuth user
-        const { generateTokens } = require('./auth.controller'); // Need to export generateTokens from controller or just recreate
+    if (error) {
+        return res.redirect('/login?error=supabase_auth_failed');
+    }
+
+    res.redirect(data.url);
+});
+
+// Supabase OAuth Callback
+router.get('/supabase/callback', async (req, res) => {
+    const code = req.query.code;
+    if (!code) return res.redirect('/login?error=missing_code');
+
+    try {
+        // Exchange code for Supabase session
+        const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
+        if (sessionError) throw sessionError;
+
+        // Fetch User Info
+        const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser(sessionData.session.access_token);
+        if (userError) throw userError;
+
+        const email = supabaseUser.email;
+        const name = supabaseUser.user_metadata?.full_name || supabaseUser.user_metadata?.name || email.split('@')[0];
+        const avatar = supabaseUser.user_metadata?.avatar_url || null;
+        const provider = supabaseUser.app_metadata?.provider || 'google';
+
+        const prisma = require('../../config/database');
+        
+        // Find or create local user
+        let user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name,
+                    oauthProvider: provider,
+                    oauthId: supabaseUser.id,
+                    avatar,
+                    role: 'STUDENT',
+                    isVerified: true
+                }
+            });
+        }
+
+        // Generate local JWTs
         const jwt = require('jsonwebtoken');
-        const accessToken = jwt.sign({ id: req.user.id, role: req.user.role }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
-        const refreshToken = jwt.sign({ id: req.user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+        const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -32,15 +79,19 @@ router.get('/google/callback',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        // Redirect to frontend dashboard with access token
+        // Redirect to dashboard with token
         res.redirect(`${process.env.APP_URL}/auth/success?token=${accessToken}`);
-    }
-);
 
-// To be implemented
-// router.post('/forgot-password', authController.forgotPassword);
-// router.post('/reset-password', authController.resetPassword);
-// router.post('/verify-email', authController.verifyEmail);
+    } catch (error) {
+        console.error('Supabase OAuth Error:', error.message);
+        res.redirect('/login?error=oauth_failed');
+    }
+});
+
+// Password Recovery & Email Verification
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
+router.post('/verify-email', authController.verifyEmail);
 
 const profileController = require('./profile.controller');
 const multer = require('multer');

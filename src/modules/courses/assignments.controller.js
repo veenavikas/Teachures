@@ -103,6 +103,38 @@ exports.submitAssignment = async (req, res) => {
             create: { assignmentId, userId: req.user.id, fileUrl, status: 'PENDING' }
         });
 
+        // ─── PEER REVIEW ASSIGNMENT LOGIC ───
+        // Only assign if it's a new submission or didn't have reviewers assigned yet
+        const existingReviews = await prisma.peerReview.count({
+            where: { submissionId: submission.id }
+        });
+
+        if (existingReviews === 0) {
+            // Find other enrolled students in this course
+            const courseId = assignment.lesson.section.courseId;
+            const otherEnrollments = await prisma.enrollment.findMany({
+                where: {
+                    courseId,
+                    userId: { not: req.user.id }
+                },
+                select: { userId: true }
+            });
+
+            // Randomly select up to 2 reviewers
+            const shuffled = otherEnrollments.sort(() => 0.5 - Math.random());
+            const selectedReviewers = shuffled.slice(0, 2);
+
+            for (const reviewer of selectedReviewers) {
+                await prisma.peerReview.create({
+                    data: {
+                        submissionId: submission.id,
+                        reviewerId: reviewer.userId,
+                        status: 'PENDING'
+                    }
+                });
+            }
+        }
+
         res.json({ success: true, data: submission });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });

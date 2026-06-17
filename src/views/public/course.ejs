@@ -12,10 +12,35 @@
         <h1 style="margin: 0; font-family: var(--font-display);"><%= course.title %></h1>
         <p style="color: var(--color-gray-light); margin-top: 0.5rem;"><%= course.description %></p>
         <p style="margin-top: 1rem; font-weight: 600; color: var(--color-primary);">Price: $<%= course.price %></p>
-        <a href="/courses/<%= course.slug %>/checkout" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-primary); color: #fff; text-decoration: none; border-radius: 4px; margin-top: 1rem; font-weight: 600;">Enroll Now</a>
+        <% if (prereqsMet) { %>
+            <a href="/courses/<%= course.slug %>/checkout" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-primary); color: #fff; text-decoration: none; border-radius: 4px; margin-top: 1rem; font-weight: 600;">Enroll Now</a>
+        <% } else { %>
+            <div style="margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 4px; display: inline-block;">
+                <p style="color: #ef4444; margin: 0; font-weight: 600;"><i data-lucide="lock" class="icon-sm" style="vertical-align: middle;"></i> Prerequisites Not Met</p>
+                <p style="color: var(--color-gray-light); margin: 0.5rem 0 0 0; font-size: 0.9rem;">You must complete the following courses before enrolling:</p>
+                <ul style="margin: 0.5rem 0 0 1.5rem; color: #fff; font-size: 0.9rem;">
+                    <% pendingPrereqs.forEach(p => { %>
+                        <li><a href="/courses/<%= p.slug %>" style="color: var(--color-primary); text-decoration: none;"><%= p.title %></a></li>
+                    <% }) %>
+                </ul>
+            </div>
+        <% } %>
     </header>
 
     <main style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+        <% if (announcements && announcements.length > 0) { %>
+            <h2 style="font-family: var(--font-display); margin-bottom: 1.5rem;">Instructor Announcements</h2>
+            <div style="margin-bottom: 3rem;">
+                <% announcements.forEach(ann => { %>
+                    <div style="background: rgba(37, 99, 235, 0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--color-primary);">
+                        <h3 style="margin-bottom: 0.5rem; color: var(--color-primary);"><%= ann.title %></h3>
+                        <p style="color: var(--color-text); margin: 0; white-space: pre-wrap;"><%= ann.content %></p>
+                        <small style="color: var(--color-gray-light); display: block; margin-top: 1rem;"><%= new Date(ann.createdAt).toLocaleDateString() %></small>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
         <h2 style="font-family: var(--font-display); margin-bottom: 1.5rem;">Student Reviews</h2>
         
         <div id="reviews-container">

@@ -85,6 +85,11 @@ const requireAuth = async (req, res, next) => {
 
 const requireRole = (...roles) => {
     return (req, res, next) => {
+        // If INSTRUCTOR is allowed, also allow ADMINISTRATOR
+        if (roles.includes('INSTRUCTOR') && !roles.includes('ADMINISTRATOR')) {
+            roles.push('ADMINISTRATOR');
+        }
+        
         if (!req.user || !roles.includes(req.user.role)) {
             if (req.accepts('html')) {
                 return res.status(403).send('<h1 style="font-family:sans-serif;text-align:center;margin-top:10vh;color:#fff;background:#050505;min-height:100vh;padding-top:10vh;">403 — Access Denied. <a href="/" style="color:#F5C518;">Go Home</a></h1>');
@@ -117,4 +122,48 @@ const optionalAuth = async (req, res, next) => {
     next();
 };
 
-module.exports = { requireAuth, requireRole, optionalAuth };
+const isCourseOwner = async (req, res, next) => {
+    try {
+        let courseId = req.params.courseId || req.params.id;
+
+        if (!courseId && req.params.sectionId) {
+            const section = await prisma.section.findUnique({ where: { id: req.params.sectionId }, select: { courseId: true } });
+            if (section) courseId = section.courseId;
+        }
+
+        if (!courseId && req.params.lessonId) {
+            const lesson = await prisma.lesson.findUnique({ where: { id: req.params.lessonId }, select: { section: { select: { courseId: true } } } });
+            if (lesson && lesson.section) courseId = lesson.section.courseId;
+        }
+
+        if (!courseId && req.params.assignmentId) {
+            const assignment = await prisma.assignment.findUnique({ where: { id: req.params.assignmentId }, select: { courseId: true } });
+            if (assignment) courseId = assignment.courseId;
+        }
+
+        if (!courseId) {
+            return res.status(400).json({ success: false, message: 'Course ID could not be determined' });
+        }
+
+        const course = await prisma.course.findUnique({
+            where: { id: courseId },
+            select: { instructorId: true }
+        });
+
+        if (!course) {
+            if (req.accepts('html')) return res.status(404).send('Course not found');
+            return res.status(404).json({ success: false, message: 'Course not found' });
+        }
+
+        if (course.instructorId !== req.user.id && req.user.role !== 'ADMINISTRATOR') {
+            if (req.accepts('html')) return res.status(403).send('Forbidden: Not your course');
+            return res.status(403).json({ success: false, message: 'Forbidden: Not your course' });
+        }
+
+        next();
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+module.exports = { requireAuth, requireRole, optionalAuth, isCourseOwner };

@@ -1,7 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const { uploadFileToS3 } = require('./s3.service');
+const { uploadFileLocal } = require('./file.service');
 
 /**
  * Generate a PDF Certificate and upload to S3
@@ -27,9 +27,9 @@ exports.generateCertificate = async (data) => {
 
                 // Upload to S3
                 const fileName = `cert-${data.verifyCode}.pdf`;
-                const s3Key = await uploadFileToS3(pdfData, fileName, 'application/pdf', 'certificates');
+                const localUrl = await uploadFileLocal(pdfData, fileName, 'application/pdf', 'certificates');
 
-                resolve(s3Key);
+                resolve(localUrl);
             });
 
             // --- Draw Certificate ---

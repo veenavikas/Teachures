@@ -38,12 +38,12 @@ exports.generateCertificate = async (req, res) => {
             });
 
             const fileName = `certificate_${userId}_${courseId}.pdf`;
-            const certsPath = path.join(__dirname, '../../../public/certificates');
+            const certsPath = path.join(__dirname, '../../public/uploads/certificates');
             if (!fs.existsSync(certsPath)) {
                 fs.mkdirSync(certsPath, { recursive: true });
             }
             const filePath = path.join(certsPath, fileName);
-            const pdfUrl = `/certificates/${fileName}`;
+            const pdfUrl = `/uploads/certificates/${fileName}`;
 
             doc.pipe(fs.createWriteStream(filePath));
 

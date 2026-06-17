@@ -14,6 +14,11 @@
             style="width: 100%; margin-top: 1.5rem; border: 1px dashed var(--color-primary); color: var(--color-primary);">
             <i data-lucide="plus" style="margin-right: 8px;"></i> Add Section
         </button>
+
+        <button id="aiCurriculumBtn" class="btn btn-primary"
+            style="width: 100%; margin-top: 1rem; background: var(--color-primary); color: black; font-weight: bold;">
+            <i data-lucide="sparkles" style="margin-right: 8px;"></i> Auto-Generate Curriculum with AI
+        </button>
     </div>
 
     <!-- Right Side: Course Settings -->
@@ -54,6 +59,35 @@
                 </div>
             </div>
 
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 1.5rem 0;">
+
+            <div class="form-group">
+                <label class="form-label" style="display: flex; align-items: center; justify-content: space-between;">
+                    Prerequisites
+                    <small class="text-muted" style="font-weight: 400;">(Hold Cmd/Ctrl to select multiple)</small>
+                </label>
+                <select id="coursePrerequisites" class="form-control" multiple style="height: 120px; background: white; color: black; padding: 0.5rem;">
+                    <% 
+                       const prereqSet = new Set(course.prerequisites ? course.prerequisites.map(p => p.prerequisiteId) : []);
+                       otherCourses.forEach(c => { 
+                    %>
+                        <option value="<%= c.id %>" <%= prereqSet.has(c.id) ? 'selected' : '' %>><%= c.title %></option>
+                    <% }) %>
+                </select>
+                <button type="button" id="savePrereqsBtn" class="btn btn-outline" style="width: 100%; margin-top: 0.5rem; font-size: 0.85rem; padding: 0.5rem;">Save Prerequisites</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 1.5rem 0;">
+
+            <div class="form-group">
+                <label class="form-label">Send Course Announcement</label>
+                <input type="text" id="announcementTitle" class="form-control" placeholder="Announcement Subject" style="margin-bottom: 0.5rem;">
+                <textarea id="announcementContent" class="form-control" rows="3" placeholder="Write your message..."></textarea>
+                <button type="button" id="sendAnnouncementBtn" class="btn btn-outline" style="width: 100%; margin-top: 0.5rem; font-size: 0.85rem; padding: 0.5rem;">Send & Email Students</button>
+            </div>
+
             <hr style="border: 0; border-top: 1px solid var(--color-gray-mid); margin: 1.5rem 0;">
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">Save
@@ -70,6 +104,82 @@
                     <% } %>
         </form>
     </div>
+</div>
+
+<div class="card" style="padding: 2rem; margin-top: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Course Question Bank</h3>
+    <p style="color: var(--color-gray-light); margin-bottom: 1.5rem;">Add questions here to dynamically pull them into your quizzes.</p>
+    
+    <div id="bankQuestionsList" style="margin-bottom: 1.5rem;">
+        <!-- Bank questions will load here -->
+    </div>
+
+    <form id="bankQuestionForm" style="border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+        <h4 style="margin-bottom: 1rem;">Add New Question to Bank</h4>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Question Text</label>
+            <input type="text" id="bankQText" class="form-control" required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Points</label>
+            <input type="number" id="bankQPoints" class="form-control" value="1" min="1" required>
+        </div>
+
+        <label class="form-label">Options (Check the correct one)</label>
+        <div id="bankOptionsContainer" style="margin-bottom: 1rem;">
+            <!-- Options inputs -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="radio" name="bankCorrectOption" checked>
+                <input type="text" class="form-control bank-opt-text" placeholder="Option A" required>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="radio" name="bankCorrectOption">
+                <input type="text" class="form-control bank-opt-text" placeholder="Option B" required>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="radio" name="bankCorrectOption">
+                <input type="text" class="form-control bank-opt-text" placeholder="Option C">
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <input type="radio" name="bankCorrectOption">
+                <input type="text" class="form-control bank-opt-text" placeholder="Option D">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Save to Bank</button>
+    </form>
+</div>
+
+<!-- Cohorts Management -->
+<div class="card" style="padding: 2rem; margin-top: 2rem;">
+    <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">Course Cohorts</h3>
+    <p style="color: var(--color-gray-light); margin-bottom: 1.5rem;">Create cohorts to launch specific start dates. If a student enrolls into a cohort, their drip content is calculated relative to the cohort's start date.</p>
+    
+    <div id="cohortsList" style="margin-bottom: 1.5rem;">
+        <!-- Cohorts will load here -->
+    </div>
+
+    <form id="cohortForm" style="border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+        <h4 style="margin-bottom: 1rem;">Create New Cohort</h4>
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label">Cohort Name</label>
+            <input type="text" id="cohortName" class="form-control" placeholder="e.g., Fall 2026 Batch" required>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="form-group">
+                <label class="form-label">Start Date</label>
+                <input type="date" id="cohortStartDate" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">End Date (Optional)</label>
+                <input type="date" id="cohortEndDate" class="form-control">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Cohort</button>
+    </form>
 </div>
 
 <!-- Modal for Lesson Editing -->
@@ -98,6 +208,8 @@
                     <option value="VIDEO">Video</option>
                     <option value="ARTICLE">Article</option>
                     <option value="QUIZ">Quiz</option>
+                    <option value="ASSIGNMENT">Assignment</option>
+                    <option value="LIVE">Live Session</option>
                 </select>
             </div>
 
@@ -105,6 +217,12 @@
                 <label class="form-label">Upload Video File</label>
                 <input type="file" id="lessonVideo" name="video" class="form-control" accept="video/*" style="background: white; color: black; padding: 0.5rem;">
                 <small class="text-muted" style="display: block; margin-top: 0.5rem;">File will be securely uploaded to AWS S3.</small>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label class="form-label">Drip Delay (Days)</label>
+                <input type="number" id="lessonDripDays" class="form-control" value="0" min="0">
+                <small class="text-muted" style="display: block; margin-top: 0.5rem;">Number of days to lock this lesson after student enrollment. Set to 0 to make it immediately available.</small>
             </div>
 
             <!-- Quiz Builder Zone -->
@@ -121,9 +239,79 @@
                     </div>
                 </div>
                 
-                <h4 style="margin-bottom: 1rem;">Questions</h4>
+                <h4 style="margin-bottom: 1rem;">Dynamic Question Bank</h4>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label">Pull Random Questions (Enter number)</label>
+                    <input type="number" id="quizPullRandomCount" class="form-control" placeholder="Leave empty to use manual questions below">
+                    <small class="text-muted" style="display: block; margin-top: 0.5rem;">If set, the quiz will dynamically pull this many random questions from the Course Question Bank, ignoring any manually added questions below.</small>
+                </div>
+
+                <h4 style="margin-bottom: 1rem;">Manual Questions</h4>
                 <div id="questionsContainer"></div>
-                <button type="button" id="addQuestionBtn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">+ Add Question</button>
+                <button type="button" id="addQuestionBtn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">+ Add Manual Question</button>
+            </div>
+
+            <!-- Live Session Zone -->
+            <div id="liveSessionZone" style="display: none; margin-top: 1rem; border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+
+<!-- AI Curriculum Modal -->
+<div id="aiCurriculumModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 2rem; position: relative;">
+        <button onclick="document.getElementById('aiCurriculumModal').style.display = 'none';"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="sparkles" style="color: var(--color-primary);"></i> AI Curriculum Builder
+        </h3>
+        <p style="color: var(--color-gray-light); margin-bottom: 1rem;">Describe what you want to teach, and our AI will automatically build out your sections and lessons.</p>
+
+        <form id="aiCurriculumForm">
+            <div class="form-group">
+                <label class="form-label">Course Prompt</label>
+                <textarea id="aiPrompt" class="form-control" rows="4" placeholder="e.g. A 4-week beginner course on advanced React patterns, covering hooks, context, and performance optimization." required></textarea>
+            </div>
+            
+            <button type="submit" id="aiGenerateBtn" class="btn btn-primary" style="width: 100%;">
+                Generate Curriculum
+            </button>
+        </form>
+    </div>
+</div>
+                <h4 style="margin-bottom: 1rem;">Live Session Settings</h4>
+                <div class="form-group">
+                    <label class="form-label">Live URL (Zoom, Meet, etc)</label>
+                    <input type="url" id="lessonLiveUrl" class="form-control" placeholder="https://...">
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Start Time</label>
+                    <input type="datetime-local" id="lessonLiveStartTime" class="form-control">
+                </div>
+            </div>
+
+            <!-- Assignment Zone -->
+            <div id="assignmentZone" style="display: none; margin-top: 1rem; border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+                <h4 style="margin-bottom: 1rem;">Assignment Settings</h4>
+                <div class="form-group">
+                    <label class="form-label">Description / Instructions</label>
+                    <textarea id="assignmentDescription" class="form-control" rows="3" placeholder="Explain what students need to submit..."></textarea>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Deadline (Optional)</label>
+                    <input type="datetime-local" id="assignmentDeadline" class="form-control">
+                </div>
+            </div>
+
+            <!-- Resources Zone -->
+            <div id="resourcesZone" style="margin-top: 1rem; border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
+                <h4 style="margin-bottom: 1rem;">Downloadable Resources</h4>
+                <div class="form-group">
+                    <label class="form-label">Add Resource Links (JSON Array)</label>
+                    <textarea id="lessonAttachments" class="form-control" rows="2" placeholder='[{"name":"Cheat Sheet","url":"https://..."}]'></textarea>
+                    <small class="text-muted" style="display: block; margin-top: 0.5rem;">Add external URLs for students to download.</small>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Save Lesson</button>
@@ -201,4 +389,120 @@
             }
         });
     }
+
+    // Save Prerequisites
+    const savePrereqsBtn = document.getElementById('savePrereqsBtn');
+    if(savePrereqsBtn) {
+        savePrereqsBtn.addEventListener('click', async () => {
+            const select = document.getElementById('coursePrerequisites');
+            const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
+
+            savePrereqsBtn.disabled = true;
+            savePrereqsBtn.innerHTML = 'Saving...';
+
+            try {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/prerequisites`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prerequisiteIds: selectedOptions })
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    alert('Prerequisites updated successfully!');
+                } else {
+                    alert(data.message || 'Failed to update prerequisites.');
+                }
+            } catch(err) {
+                alert('An error occurred while saving prerequisites.');
+            } finally {
+                savePrereqsBtn.disabled = false;
+                savePrereqsBtn.innerHTML = 'Save Prerequisites';
+            }
+        });
+    }
+
+    // Send Announcement
+    const sendAnnouncementBtn = document.getElementById('sendAnnouncementBtn');
+    if(sendAnnouncementBtn) {
+        sendAnnouncementBtn.addEventListener('click', async () => {
+            const title = document.getElementById('announcementTitle').value;
+            const content = document.getElementById('announcementContent').value;
+            
+            if(!title || !content) {
+                return alert('Please fill in both subject and message for the announcement.');
+            }
+
+            if(!confirm('Are you sure you want to broadcast this to all enrolled students?')) return;
+
+            sendAnnouncementBtn.disabled = true;
+            sendAnnouncementBtn.innerHTML = 'Sending...';
+
+            try {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/announcements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    alert('Announcement sent to all students successfully!');
+                    document.getElementById('announcementTitle').value = '';
+                    document.getElementById('announcementContent').value = '';
+                } else {
+                    alert(data.message || 'Failed to send announcement.');
+                }
+            } catch(err) {
+                alert('An error occurred while sending announcement.');
+            } finally {
+                sendAnnouncementBtn.disabled = false;
+                sendAnnouncementBtn.innerHTML = 'Send & Email Students';
+            }
+        });
+    }
+    // AI Curriculum Builder Logic
+    const aiCurriculumBtn = document.getElementById('aiCurriculumBtn');
+    const aiCurriculumModal = document.getElementById('aiCurriculumModal');
+    const aiCurriculumForm = document.getElementById('aiCurriculumForm');
+    const aiGenerateBtn = document.getElementById('aiGenerateBtn');
+
+    if(aiCurriculumBtn && aiCurriculumModal && aiCurriculumForm) {
+        aiCurriculumBtn.addEventListener('click', () => {
+            aiCurriculumModal.style.display = 'flex';
+        });
+
+        aiCurriculumForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = document.getElementById('aiPrompt').value;
+            if(!prompt) return;
+
+            aiGenerateBtn.disabled = true;
+            aiGenerateBtn.innerHTML = '<i data-lucide="loader-2" class="spin" style="margin-right:8px;"></i> Generating... (This may take a minute)';
+
+            try {
+                const res = await fetch(`/api/v1/ai/generate-curriculum`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseId: window.COURSE_ID, prompt })
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    alert('Curriculum generated successfully!');
+                    aiCurriculumModal.style.display = 'none';
+                    window.location.reload(); // Reload the UI to show new sections
+                } else {
+                    alert(data.message || 'Failed to generate curriculum.');
+                }
+            } catch(err) {
+                console.error(err);
+                alert('An error occurred during generation.');
+            } finally {
+                aiGenerateBtn.disabled = false;
+                aiGenerateBtn.innerHTML = 'Generate Curriculum';
+            }
+        });
+    }
+
 </script>

@@ -135,4 +135,68 @@ router.post('/capture-order', requireAuth, async (req, res) => {
     }
 });
 
+// POST /api/v1/payments/mock-checkout (For demo/enterprise flow)
+router.post('/mock-checkout', requireAuth, async (req, res) => {
+    try {
+        const { courseId, couponCode } = req.body;
+
+        const course = await prisma.course.findUnique({ where: { id: courseId } });
+        if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
+
+        const existing = await prisma.enrollment.findUnique({
+            where: { userId_courseId: { userId: req.user.id, courseId } }
+        });
+        if (existing) return res.status(400).json({ success: false, message: 'Already enrolled' });
+
+        let finalPrice = course.price;
+        let appliedCouponId = null;
+
+        if (couponCode) {
+            const coupon = await prisma.coupon.findUnique({ where: { code: couponCode.toUpperCase() } });
+            if (coupon && (!coupon.expiresAt || new Date() <= coupon.expiresAt) && (!coupon.maxUses || coupon.usesCount < coupon.maxUses) && (!coupon.courseId || coupon.courseId === courseId)) {
+                if (coupon.discountPercentage) {
+                    finalPrice = finalPrice * (1 - (coupon.discountPercentage / 100));
+                } else if (coupon.discountAmount) {
+                    finalPrice = Math.max(0, finalPrice - coupon.discountAmount);
+                }
+                appliedCouponId = coupon.id;
+            }
+        }
+
+        // Mock a successful payment
+        const payment = await prisma.payment.create({
+            data: {
+                userId: req.user.id,
+                paypalPaymentId: 'MOCK_PAY_' + Date.now(),
+                amount: finalPrice,
+                status: 'COMPLETED'
+            }
+        });
+
+        await prisma.enrollment.create({
+            data: {
+                userId: req.user.id,
+                courseId,
+                paymentId: payment.id
+            }
+        });
+
+        if (appliedCouponId) {
+            await prisma.coupon.update({
+                where: { id: appliedCouponId },
+                data: { usesCount: { increment: 1 } }
+            });
+        }
+
+        await prisma.courseProgress.create({
+            data: { userId: req.user.id, courseId }
+        });
+
+        res.json({ success: true, message: 'Mock payment successful' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Failed to process mock checkout' });
+    }
+});
+
 module.exports = router;

@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let icon = 'video';
                     if (lesson.type === 'ARTICLE') icon = 'file-text';
                     if (lesson.type === 'QUIZ') icon = 'help-circle';
+                    if (lesson.type === 'LIVE') icon = 'radio';
+                    if (lesson.type === 'ASSIGNMENT') icon = 'clipboard';
 
                     html += `
             <div class="lesson-item" data-id="${lesson.id}" style="background: var(--color-black); border: 1px solid var(--color-gray-mid); padding: 0.75rem 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
@@ -53,8 +55,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <i data-lucide="grip-vertical" class="text-muted" style="cursor: grab;"></i>
                 <i data-lucide="${icon}" class="text-primary icon-sm"></i>
                 <span style="color: var(--color-white); font-size: 0.95rem;">${lesson.title}</span>
+                ${lesson.dripDays > 0 ? `<span class="text-muted" style="font-size: 0.8rem; margin-left: 10px;"><i data-lucide="clock" class="icon-sm"></i> Drip: ${lesson.dripDays} days</span>` : ''}
               </div>
-              <button class="edit-lesson-btn" data-id="${lesson.id}" data-section="${section.id}" data-title="${lesson.title}" data-type="${lesson.type}" style="background:none; border:none; color: var(--color-gray-light); cursor: pointer;"><i data-lucide="edit-2" class="icon-sm"></i></button>
+              <button class="edit-lesson-btn" data-id="${lesson.id}" data-section="${section.id}" data-title="${lesson.title}" data-type="${lesson.type}" data-drip="${lesson.dripDays || 0}" data-live-url="${lesson.liveUrl || ''}" data-live-start="${lesson.liveStartTime || ''}" data-attachments='${lesson.attachments ? JSON.stringify(lesson.attachments).replace(/'/g, "&#39;") : ""}' style="background:none; border:none; color: var(--color-gray-light); cursor: pointer;"><i data-lucide="edit-2" class="icon-sm"></i></button>
             </div>
           `;
                 });
@@ -105,6 +108,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('lessonForm').reset();
                 document.getElementById('modalSectionId').value = e.target.closest('button').dataset.section;
                 document.getElementById('modalLessonId').value = '';
+                document.getElementById('lessonDripDays').value = 0;
+                document.getElementById('lessonLiveUrl').value = '';
+                document.getElementById('lessonLiveStartTime').value = '';
+                document.getElementById('assignmentDescription').value = '';
+                document.getElementById('assignmentDeadline').value = '';
             });
         });
 
@@ -117,6 +125,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('modalSectionId').value = el.dataset.section;
                 document.getElementById('lessonTitle').value = el.dataset.title;
                 document.getElementById('lessonType').value = el.dataset.type;
+                document.getElementById('lessonDripDays').value = el.dataset.drip || 0;
+                
+                document.getElementById('lessonLiveUrl').value = el.dataset.liveUrl || '';
+                if(el.dataset.liveStart) {
+                    // Format for datetime-local
+                    const d = new Date(el.dataset.liveStart);
+                    if (!isNaN(d.getTime())) {
+                        document.getElementById('lessonLiveStartTime').value = d.toISOString().slice(0,16);
+                    }
+                } else {
+                    document.getElementById('lessonLiveStartTime').value = '';
+                }
+                
+                try {
+                    const attachmentsRaw = el.dataset.attachments;
+                    if(attachmentsRaw) {
+                        const parsed = JSON.parse(attachmentsRaw);
+                        document.getElementById('lessonAttachments').value = JSON.stringify(parsed, null, 2);
+                    } else {
+                        document.getElementById('lessonAttachments').value = '';
+                    }
+                } catch(e) {
+                    document.getElementById('lessonAttachments').value = '';
+                }
             });
         });
     }
@@ -140,19 +172,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const typeSelect = document.getElementById('lessonType');
     const videoZone = document.getElementById('videoUploadGroup');
     const quizZone = document.getElementById('quizBuilderZone');
+    const liveZone = document.getElementById('liveSessionZone');
+    const assignmentZone = document.getElementById('assignmentZone');
     const questionsContainer = document.getElementById('questionsContainer');
     let questionCount = 0;
 
     typeSelect.addEventListener('change', (e) => {
+        videoZone.style.display = 'none';
+        quizZone.style.display = 'none';
+        liveZone.style.display = 'none';
+        assignmentZone.style.display = 'none';
+
         if (e.target.value === 'QUIZ') {
-            videoZone.style.display = 'none';
             quizZone.style.display = 'block';
         } else if (e.target.value === 'VIDEO') {
             videoZone.style.display = 'block';
-            quizZone.style.display = 'none';
-        } else {
-            videoZone.style.display = 'none';
-            quizZone.style.display = 'none';
+        } else if (e.target.value === 'LIVE') {
+            liveZone.style.display = 'block';
+        } else if (e.target.value === 'ASSIGNMENT') {
+            assignmentZone.style.display = 'block';
         }
     });
 
@@ -196,15 +234,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sectionId = document.getElementById('modalSectionId').value;
         const title = document.getElementById('lessonTitle').value;
         const type = document.getElementById('lessonType').value;
+        const dripDays = parseInt(document.getElementById('lessonDripDays').value) || 0;
         const videoInput = document.getElementById('lessonVideo');
+        const liveUrl = document.getElementById('lessonLiveUrl').value;
+        const liveStartTime = document.getElementById('lessonLiveStartTime').value;
+        const assignmentDescription = document.getElementById('assignmentDescription').value;
+        const assignmentDeadline = document.getElementById('assignmentDeadline').value;
+        const attachmentsStr = document.getElementById('lessonAttachments').value;
 
         const formData = new FormData();
         formData.append('title', title);
         formData.append('type', type);
         formData.append('order', 99);
+        formData.append('dripDays', dripDays);
+        if(type === 'LIVE') {
+            formData.append('liveUrl', liveUrl);
+            if(liveStartTime) {
+                formData.append('liveStartTime', new Date(liveStartTime).toISOString());
+            }
+        }
+        if(type === 'ASSIGNMENT') {
+            formData.append('assignmentDescription', assignmentDescription);
+            if(assignmentDeadline) {
+                formData.append('assignmentDeadline', new Date(assignmentDeadline).toISOString());
+            }
+        }
         
         if (type === 'VIDEO' && videoInput && videoInput.files[0]) {
             formData.append('video', videoInput.files[0]);
+        }
+        
+        if (attachmentsStr && attachmentsStr.trim() !== '') {
+            try {
+                const parsed = JSON.parse(attachmentsStr);
+                formData.append('attachments', JSON.stringify(parsed));
+            } catch(e) {
+                return alert('Invalid JSON in Attachments field. Please verify the format: [{"name":"...","url":"..."}]');
+            }
         }
 
         try {
@@ -254,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     title: title + ' Quiz',
                     passingScore: document.getElementById('quizPassingScore').value,
                     timeLimit: document.getElementById('quizTimeLimit').value,
+                    pullRandomCount: document.getElementById('quizPullRandomCount').value,
                     questions
                 };
 
@@ -283,4 +350,163 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Kickoff
     loadCurriculum();
+    loadBankQuestions();
+
+    // Question Bank Logic
+    async function loadBankQuestions() {
+        try {
+            const res = await fetch(`/api/v1/courses/${courseId}/questions`);
+            const data = await res.json();
+            if(data.success) {
+                const list = document.getElementById('bankQuestionsList');
+                if(!list) return;
+                list.innerHTML = '';
+                
+                if(data.data.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No questions in the bank yet.</p>';
+                    return;
+                }
+
+                data.data.forEach(q => {
+                    const div = document.createElement('div');
+                    div.style = 'border: 1px solid var(--color-gray-mid); padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${q.text}</strong>
+                            <div style="font-size: 0.85rem; color: var(--color-gray-light); margin-top: 0.25rem;">Points: ${q.points} | Type: ${q.type}</div>
+                        </div>
+                        <button class="btn btn-outline" style="color: var(--color-danger); border-color: var(--color-danger); padding: 0.25rem 0.5rem;" onclick="deleteBankQuestion('${q.id}')">Delete</button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    const bankForm = document.getElementById('bankQuestionForm');
+    if(bankForm) {
+        bankForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('bankQText').value;
+            const points = document.getElementById('bankQPoints').value;
+            
+            const optInputs = document.querySelectorAll('.bank-opt-text');
+            const radioInputs = document.querySelectorAll('input[name="bankCorrectOption"]');
+            
+            const options = [];
+            optInputs.forEach((inp, idx) => {
+                if(inp.value.trim()) {
+                    options.push({
+                        id: idx + 1,
+                        text: inp.value.trim(),
+                        isCorrect: radioInputs[idx].checked
+                    });
+                }
+            });
+
+            try {
+                const res = await fetch(`/api/v1/courses/${courseId}/questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, points, options })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    bankForm.reset();
+                    loadBankQuestions();
+                } else {
+                    alert(data.message);
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        });
+    }
+
+    window.deleteBankQuestion = async function(questionId) {
+        if(!confirm('Are you sure you want to delete this question from the bank?')) return;
+        try {
+            await fetch(`/api/v1/courses/${courseId}/questions/${questionId}`, { method: 'DELETE' });
+            loadBankQuestions();
+        } catch(err) {
+            console.error(err);
+        }
+    };
+
+    // Cohort Logic
+    loadCohorts();
+
+    async function loadCohorts() {
+        try {
+            const res = await fetch(`/api/v1/courses/${courseId}/cohorts`);
+            const data = await res.json();
+            if(data.success) {
+                const list = document.getElementById('cohortsList');
+                if(!list) return;
+                list.innerHTML = '';
+                
+                if(data.data.length === 0) {
+                    list.innerHTML = '<p class="text-muted">No cohorts created yet.</p>';
+                    return;
+                }
+
+                data.data.forEach(c => {
+                    const div = document.createElement('div');
+                    div.style = 'border: 1px solid var(--color-gray-mid); padding: 1rem; margin-bottom: 0.5rem; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;';
+                    div.innerHTML = `
+                        <div>
+                            <strong>${c.name}</strong>
+                            <div style="font-size: 0.85rem; color: var(--color-gray-light); margin-top: 0.25rem;">
+                                Starts: ${new Date(c.startDate).toLocaleDateString()} | 
+                                Enrollments: ${c._count.enrollments}
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="color: var(--color-danger); border-color: var(--color-danger); padding: 0.25rem 0.5rem;" onclick="deleteCohort('${c.id}')">Delete</button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    const cohortForm = document.getElementById('cohortForm');
+    if(cohortForm) {
+        cohortForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('cohortName').value;
+            const startDate = document.getElementById('cohortStartDate').value;
+            const endDate = document.getElementById('cohortEndDate').value;
+            
+            try {
+                const res = await fetch(`/api/v1/courses/${courseId}/cohorts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, startDate, endDate })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    cohortForm.reset();
+                    loadCohorts();
+                } else {
+                    alert(data.message);
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        });
+    }
+
+    window.deleteCohort = async function(cohortId) {
+        if(!confirm('Are you sure you want to delete this cohort?')) return;
+        try {
+            await fetch(`/api/v1/courses/${courseId}/cohorts/${cohortId}`, { method: 'DELETE' });
+            loadCohorts();
+        } catch(err) {
+            console.error(err);
+        }
+    };
 });

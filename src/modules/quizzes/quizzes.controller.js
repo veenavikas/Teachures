@@ -143,6 +143,14 @@ exports.submitAttempt = async (req, res) => {
 
         if (!quiz) return res.status(404).json({ success: false, message: 'Quiz not found' });
 
+        const attemptsCount = await prisma.quizAttempt.count({
+            where: { quizId, userId: req.user.id }
+        });
+
+        if (attemptsCount >= quiz.maxAttempts) {
+            return res.status(403).json({ success: false, message: `Maximum attempts (${quiz.maxAttempts}) reached.` });
+        }
+
         let totalPoints = 0;
         let earnedPoints = 0;
 
