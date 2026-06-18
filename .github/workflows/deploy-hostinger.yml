@@ -28,3 +28,4 @@ jobs:
             # Restart Hostinger Litespeed Node Server (or use pm2 restart all if on VPS)
             touch tmp/restart.txt || true
             pm2 restart all || true
+            
