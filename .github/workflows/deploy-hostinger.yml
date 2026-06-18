@@ -16,15 +16,15 @@ jobs:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          port: 65002
           script: |
             cd /home/u853354115/domains/lavenderblush-jellyfish-375463.hostingersite.com/nodejs
             
-            # Force update from main branch to prevent merge conflicts
             git fetch origin main
             git reset --hard origin/main
             
-            # Install new packages
             npm install
             
-            # Restart the server (this varies depending on Hostinger setup, assuming PM2 is used if SSH is available)
+            # Restart Hostinger Litespeed Node Server (or use pm2 restart all if on VPS)
+            touch tmp/restart.txt || true
             pm2 restart all || true
