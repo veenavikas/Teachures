@@ -16,7 +16,7 @@ jobs:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: 65002
+          port: 22
           script: |
             cd /home/u853354115/domains/lavenderblush-jellyfish-375463.hostingersite.com/nodejs
             
