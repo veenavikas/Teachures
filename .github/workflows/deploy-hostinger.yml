@@ -16,16 +16,24 @@ jobs:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          port: 22
+          port: ${{ secrets.HOSTINGER_PORT || 65002 }}
           script: |
+            # Source bash profile to ensure npm and node are in PATH for non-interactive SSH
+            source ~/.bash_profile || true
+            source ~/.bashrc || true
+            
             cd /home/u853354115/domains/lavenderblush-jellyfish-375463.hostingersite.com/nodejs
             
             git fetch origin main
             git reset --hard origin/main
             
+            # Install new packages and generate prisma
             npm install
+            npx prisma generate
             
-            # Restart Hostinger Litespeed Node Server (or use pm2 restart all if on VPS)
-            touch tmp/restart.txt || true
+            # Restart the server
+            # 1. If using Hostinger Shared Node.js (Phusion Passenger):
+            mkdir -p tmp && touch tmp/restart.txt
+            
+            # 2. If using PM2:
             pm2 restart all || true
-            
