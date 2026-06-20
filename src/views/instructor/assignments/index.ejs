@@ -46,7 +46,7 @@
                                 <a href="<%= sub.fileUrl %>" target="_blank" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; margin-right: 0.5rem;">
                                     <i data-lucide="eye" style="width: 14px; margin-right: 5px;"></i> View
                                 </a>
-                                <button class="btn btn-primary" onclick="openGradeModal('<%= sub.id %>', '<%= sub.user.name %>', '<%= sub.status %>', <%= sub.grade || 0 %>, '<%= sub.feedback ? sub.feedback.replace(/'/g, \'\\'\') : \'\' %>')" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+                                <button class="btn btn-primary" onclick="openGradeModal('<%= sub.id %>', '<%= sub.user.name %>', '<%= sub.status %>', <%= sub.grade || 0 %>, '')" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;">
                                     <i data-lucide="check-circle" style="width: 14px; margin-right: 5px;"></i> Grade
                                 </button>
                             </td>

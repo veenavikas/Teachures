@@ -41,7 +41,7 @@
                             </td>
                             <td style="padding: 1rem;">
                                 <% if (!instructor.instructorProfile?.isApproved) { %>
-                                    <form action="/wp-admin/instructors/<%= instructor.id %>/approve" method="POST" style="display:inline;">
+                                    <form action="/admin/instructors/<%= instructor.id %>/approve" method="POST" style="display:inline;">
                                         <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Approve</button>
                                     </form>
                                 <% } else { %>

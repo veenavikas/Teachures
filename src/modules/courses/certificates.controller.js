@@ -2,7 +2,7 @@ const prisma = require('../../config/database');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 exports.generateCertificate = async (req, res) => {
     try {
@@ -63,7 +63,7 @@ exports.generateCertificate = async (req, res) => {
                     userId,
                     courseId,
                     pdfUrl,
-                    verifyCode: uuidv4()
+                    verifyCode: crypto.randomUUID()
                 }
             });
         }

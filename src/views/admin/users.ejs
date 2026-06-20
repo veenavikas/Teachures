@@ -20,7 +20,7 @@
                         </span>
                     </td>
                     <td style="padding: 1rem 0;">
-                        <form action="/wp-admin/users/<%= u.id %>/role" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
+                        <form action="/admin/users/<%= u.id %>/role" method="POST" style="display: flex; gap: 0.5rem; align-items: center;">
                             <select name="role" class="form-control" style="width: auto; padding: 0.4rem; font-size: 0.85rem;">
                                 <option value="STUDENT" <%= u.role === 'STUDENT' ? 'selected' : '' %>>Student</option>
                                 <option value="INSTRUCTOR" <%= u.role === 'INSTRUCTOR' ? 'selected' : '' %>>Instructor</option>

@@ -1,46 +1,57 @@
 const { Queue, Worker } = require('bullmq');
 const { sendEmail } = require('./email.service');
 
-const connection = process.env.REDIS_URL 
-    ? new URL(process.env.REDIS_URL) 
-    : {
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD || undefined
-    };
+const USE_REDIS = process.env.USE_REDIS === 'true';
 
-// BullMQ supports passing a Redis instance or a connection object, but if REDIS_URL is provided, 
-// we should map it to the object format it expects:
-const redisConnectionConfig = process.env.REDIS_URL ? {
-    host: connection.hostname,
-    port: connection.port || 6379,
-    password: connection.password || undefined
-} : connection;
+let emailQueue;
+let emailWorker;
 
-// Create Email Queue
-const emailQueue = new Queue('emailQueue', { connection: redisConnectionConfig });
+if (USE_REDIS) {
+    const connection = process.env.REDIS_URL 
+        ? new URL(process.env.REDIS_URL) 
+        : {
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: process.env.REDIS_PORT || 6379,
+            password: process.env.REDIS_PASSWORD || undefined
+        };
 
-// Worker to process emails
-const emailWorker = new Worker('emailQueue', async (job) => {
-    const { to, subject, text, html } = job.data;
-    console.log(`Processing email job ${job.id} for ${to}`);
-    await sendEmail(to, subject, text, html);
-}, { connection: redisConnectionConfig });
+    const redisConnectionConfig = process.env.REDIS_URL ? {
+        host: connection.hostname,
+        port: connection.port || 6379,
+        password: connection.password || undefined
+    } : connection;
 
-emailWorker.on('completed', (job) => {
-    console.log(`Job ${job.id} has completed!`);
-});
+    // Create Email Queue
+    emailQueue = new Queue('emailQueue', { connection: redisConnectionConfig });
 
-emailWorker.on('failed', (job, err) => {
-    console.log(`Job ${job.id} has failed with ${err.message}`);
-});
+    // Worker to process emails
+    emailWorker = new Worker('emailQueue', async (job) => {
+        const { to, subject, text, html } = job.data;
+        console.log(`Processing email job ${job.id} for ${to}`);
+        await sendEmail(to, subject, text, html);
+    }, { connection: redisConnectionConfig });
+
+    emailWorker.on('completed', (job) => {
+        console.log(`Job ${job.id} has completed!`);
+    });
+
+    emailWorker.on('failed', (job, err) => {
+        console.log(`Job ${job.id} has failed with ${err.message}`);
+    });
+}
 
 exports.enqueueEmail = async (to, subject, text, html) => {
-    await emailQueue.add('sendEmail', { to, subject, text, html }, {
-        attempts: 3,
-        backoff: {
-            type: 'exponential',
-            delay: 1000
-        }
-    });
+    if (USE_REDIS && emailQueue) {
+        await emailQueue.add('sendEmail', { to, subject, text, html }, {
+            attempts: 3,
+            backoff: {
+                type: 'exponential',
+                delay: 1000
+            }
+        });
+    } else {
+        // Fallback: synchronous sending when Redis is disabled
+        console.log(`Redis is disabled. Sending email directly to ${to}`);
+        await sendEmail(to, subject, text, html);
+    }
 };

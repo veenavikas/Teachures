@@ -13,7 +13,7 @@ exports.getMyTickets = async (req, res) => {
         }
 
         // Render EJS view otherwise
-        res.render('learner/support', {
+        res.render('student/support', {
             layout: 'layouts/dashboard',
             title: 'Support Center',
             path: req.originalUrl,

@@ -42,7 +42,7 @@
                 // Determine dashboard based on role
                 const role = data.data.user.role;
                 if (role === 'INSTRUCTOR') window.location.href = '/instructor/dashboard';
-                else if (role === 'ADMINISTRATOR') window.location.href = '/wp-admin/dashboard';
+                else if (role === 'ADMINISTRATOR') window.location.href = '/admin/dashboard';
                 else window.location.href = '/student/dashboard';
             } else {
                 alert(data.message || 'Verification failed');

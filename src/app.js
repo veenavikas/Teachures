@@ -13,7 +13,9 @@ require('./config/database');
 
 // Initialize Cron Jobs
 const { initCronJobs } = require('./services/cron.service');
-initCronJobs();
+if (process.env.NODE_ENV !== 'test') {
+    initCronJobs();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -120,12 +122,14 @@ app.use('/api/v1/paths', pathsRoutes);
 app.use('/api/v1/community', communityRoutes);
 app.use('/instructor', instructorRoutes);
 app.use('/student', studentRoutes);
-app.use('/wp-admin', adminRoutes);
+app.use('/admin', adminRoutes);
 app.use('/', publicRoutes);
 
 // Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
 
 module.exports = app;

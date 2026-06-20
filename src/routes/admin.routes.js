@@ -112,7 +112,7 @@ router.get('/pages', async (req, res) => {
         res.render('admin/pages/index', {
             layout: 'layouts/dashboard',
             title: 'Manage Pages',
-            path: '/wp-admin/pages',
+            path: '/admin/pages',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             pages
@@ -126,7 +126,7 @@ router.get('/pages/new', (req, res) => {
     res.render('admin/pages/edit', {
         layout: 'layouts/dashboard',
         title: 'Create Page',
-        path: '/wp-admin/pages',
+        path: '/admin/pages',
         user: req.user,
         sidebarPartial: '../partials/sidebar-admin',
         page: null
@@ -140,7 +140,7 @@ router.get('/pages/:id/edit', async (req, res) => {
         res.render('admin/pages/edit', {
             layout: 'layouts/dashboard',
             title: 'Edit Page',
-            path: '/wp-admin/pages',
+            path: '/admin/pages',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             page
@@ -159,7 +159,7 @@ router.get('/users', async (req, res) => {
         res.render('admin/users', {
             layout: 'layouts/dashboard',
             title: 'User Management',
-            path: '/wp-admin/users',
+            path: '/admin/users',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             users
@@ -176,7 +176,7 @@ router.post('/users/:id/role', async (req, res) => {
             where: { id: req.params.id },
             data: { role }
         });
-        res.redirect('/wp-admin/users');
+        res.redirect('/admin/users');
     } catch (error) {
         res.status(500).send('Server Error');
     }
@@ -193,7 +193,7 @@ router.get('/moderation', async (req, res) => {
         res.render('admin/moderation', {
             layout: 'layouts/dashboard',
             title: 'Content Moderation',
-            path: '/wp-admin/moderation',
+            path: '/admin/moderation',
             user: req.user,
             sidebarPartial: '../partials/sidebar-admin',
             courses
@@ -217,7 +217,7 @@ router.post('/moderation/:id/approve', async (req, res) => {
             await createNotification(course.instructorId, 'Course Approved! 🎉', `Your course "${course.title}" has been approved and is now live!`, `/courses/${course.slug}`);
         }
         
-        res.redirect('/wp-admin/moderation');
+        res.redirect('/admin/moderation');
     } catch (error) {
         res.status(500).send('Server Error');
     }
@@ -232,7 +232,7 @@ router.get('/instructors', async (req, res) => {
             orderBy: { createdAt: 'desc' }
         });
         res.render('admin/instructors', {
-            layout: 'layouts/dashboard', title: 'Instructors', path: '/wp-admin/instructors', user: req.user, sidebarPartial: '../partials/sidebar-admin', instructors
+            layout: 'layouts/dashboard', title: 'Instructors', path: '/admin/instructors', user: req.user, sidebarPartial: '../partials/sidebar-admin', instructors
         });
     } catch (error) {
         res.status(500).send('Server Error');
@@ -245,7 +245,7 @@ router.post('/instructors/:id/approve', async (req, res) => {
             where: { userId: req.params.id },
             data: { isApproved: true }
         });
-        res.redirect('/wp-admin/instructors');
+        res.redirect('/admin/instructors');
     } catch (error) {
         res.status(500).send('Server Error');
     }
@@ -256,12 +256,12 @@ router.get('/courses', async (req, res) => {
         const courses = await prisma.course.findMany({
             include: { 
                 instructor: { select: { name: true, email: true } },
-                _count: { select: { enrollments: true, lessons: true } }
+                _count: { select: { enrollments: true } }
             },
             orderBy: { createdAt: 'desc' }
         });
         res.render('admin/courses', {
-            layout: 'layouts/dashboard', title: 'Courses Management', path: '/wp-admin/courses', user: req.user, sidebarPartial: '../partials/sidebar-admin', courses
+            layout: 'layouts/dashboard', title: 'Courses Management', path: '/admin/courses', user: req.user, sidebarPartial: '../partials/sidebar-admin', courses
         });
     } catch (error) {
         res.status(500).send('Server Error');
@@ -305,7 +305,7 @@ router.get('/revenue', async (req, res) => {
         });
 
         res.render('admin/revenue', {
-            layout: 'layouts/dashboard', title: 'Revenue & Payouts', path: '/wp-admin/revenue', user: req.user, sidebarPartial: '../partials/sidebar-admin',
+            layout: 'layouts/dashboard', title: 'Revenue & Payouts', path: '/admin/revenue', user: req.user, sidebarPartial: '../partials/sidebar-admin',
             financials: { grossVolume, platformFee, trainerPayouts: Object.values(trainerPayouts), payments }
         });
     } catch (error) {
@@ -324,14 +324,14 @@ router.get('/settings', (req, res) => {
     };
 
     res.render('admin/settings', {
-        layout: 'layouts/dashboard', title: 'Platform Settings', path: '/wp-admin/settings', user: req.user, sidebarPartial: '../partials/sidebar-admin', settings
+        layout: 'layouts/dashboard', title: 'Platform Settings', path: '/admin/settings', user: req.user, sidebarPartial: '../partials/sidebar-admin', settings
     });
 });
 
 router.post('/settings', (req, res) => {
     // In a real app, save to GlobalSettings table here.
     // For now, we mock the success response.
-    res.redirect('/wp-admin/settings?success=1');
+    res.redirect('/admin/settings?success=1');
 });
 
 module.exports = router;

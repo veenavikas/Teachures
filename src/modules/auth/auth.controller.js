@@ -46,7 +46,7 @@ exports.register = async (req, res) => {
                 email,
                 passwordHash,
                 name,
-                role: role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'SUBSCRIBER',
+                role: role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'STUDENT',
                 verifyEmailToken: verifyToken,
                 verifyEmailExpires
             }
@@ -91,7 +91,7 @@ exports.register = async (req, res) => {
         // For browser form submissions, redirect to dashboard
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
-            const dashboard = user.role === 'ADMINISTRATOR' ? '/wp-admin/dashboard' : '/student/dashboard';
+            const dashboard = user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
             return res.redirect(dashboard);
         }
 
@@ -181,7 +181,7 @@ exports.login = async (req, res) => {
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
             const next = req.query.next || null;
-            const dashboard = next || (user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/wp-admin/dashboard' : '/student/dashboard');
+            const dashboard = next || (user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard');
             return res.redirect(dashboard);
         }
 

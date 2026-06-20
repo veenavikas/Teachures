@@ -22,7 +22,7 @@
                             <span class="role-badge" style="font-size:0.75rem; color:#F5C518; text-transform:uppercase;"><%= user.role %></span>
                         </div>
                     </div>
-                    <% const dashLink = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : (user.role === 'ADMIN' ? '/wp-admin/dashboard' : '/student/dashboard') %>
+                    <% const dashLink = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : (user.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard') %>
                     <a href="<%= dashLink %>" class="menu-item" role="menuitem" style="display:block; padding:0.5rem 0; color:#ccc; text-decoration:none;">Dashboard</a>
                     <a href="<%= dashLink %>/profile" class="menu-item" role="menuitem" style="display:block; padding:0.5rem 0; color:#ccc; text-decoration:none;">My Profile</a>
                     <a href="/api/v1/auth/logout" class="menu-item logout" role="menuitem" style="display:block; padding:0.5rem 0; color:#F87171; text-decoration:none;">Logout</a>

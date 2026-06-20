@@ -182,6 +182,33 @@
     </form>
 </div>
 
+<!-- AI Curriculum Modal -->
+<div id="aiCurriculumModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 2rem; position: relative;">
+        <button onclick="document.getElementById('aiCurriculumModal').style.display = 'none';"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="sparkles" style="color: var(--color-primary);"></i> AI Curriculum Builder
+        </h3>
+        <p style="color: var(--color-gray-light); margin-bottom: 1rem;">Describe what you want to teach, and our AI will automatically build out your sections and lessons.</p>
+
+        <form id="aiCurriculumForm">
+            <div class="form-group">
+                <label class="form-label">Course Prompt</label>
+                <textarea id="aiPrompt" class="form-control" rows="4" placeholder="e.g. A 4-week beginner course on advanced React patterns, covering hooks, context, and performance optimization." required></textarea>
+            </div>
+            
+            <button type="submit" id="aiGenerateBtn" class="btn btn-primary" style="width: 100%;">
+                Generate Curriculum
+            </button>
+        </form>
+    </div>
+</div>
+
 <!-- Modal for Lesson Editing -->
 <div id="lessonModal"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
@@ -254,32 +281,6 @@
             <!-- Live Session Zone -->
             <div id="liveSessionZone" style="display: none; margin-top: 1rem; border: 1px solid var(--color-gray-mid); padding: 1.5rem; border-radius: 4px;">
 
-<!-- AI Curriculum Modal -->
-<div id="aiCurriculumModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
-    <div class="card" style="width: 100%; max-width: 500px; padding: 2rem; position: relative;">
-        <button onclick="document.getElementById('aiCurriculumModal').style.display = 'none';"
-            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
-            <i data-lucide="x"></i>
-        </button>
-
-        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="sparkles" style="color: var(--color-primary);"></i> AI Curriculum Builder
-        </h3>
-        <p style="color: var(--color-gray-light); margin-bottom: 1rem;">Describe what you want to teach, and our AI will automatically build out your sections and lessons.</p>
-
-        <form id="aiCurriculumForm">
-            <div class="form-group">
-                <label class="form-label">Course Prompt</label>
-                <textarea id="aiPrompt" class="form-control" rows="4" placeholder="e.g. A 4-week beginner course on advanced React patterns, covering hooks, context, and performance optimization." required></textarea>
-            </div>
-            
-            <button type="submit" id="aiGenerateBtn" class="btn btn-primary" style="width: 100%;">
-                Generate Curriculum
-            </button>
-        </form>
-    </div>
-</div>
                 <h4 style="margin-bottom: 1rem;">Live Session Settings</h4>
                 <div class="form-group">
                     <label class="form-label">Live URL (Zoom, Meet, etc)</label>

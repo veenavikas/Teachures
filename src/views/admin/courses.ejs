@@ -38,7 +38,7 @@
                             </td>
                             <td style="padding: 1rem;">
                                 <small style="display: block;">🎓 <%= course._count.enrollments %> Students</small>
-                                <small style="display: block;">📚 <%= course._count.lessons %> Lessons</small>
+                                <small style="display: block;">📚 <%= course.totalLessons %> Lessons</small>
                             </td>
                             <td style="padding: 1rem;">
                                 <% if (course.isPublished) { %>

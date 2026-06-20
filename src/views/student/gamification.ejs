@@ -220,14 +220,16 @@
             <h3>🏅 Achievement Badges</h3>
         </div>
         <div class="badges-grid">
-            <% const allBadges=[ { name:'First Step', emoji:'👣', desc:'Complete your first lesson',
-                threshold:'lesson_1' }, { name:'Quiz Ace', emoji:'🎯', desc:'Score 100% on a quiz', threshold:'quiz_100'
-                }, { name:'On Fire', emoji:'🔥', desc:'7-day learning streak', threshold:'streak_7' }, {
-                name:'Graduate', emoji:'🎓', desc:'Complete first course', threshold:'course_1' }, { name:'Centurion',
-                emoji:'💯', desc:'Earn 100 XP points', threshold:'xp_100' }, { name:'Social', emoji:'🤝', desc:'Leave a
-                course review', threshold:'review_1' }, { name:'Speedrun', emoji:'⚡', desc:'Complete a course in 24h',
-                threshold:'speed_1' }, { name:'Legend', emoji:'👑', desc:'Top 3 on leaderboard', threshold:'lb_top3' },
-                ]; %>
+            <% const allBadges=[ 
+                { name:'First Step', emoji:'👣', desc:'Complete your first lesson', threshold:'lesson_1' }, 
+                { name:'Quiz Ace', emoji:'🎯', desc:'Score 100% on a quiz', threshold:'quiz_100' }, 
+                { name:'On Fire', emoji:'🔥', desc:'7-day learning streak', threshold:'streak_7' }, 
+                { name:'Graduate', emoji:'🎓', desc:'Complete first course', threshold:'course_1' }, 
+                { name:'Centurion', emoji:'💯', desc:'Earn 100 XP points', threshold:'xp_100' }, 
+                { name:'Social', emoji:'🤝', desc:'Leave a course review', threshold:'review_1' }, 
+                { name:'Speedrun', emoji:'⚡', desc:'Complete a course in 24h', threshold:'speed_1' }, 
+                { name:'Legend', emoji:'👑', desc:'Top 3 on leaderboard', threshold:'lb_top3' },
+            ]; %>
                 <% allBadges.forEach(function(b) { const isEarned=badges && badges.some && badges.some(ub=> ub.badge &&
                     ub.badge.name === b.name);
                     %>
@@ -256,9 +258,13 @@
             <h3>🏆 Leaderboard</h3>
             <span style="font-size:0.78rem; color:rgba(0,0,0,0.3);">Top Learners</span>
         </div>
-        <% const lbData=leaders && leaders.length ? leaders : [ { name:'Alex Kim', points:920, isYou:false }, {
-            name:'Priya Shah', points:810, isYou:false }, { name:'Marco L.', points:640, isYou:false }, { name:'You',
-            points: user.points||0, isYou:true }, { name:'Jordan T.', points:390, isYou:false }, ]; %>
+        <% const lbData=leaders && leaders.length ? leaders : [ 
+            { name:'Alex Kim', points:920, isYou:false }, 
+            { name:'Priya Shah', points:810, isYou:false }, 
+            { name:'Marco L.', points:640, isYou:false }, 
+            { name:'You', points: user.totalPoints||0, isYou:true }, 
+            { name:'Jordan T.', points:390, isYou:false } 
+        ]; %>
             <% lbData.slice(0,10).forEach(function(p, i) { %>
                 <div class="leaderboard-item"
                     style="<%= p.isYou ? 'border-color:rgba(245,197,24,0.3); background:rgba(245,197,24,0.04);' : '' %>">

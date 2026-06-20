@@ -1,0 +1,70 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <div class="card" style="padding: 2.5rem; background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 2rem; color: #0F172A; font-weight: 700;">My Profile</h2>
+            <p style="color: #64748B; margin-top: 0.5rem;">Update your professional details and payout settings.</p>
+        </div>
+
+        <form id="profileForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+                <label for="bio" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Short Bio</label>
+                <textarea id="bio" name="bio" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit; resize: vertical;" placeholder="Tell students about your background and experience..."><%= profile.bio || '' %></textarea>
+            </div>
+
+            <div>
+                <label for="expertise" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Expertise (Comma separated)</label>
+                <input type="text" name="expertise" id="expertise" value="<%= (profile.expertise || []).join(', ') %>" style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;" placeholder="e.g. JavaScript, Python, Data Science">
+            </div>
+
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="website" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Personal Website / Portfolio</label>
+                    <input type="url" name="website" id="website" value="<%= profile.website || '' %>" style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;" placeholder="https://">
+                </div>
+
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="paypalAccountId" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">PayPal Email (for payouts)</label>
+                    <input type="email" name="paypalAccountId" id="paypalAccountId" value="<%= profile.paypalAccountId || '' %>" required style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;" placeholder="payouts@example.com">
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 0.375rem; background: var(--color-primary); color: #0F172A; border: none; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                    Save Profile
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('profileForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Convert expertise string to array
+    if(data.expertise) {
+        data.expertise = data.expertise.split(',').map(item => item.trim()).filter(Boolean);
+    } else {
+        data.expertise = [];
+    }
+
+    try {
+        const response = await fetch('/instructor/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Profile updated successfully!');
+        } else {
+            alert(result.message || 'Error updating profile');
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+    }
+});
+</script>

@@ -42,7 +42,8 @@ router.get('/dashboard', async (req, res) => {
             sidebarPartial: '../partials/sidebar-student',
             myCourses,
             badges,
-            leaders
+            leaders,
+            continueCourse: null
         });
     } catch (error) {
         res.status(500).send('Server Error: ' + error.message);
@@ -59,9 +60,9 @@ router.get('/gamification', async (req, res) => {
 
         const leaderboard = await prisma.user.findMany({
             where: { role: 'STUDENT' },
-            orderBy: { points: 'desc' },
+            orderBy: { totalPoints: 'desc' },
             take: 10,
-            select: { id: true, name: true, points: true }
+            select: { id: true, name: true, totalPoints: true }
         });
 
         res.render('student/gamification', {
@@ -71,7 +72,7 @@ router.get('/gamification', async (req, res) => {
             user: req.user,
             sidebarPartial: '../partials/sidebar-student',
             badges: userBadges,
-            leaders: leaderboard.map(u => ({ ...u, isYou: u.id === req.user.id }))
+            leaders: leaderboard.map(u => ({ name: u.name, points: u.totalPoints, isYou: u.id === req.user.id }))
         });
     } catch (error) {
         res.status(500).send('Server Error: ' + error.message);

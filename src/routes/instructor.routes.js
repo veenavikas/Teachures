@@ -51,6 +51,42 @@ router.post('/onboarding', async (req, res) => {
     }
 });
 
+// Instructor Profile
+router.get('/profile', async (req, res) => {
+    try {
+        const profile = await prisma.instructorProfile.findUnique({
+            where: { userId: req.user.id }
+        });
+
+        res.render('instructor/profile', {
+            layout: 'layouts/dashboard',
+            title: 'My Profile',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            profile: profile || {}
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
+router.post('/profile', async (req, res) => {
+    try {
+        const { bio, expertise, website, paypalAccountId } = req.body;
+
+        const profile = await prisma.instructorProfile.upsert({
+            where: { userId: req.user.id },
+            update: { bio, expertise, website, paypalAccountId },
+            create: { userId: req.user.id, bio, expertise, website, paypalAccountId }
+        });
+
+        res.json({ success: true, data: profile, message: 'Profile updated successfully.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server Error updating profile.' });
+    }
+});
+
 // Instructor Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
@@ -346,46 +382,7 @@ router.get('/analytics', async (req, res) => {
     }
 });
 
-router.get('/earnings', async (req, res) => {
-    try {
-        const payments = await prisma.payment.findMany({
-            where: { status: 'COMPLETED' },
-            include: {
-                enrollments: { include: { course: true } }
-            },
-            orderBy: { createdAt: 'desc' }
-        });
 
-        let totalEarnings = 0;
-        let recentTransactions = [];
-
-        payments.forEach(p => {
-            if (p.enrollments && p.enrollments.length > 0 && p.enrollments[0].course) {
-                if (p.enrollments[0].course.instructorId === req.user.id) {
-                    // Instructor takes 90%
-                    const payout = p.amount * 0.90;
-                    totalEarnings += payout;
-                    recentTransactions.push({
-                        course: p.enrollments[0].course.title,
-                        date: p.createdAt.toLocaleDateString(),
-                        amount: payout
-                    });
-                }
-            }
-        });
-
-        res.render('instructor/earnings', {
-            layout: 'layouts/dashboard',
-            title: 'Earnings',
-            path: req.originalUrl,
-            user: req.user,
-            sidebarPartial: '../partials/sidebar-instructor',
-            earnings: { totalEarnings, recentTransactions }
-        });
-    } catch (error) {
-        res.status(500).send('Server Error: ' + error.message);
-    }
-});
 
 router.get('/coupons', async (req, res) => {
     try {
