@@ -6,23 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About | Teachures</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
     <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        :root {
+            --yellow: #FFC107;
+            --yellow-dim: #FFB300;
+            --yellow-light: #FFF8E1;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+            
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            --bg-muted: #F1F5F9;
+            
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            
+            --border-light: #E2E8F0;
+            
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            
+            --radius-md: 16px;
+            --radius-lg: 24px;
+        }
+
+        body {
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
         .about-hero {
-            padding: 6rem 2rem 4rem;
+            padding: 8rem 2rem 4rem;
             text-align: center;
         }
 
         .about-hero h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(3.5rem, 7vw, 6rem);
-            letter-spacing: 2px;
-            line-height: 1;
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            color: var(--text-main);
         }
 
         .mission-section {
@@ -36,39 +65,39 @@
         .mission-label {
             font-size: 0.8rem;
             font-weight: 700;
-            color: #F5C518;
+            color: #D97706;
             text-transform: uppercase;
             letter-spacing: 3px;
             margin-bottom: 1rem;
         }
 
         .mission-headline {
-            font-family: 'DM Sans', sans-serif;
             font-size: 2.5rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--text-main);
             line-height: 1.2;
             margin-bottom: 1.5rem;
         }
 
         .mission-text {
-            color: rgba(255, 255, 255, 0.45);
+            color: var(--text-secondary);
             line-height: 1.8;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .mission-visual {
-            background: rgba(245, 197, 24, 0.04);
-            border: 1px solid rgba(245, 197, 24, 0.1);
-            border-radius: 20px;
+            background: var(--bg-offwhite);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
             padding: 3rem;
             text-align: center;
+            box-shadow: var(--shadow-md);
         }
 
         .big-stat {
-            font-family: 'Bebas Neue', sans-serif;
             font-size: 5rem;
-            background: linear-gradient(135deg, #F5C518, #FFD700);
+            font-weight: 800;
+            background: var(--yellow-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -84,21 +113,23 @@
 
         .value-card {
             padding: 2rem;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
             transition: all 0.3s;
         }
 
         .value-card:hover {
-            border-color: rgba(245, 197, 24, 0.2);
+            border-color: var(--yellow);
             transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
 
         .value-icon {
             width: 48px;
             height: 48px;
-            background: rgba(245, 197, 24, 0.1);
+            background: var(--yellow-light);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -109,29 +140,30 @@
         .value-icon svg {
             width: 24px;
             height: 24px;
-            color: #F5C518;
+            color: #D97706;
         }
 
         .value-title {
             font-weight: 700;
-            color: #fff;
+            color: var(--text-main);
             margin-bottom: 0.5rem;
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
 
         .value-text {
-            color: rgba(255, 255, 255, 0.35);
-            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
             line-height: 1.6;
         }
 
         .cta-section {
             text-align: center;
             padding: 6rem 2rem;
-            background: linear-gradient(135deg, rgba(245, 197, 24, 0.05), transparent);
-            border-radius: 24px;
+            background: var(--yellow-gradient);
+            border-radius: var(--radius-lg);
             margin: 3rem 0 6rem;
-            border: 1px solid rgba(245, 197, 24, 0.08);
+            color: white;
+            box-shadow: 0 20px 40px rgba(255,193,7,0.2);
         }
 
         @media (max-width: 768px) {
@@ -148,14 +180,10 @@
 
         <main class="container">
             <div class="about-hero">
-                <p
-                    style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                <p style="color:#D97706; font-size:0.85rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; margin-bottom:1rem;">
                     Our Story</p>
-                <h1>Learning Should<br><span
-                        style="background:linear-gradient(135deg,#F5C518,#FFD700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">Never
-                        Stop.</span></h1>
-                <p
-                    style="color:rgba(255,255,255,0.4); margin-top:1.5rem; font-size:1.1rem; max-width:550px; margin-left:auto; margin-right:auto; line-height:1.7;">
+                <h1>Learning Should<br><span style="background:var(--yellow-gradient);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-family:'Playfair Display',serif;font-style:italic;">Never Stop.</span></h1>
+                <p style="color:var(--text-secondary); margin-top:1.5rem; font-size:1.15rem; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.7;">
                     We built Teachures because we believe that the best learning happens when great instructors meet
                     motivated students — and nothing should get in the way of that.</p>
             </div>
@@ -174,29 +202,20 @@
                 </div>
                 <div class="mission-visual">
                     <div class="big-stat">12,000+</div>
-                    <p style="color:rgba(255,255,255,0.4); margin-top:0.75rem; font-size:1rem;">Active learners growing
+                    <p style="color:var(--text-secondary); margin-top:0.75rem; font-size:1rem; font-weight: 500;">Active learners growing
                         their skills every day</p>
-                    <div
-                        style="display:flex; justify-content:center; gap:2rem; margin-top:2.5rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:2rem;">
+                    <div style="display:flex; justify-content:center; gap:2.5rem; margin-top:2.5rem; border-top:1px solid var(--border-light); padding-top:2rem;">
                         <div>
-                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">400+
-                            </div>
-                            <div
-                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
-                                Courses</div>
+                            <div style="font-weight: 800; font-size:2rem; color:var(--text-main);">400+</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:1px;">Courses</div>
                         </div>
                         <div>
-                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">200+
-                            </div>
-                            <div
-                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
-                                Instructors</div>
+                            <div style="font-weight: 800; font-size:2rem; color:var(--text-main);">200+</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:1px;">Instructors</div>
                         </div>
                         <div>
-                            <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">95%</div>
-                            <div
-                                style="font-size:0.8rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
-                                Completion</div>
+                            <div style="font-weight: 800; font-size:2rem; color:var(--text-main);">95%</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:1px;">Completion</div>
                         </div>
                     </div>
                 </div>
@@ -204,11 +223,9 @@
 
             <!-- Values -->
             <div>
-                <p
-                    style="text-align:center; font-size:0.85rem; font-weight:700; color:#F5C518; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                <p style="text-align:center; font-size:0.85rem; font-weight:800; color:#D97706; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
                     Our Values</p>
-                <h2
-                    style="text-align:center; font-family:'Bebas Neue',sans-serif; font-size:3rem; letter-spacing:1px; margin-bottom:0;">
+                <h2 style="text-align:center; font-size:2.5rem; font-weight:800; color:var(--text-main); margin-bottom:0;">
                     What We Stand For</h2>
             </div>
             <div class="values-grid">
@@ -238,17 +255,13 @@
 
             <!-- CTA -->
             <div class="cta-section">
-                <h2
-                    style="font-family:'DM Sans',sans-serif; font-size:2.5rem; font-weight:700; color:#fff; margin-bottom:1rem;">
-                    Ready to Start Learning?</h2>
-                <p style="color:rgba(255,255,255,0.4); margin-bottom:2.5rem; font-size:1rem;">Join 12,000+ learners
+                <h2 style="font-size:2.5rem; font-weight:800; color:white; margin-bottom:1rem;">Ready to Start Learning?</h2>
+                <p style="color:rgba(255,255,255,0.9); margin-bottom:2.5rem; font-size:1.15rem; font-weight:500;">Join 12,000+ learners
                     building their future with Teachures.</p>
                 <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-                    <a href="/register"
-                        style="padding:0.9rem 2.5rem; background:linear-gradient(135deg,#F5C518,#D4AA00); color:#000; border-radius:10px; font-weight:700; font-size:0.95rem; text-decoration:none; text-transform:uppercase; letter-spacing:1px; transition:all 0.3s;">Get
+                    <a href="/register" style="padding:1rem 2.5rem; background:white; color:#D97706; border-radius:50px; font-weight:700; font-size:1rem; text-decoration:none; box-shadow:0 10px 20px rgba(0,0,0,0.1); transition:all 0.3s;">Get
                         Started Free</a>
-                    <a href="/courses"
-                        style="padding:0.9rem 2.5rem; background:rgba(255,255,255,0.04); color:#fff; border:1px solid rgba(255,255,255,0.1); border-radius:10px; font-weight:600; font-size:0.95rem; text-decoration:none; transition:all 0.3s;">Browse
+                    <a href="/courses" style="padding:1rem 2.5rem; background:transparent; color:white; border:2px solid rgba(255,255,255,0.5); border-radius:50px; font-weight:600; font-size:1rem; text-decoration:none; transition:all 0.3s;">Browse
                         Courses</a>
                 </div>
             </div>
