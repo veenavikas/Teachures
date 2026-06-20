@@ -15,7 +15,7 @@
         width: 90px;
         height: 90px;
         border-radius: 50%;
-        background: conic-gradient(#F5C518 <%=(user.points || 0) % 100 %>%, rgba(255, 255, 255, 0.05) 0);
+        background: conic-gradient(#F5C518 <%=(user.points || 0) % 100 %>%, rgba(0,0,0,0.05) 0);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -55,7 +55,7 @@
     .section-head h3 {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--color-white);
     }
 
     .badges-grid {
@@ -66,8 +66,8 @@
     }
 
     .badge-card {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.06);
         border-radius: 14px;
         padding: 1.5rem 1rem;
         text-align: center;
@@ -92,12 +92,12 @@
     .badge-name {
         font-size: 0.8rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--color-white);
     }
 
     .badge-desc {
         font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(0,0,0,0.3);
         margin-top: 0.25rem;
     }
 
@@ -111,8 +111,8 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem 1.25rem;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        background: rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.04);
         border-radius: 12px;
         margin-bottom: 0.75rem;
         transition: all 0.2s;
@@ -125,7 +125,7 @@
     .lb-rank {
         font-family: 'Bebas Neue', sans-serif;
         font-size: 1.3rem;
-        color: rgba(255, 255, 255, 0.2);
+        color: rgba(0,0,0,0.2);
         width: 30px;
     }
 
@@ -156,7 +156,7 @@
     .lb-name {
         flex: 1;
         font-weight: 600;
-        color: #fff;
+        color: var(--color-white);
         font-size: 0.9rem;
     }
 
@@ -181,34 +181,34 @@
     </div>
     <div style="flex:1;">
         <p
-            style="color:rgba(255,255,255,0.4); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.25rem;">
+            style="color:rgba(0,0,0,0.4); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.25rem;">
             Total XP Earned</p>
         <div style="display:flex; align-items:baseline; gap:0.75rem;">
             <span class="xp-total">
                 <%= user.points || 0 %>
             </span>
-            <span style="color:rgba(255,255,255,0.3); font-size:0.9rem;">points</span>
+            <span style="color:rgba(0,0,0,0.3); font-size:0.9rem;">points</span>
         </div>
         <div style="margin-top:1rem;">
             <div
-                style="display:flex; justify-content:space-between; font-size:0.78rem; color:rgba(255,255,255,0.35); margin-bottom:6px;">
+                style="display:flex; justify-content:space-between; font-size:0.78rem; color:rgba(0,0,0,0.35); margin-bottom:6px;">
                 <span>Progress to Level <%= Math.floor((user.points||0)/100)+2 %></span>
                 <span>
                     <%= (user.points||0) % 100 %>/100 XP
                 </span>
             </div>
-            <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
+            <div style="height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden;">
                 <div
                     style="height:100%; width:<%= (user.points||0) % 100 %>%; background:linear-gradient(90deg,#F5C518,#FFD700); box-shadow:0 0 10px rgba(245,197,24,0.5); border-radius:3px; transition:width 1s ease;">
                 </div>
             </div>
         </div>
     </div>
-    <div style="text-align:center; padding-left:2rem; border-left:1px solid rgba(255,255,255,0.06);">
+    <div style="text-align:center; padding-left:2rem; border-left:1px solid rgba(0,0,0,0.06);">
         <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">
             <%= badges.filter(b=>b.earned).length || 0 %>
         </div>
-        <div style="font-size:0.75rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1.5px;">
+        <div style="font-size:0.75rem; color:rgba(0,0,0,0.3); text-transform:uppercase; letter-spacing:1.5px;">
             Badges Earned</div>
     </div>
 </div>
@@ -254,7 +254,7 @@
     <div>
         <div class="section-head">
             <h3>🏆 Leaderboard</h3>
-            <span style="font-size:0.78rem; color:rgba(255,255,255,0.3);">Top Learners</span>
+            <span style="font-size:0.78rem; color:rgba(0,0,0,0.3);">Top Learners</span>
         </div>
         <% const lbData=leaders && leaders.length ? leaders : [ { name:'Alex Kim', points:920, isYou:false }, {
             name:'Priya Shah', points:810, isYou:false }, { name:'Marco L.', points:640, isYou:false }, { name:'You',

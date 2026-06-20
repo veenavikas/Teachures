@@ -26,7 +26,7 @@
                             <% if (page.isDraft) { %>
                                 <span class="badge" style="background: var(--color-gray-mid);">Draft</span>
                             <% } else { %>
-                                <span class="badge" style="background: var(--color-success); color: white;">Published</span>
+                                <span class="badge" style="background: var(--color-success); color: var(--color-white);">Published</span>
                             <% } %>
                         </td>
                         <td style="padding: 1rem;"><%= new Date(page.updatedAt).toLocaleDateString() %></td>

@@ -42,7 +42,7 @@
         <% } else { %>
             <div style="display: grid; gap: 1rem;">
                 <% completedReviews.forEach(review => { %>
-                    <div style="border: 1px solid var(--color-gray-mid); border-radius: 8px; padding: 1.5rem; background: rgba(255,255,255,0.02);">
+                    <div style="border: 1px solid var(--color-gray-mid); border-radius: 8px; padding: 1.5rem; background: rgba(0,0,0,0.02);">
                         <h4 style="margin-bottom: 0.5rem;"><%= review.submission.assignment.title %></h4>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <span class="badge" style="background: rgba(var(--color-success-rgb), 0.2); color: var(--color-success);">Grade Given: <%= review.grade %>%</span>

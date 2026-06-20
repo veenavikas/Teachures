@@ -7,8 +7,8 @@
     }
 
     .my-course-card {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.06);
         border-radius: 14px;
         overflow: hidden;
         transition: all 0.3s;
@@ -40,7 +40,7 @@
 
     .my-course-title {
         font-weight: 700;
-        color: #fff;
+        color: var(--color-white);
         font-size: 0.95rem;
         line-height: 1.4;
         margin-bottom: 0.5rem;
@@ -48,7 +48,7 @@
 
     .my-course-instructor {
         font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(0,0,0,0.3);
         margin-bottom: 1rem;
     }
 
@@ -61,7 +61,7 @@
 
     .pct-track {
         height: 5px;
-        background: rgba(255, 255, 255, 0.07);
+        background: rgba(0,0,0,0.07);
         border-radius: 3px;
         overflow: hidden;
     }
@@ -99,21 +99,21 @@
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.75rem;">
     <div>
-        <h2 style="font-size:1.4rem; font-weight:700; color:#fff; margin-bottom:0.25rem;">My Learning</h2>
-        <p style="color:rgba(255,255,255,0.3); font-size:0.88rem;">
+        <h2 style="font-size:1.4rem; font-weight:700; color: var(--color-white); margin-bottom:0.25rem;">My Learning</h2>
+        <p style="color:rgba(0,0,0,0.3); font-size:0.88rem;">
             <%= courses.length %> course<%= courses.length !==1 ? 's' : '' %> enrolled
         </p>
     </div>
     <a href="/courses"
-        style="padding:0.7rem 1.5rem; background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; font-size:0.85rem; font-weight:600; text-decoration:none; transition:all 0.2s;">Browse
+        style="padding:0.7rem 1.5rem; background:rgba(0,0,0,0.04); color:rgba(0,0,0,0.6); border:1px solid rgba(0,0,0,0.08); border-radius:10px; font-size:0.85rem; font-weight:600; text-decoration:none; transition:all 0.2s;">Browse
         More Courses</a>
 </div>
 
 <% if (courses.length===0) { %>
-    <div style="text-align:center; padding:5rem 2rem; color:rgba(255,255,255,0.2);">
+    <div style="text-align:center; padding:5rem 2rem; color:rgba(0,0,0,0.2);">
         <i data-lucide="book-open"
-            style="width:56px; height:56px; display:block; margin:0 auto 1.5rem; color:rgba(255,255,255,0.08);"></i>
-        <h3 style="color:rgba(255,255,255,0.25); margin-bottom:0.5rem;">No courses yet</h3>
+            style="width:56px; height:56px; display:block; margin:0 auto 1.5rem; color:rgba(0,0,0,0.08);"></i>
+        <h3 style="color:rgba(0,0,0,0.25); margin-bottom:0.5rem;">No courses yet</h3>
         <p style="margin-bottom:2rem;">Explore our catalog and start learning today.</p>
         <a href="/courses"
             style="display:inline-block; padding:0.85rem 2rem; background:linear-gradient(135deg,#F5C518,#D4AA00); color:#000; border-radius:10px; font-weight:700; text-decoration:none;">Browse
@@ -131,7 +131,7 @@
                         </svg>
                         <% if (Math.round(course.progress)>= 100) { %>
                             <span
-                                style="position:absolute; top:10px; right:10px; background:rgba(16,185,129,0.9); color:#fff; font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:50px;">✓
+                                style="position:absolute; top:10px; right:10px; background:rgba(16,185,129,0.9); color: var(--color-white); font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:50px;">✓
                                 COMPLETED</span>
                             <% } %>
                     </div>
@@ -142,7 +142,7 @@
                         <div class="my-course-instructor">By <%= course.instructor ? course.instructor.name : 'Instructor' %>
                         </div>
                         <div class="pct-label">
-                            <span style="color:rgba(255,255,255,0.35);">Progress</span>
+                            <span style="color:rgba(0,0,0,0.35);">Progress</span>
                             <span
                                 style="color:<%= Math.round(course.progress) >= 100 ? '#10B981' : '#F5C518' %>; font-weight:700;">
                                 <%= Math.round(course.progress) %>%

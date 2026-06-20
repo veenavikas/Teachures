@@ -27,9 +27,9 @@
                                 <% if (sub.status === 'PENDING') { %>
                                     <span class="badge" style="background: var(--color-warning); color: black;">Pending</span>
                                 <% } else if (sub.status === 'GRADED') { %>
-                                    <span class="badge" style="background: var(--color-success); color: white;">Graded</span>
+                                    <span class="badge" style="background: var(--color-success); color: var(--color-white);">Graded</span>
                                 <% } else { %>
-                                    <span class="badge" style="background: var(--color-danger); color: white;"><%= sub.status %></span>
+                                    <span class="badge" style="background: var(--color-danger); color: var(--color-white);"><%= sub.status %></span>
                                 <% } %>
                             </td>
                             <td><%= sub.grade !== null ? sub.grade + '%' : '-' %></td>

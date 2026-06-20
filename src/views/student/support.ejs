@@ -68,7 +68,7 @@
                 </thead>
                 <tbody>
                     <% tickets.forEach(ticket=> { %>
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; cursor: pointer;"
+                        <tr style="border-bottom: 1px solid rgba(0,0,0,0.05); transition: background 0.2s; cursor: pointer;"
                             class="ticket-row" data-id="<%= ticket.id %>">
                             <td
                                 style="padding: 1.25rem 1rem; font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-gray-light);">
@@ -140,7 +140,7 @@
                     style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Subject
                     *</label>
                 <input type="text" id="ticketSubject" required
-                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px;"
+                    style="width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); color: var(--color-white); padding: 0.85rem; border-radius: 8px;"
                     placeholder="Brief summary of your issue">
             </div>
 
@@ -148,7 +148,7 @@
                 <label
                     style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Priority</label>
                 <select id="ticketPriority"
-                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px; appearance: none;">
+                    style="width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); color: var(--color-white); padding: 0.85rem; border-radius: 8px; appearance: none;">
                     <option value="LOW" style="background: var(--color-black);">Low - General Inquiry</option>
                     <option value="MEDIUM" style="background: var(--color-black);" selected>Medium - Issue with a course
                         or feature</option>
@@ -162,7 +162,7 @@
                     style="display: block; margin-bottom: 0.5rem; color: var(--color-white); font-weight: 500;">Description
                     *</label>
                 <textarea id="ticketDesc" rows="5" required
-                    style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: white; padding: 0.85rem; border-radius: 8px;"
+                    style="width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); color: var(--color-white); padding: 0.85rem; border-radius: 8px;"
                     placeholder="Please describe the issue in detail..."></textarea>
             </div>
 

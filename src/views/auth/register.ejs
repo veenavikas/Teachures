@@ -22,20 +22,20 @@
         <label class="form-label">I want to</label>
         <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
             <label
-                style="flex:1; padding: 0.9rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); transition: all 0.2s;"
+                style="flex:1; padding: 0.9rem 1rem; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #F8FAFC; transition: all 0.2s;"
                 id="label-student">
                 <input type="radio" name="role" value="STUDENT" checked style="accent-color: #F5C518; display:none;"
                     id="role-student">
                 <span style="font-size:1.2rem;">🎓</span>
-                <span style="color:#FFFFFF; font-weight:500; font-size:0.9rem;">Learn</span>
+                <span style="color:#0F172A; font-weight:500; font-size:0.9rem;">Learn</span>
             </label>
             <label
-                style="flex:1; padding: 0.9rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); transition: all 0.2s;"
+                style="flex:1; padding: 0.9rem 1rem; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #F8FAFC; transition: all 0.2s;"
                 id="label-instructor">
                 <input type="radio" name="role" value="INSTRUCTOR" style="accent-color: #F5C518; display:none;"
                     id="role-instructor">
                 <span style="font-size:1.2rem;">🧑‍🏫</span>
-                <span style="color:#FFFFFF; font-weight:500; font-size:0.9rem;">Teach</span>
+                <span style="color:#0F172A; font-weight:500; font-size:0.9rem;">Teach</span>
             </label>
         </div>
     </div>
@@ -68,10 +68,10 @@
     const roleInstructor = document.getElementById('role-instructor');
 
     function updateSelection() {
-        labelStudent.style.borderColor = roleStudent.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
-        labelStudent.style.background = roleStudent.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
-        labelInstructor.style.borderColor = roleInstructor.checked ? '#F5C518' : 'rgba(255,255,255,0.08)';
-        labelInstructor.style.background = roleInstructor.checked ? 'rgba(245,197,24,0.06)' : 'rgba(255,255,255,0.02)';
+        labelStudent.style.borderColor = roleStudent.checked ? '#F5C518' : '#E2E8F0';
+        labelStudent.style.background = roleStudent.checked ? 'rgba(245,197,24,0.15)' : '#F8FAFC';
+        labelInstructor.style.borderColor = roleInstructor.checked ? '#F5C518' : '#E2E8F0';
+        labelInstructor.style.background = roleInstructor.checked ? 'rgba(245,197,24,0.15)' : '#F8FAFC';
     }
 
     labelStudent.addEventListener('click', () => { roleStudent.checked = true; updateSelection(); });

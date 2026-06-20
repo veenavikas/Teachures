@@ -8,8 +8,8 @@
     }
 
     .metric-card {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.06);
         border-radius: 14px;
         padding: 1.5rem;
         transition: all 0.3s;
@@ -51,14 +51,14 @@
     .metric-value {
         font-family: 'Bebas Neue', sans-serif;
         font-size: 2.2rem;
-        color: #fff;
+        color: var(--color-white);
         line-height: 1;
         margin-bottom: 0.25rem;
     }
 
     .metric-label {
         font-size: 0.78rem;
-        color: rgba(255, 255, 255, 0.35);
+        color: rgba(0,0,0,0.35);
         text-transform: uppercase;
         letter-spacing: 1.5px;
     }
@@ -78,8 +78,8 @@
     }
 
     .chart-card {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.02);
+        border: 1px solid rgba(0,0,0,0.06);
         border-radius: 14px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
@@ -88,7 +88,7 @@
     .chart-card h3 {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--color-white);
         margin-bottom: 1.25rem;
     }
 
@@ -101,7 +101,7 @@
 
     .bar {
         flex: 1;
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.06);
         border-radius: 4px 4px 0 0;
         position: relative;
         transition: all 0.5s ease;
@@ -128,7 +128,7 @@
         width: 100%;
         text-align: center;
         font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.3);
+        color: rgba(0,0,0,0.3);
     }
 
     .bar-val {
@@ -137,7 +137,7 @@
         width: 100%;
         text-align: center;
         font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(0,0,0,0.5);
         opacity: 0;
         transition: opacity 0.2s;
     }
@@ -151,7 +151,7 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(0,0,0,0.04);
     }
 
     .course-row:last-child {
@@ -169,13 +169,13 @@
     .course-name {
         flex: 1;
         font-size: 0.9rem;
-        color: #fff;
+        color: var(--color-white);
         font-weight: 500;
     }
 
     .course-enrolled {
         font-size: 0.82rem;
-        color: rgba(255, 255, 255, 0.35);
+        color: rgba(0,0,0,0.35);
         width: 80px;
         text-align: right;
     }
@@ -183,7 +183,7 @@
     .course-progress-bar {
         width: 120px;
         height: 5px;
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(0,0,0,0.06);
         border-radius: 3px;
         overflow: hidden;
     }
@@ -285,18 +285,18 @@
             </div>
         </div>
         <div
-            style="display:flex; justify-content:space-between; padding-top:2rem; border-top:1px solid rgba(255,255,255,0.04);">
+            style="display:flex; justify-content:space-between; padding-top:2rem; border-top:1px solid rgba(0,0,0,0.04);">
             <div>
                 <div style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:#10B981;">$<%=
                         vals.reduce((a,b)=>a+b,0) %></div>
                 <div
-                    style="font-size:0.75rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                    style="font-size:0.75rem; color:rgba(0,0,0,0.3); text-transform:uppercase; letter-spacing:1px;">
                     Total 6-Month Revenue</div>
             </div>
             <div style="text-align:right;">
                 <div style="font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:#F5C518;">+28%</div>
                 <div
-                    style="font-size:0.75rem; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:1px;">
+                    style="font-size:0.75rem; color:rgba(0,0,0,0.3); text-transform:uppercase; letter-spacing:1px;">
                     Growth Rate</div>
             </div>
         </div>
@@ -329,7 +329,7 @@
                     <% }); %>
                         <% } else { %>
                             <p
-                                style="text-align:center; color:rgba(255,255,255,0.2); padding:2rem 0; font-size:0.9rem;">
+                                style="text-align:center; color:rgba(0,0,0,0.2); padding:2rem 0; font-size:0.9rem;">
                                 No course data yet. Publish your first course.</p>
                             <% } %>
     </div>
