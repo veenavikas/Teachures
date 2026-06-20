@@ -14,25 +14,36 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<%= typeof title !=='undefined' ? title + ' | Dashboard' : 'Dashboard' %>">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
-        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="/css/base.css?v=v2.0">
-    <link rel="stylesheet" href="/css/components.css?v=v2.0">
+    <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
+    <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
 
     <style>
+        :root {
+            --yellow: #FFC107;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --border-light: #E2E8F0;
+        }
+
         body {
             display: flex;
             height: 100vh;
             overflow: hidden;
-            background-color: #FFFFFF;
+            background-color: var(--bg-white);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
         }
 
         .sidebar {
             width: 260px;
-            background-color: #FFFFFF;
-            border-right: 1px solid #E2E8F0;
+            background-color: var(--bg-white);
+            border-right: 1px solid var(--border-light);
             display: flex;
             flex-direction: column;
             z-index: 100;
@@ -40,10 +51,10 @@
 
         .sidebar-header {
             padding: 1.5rem;
-            border-bottom: 1px solid #E2E8F0;
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .sidebar-nav {
@@ -55,29 +66,31 @@
         .nav-item {
             display: flex;
             align-items: center;
-            padding: 0.8rem 1.5rem;
-            color: var(--color-gray-light);
+            padding: 0.85rem 1.5rem;
+            color: var(--text-secondary);
             text-decoration: none;
             transition: all 0.2s;
             border-left: 3px solid transparent;
             gap: 12px;
             font-weight: 500;
+            font-size: 0.95rem;
         }
 
         .nav-item:hover {
-            color: var(--color-white);
-            background-color: rgba(0, 0, 0, 0.05);
+            color: #D97706;
+            background-color: var(--bg-offwhite);
         }
 
         .nav-item.active {
-            color: var(--color-white);
-            border-left-color: var(--color-primary);
-            background-color: rgba(245, 197, 24, 0.1);
+            color: #D97706;
+            border-left-color: #D97706;
+            background-color: rgba(217, 119, 6, 0.05);
+            font-weight: 600;
         }
 
         .sidebar-footer {
             padding: 1.5rem;
-            border-top: 1px solid #E2E8F0;
+            border-top: 1px solid var(--border-light);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -87,46 +100,85 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: var(--color-gray-mid);
+            background-color: var(--border-light);
             background-size: cover;
             background-position: center;
-            border: 2px solid var(--color-primary);
+            border: 2px solid #D97706;
         }
 
         .user-info .name {
             font-weight: 700;
             font-size: 0.9rem;
-            color: var(--color-white);
+            color: var(--text-main);
         }
 
         .user-info .role {
-            font-size: 0.8rem;
-            color: var(--color-gray-light);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background-color: #F8FAFC;
+            background-color: var(--bg-offwhite);
         }
 
         .topbar {
             height: 70px;
-            border-bottom: 1px solid #E2E8F0;
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 2rem;
-            background-color: #FFFFFF;
+            background-color: var(--bg-white);
         }
 
         .dashboard-body {
             flex: 1;
             padding: 2.5rem;
             overflow-y: auto;
+        }
+
+        .wordmark {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .text-primary {
+            color: #D97706 !important;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--yellow-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-light);
+            background: var(--bg-white);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-offwhite);
+            color: var(--text-main);
+            border-color: #CBD5E1;
         }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -136,10 +188,9 @@
 
     <aside class="sidebar">
         <div class="sidebar-header">
-            <i data-lucide="graduation-cap" class="text-primary"></i>
-            <span class="wordmark" style="font-family: var(--font-display); font-size: 1.5rem; letter-spacing:1px;">
-                <span class="text-white">TEACH</span><span class="text-primary">URES</span>
-            </span>
+            <a href="/" style="display:flex; align-items:center; text-decoration:none;">
+                <img src="/images/teach.jpg" alt="Teachures Logo" style="height: 40px; border-radius: 6px; object-fit: contain;">
+            </a>
         </div>
 
         <nav class="sidebar-nav" aria-label="Sidebar Navigation">
@@ -163,44 +214,45 @@
     <main class="main-content" role="main">
         <header class="topbar" role="banner">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <button class="mobile-menu-btn" id="dashboardMenuToggle" aria-label="Open Sidebar">
+                <button class="mobile-menu-btn btn-outline" id="dashboardMenuToggle" aria-label="Open Sidebar" style="padding: 0.5rem; border: none;">
                     <i data-lucide="menu"></i>
                 </button>
-                <h2 style="font-family: var(--font-heading); margin: 0; font-size: 1.25rem;">
+                <h2 style="font-weight: 700; margin: 0; font-size: 1.25rem; color: var(--text-main);">
                     <%= title %>
                 </h2>
             </div>
-            <div style="position: relative;">
-                <button class="btn btn-outline" id="notificationBtn" aria-label="Notifications"
-                    style="padding: 0.5rem; border: none; position: relative;" onclick="toggleNotifications()">
-                    <i data-lucide="bell"></i>
-                    <span id="notificationBadge"
-                        style="display: none; position: absolute; top: 0px; right: 0px; background: #EF4444; color: white; font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: translate(25%, -25%);">0</span>
-                </button>
-                <!-- Notification Dropdown -->
-                <div id="notificationDropdown" class="card"
-                    style="display: none; position: absolute; top: 100%; right: 0; width: 320px; max-height: 400px; z-index: 100; margin-top: 10px; padding: 0; overflow: hidden; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.8);">
-                    <div
-                        style="padding: 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
-                        <h4 style="margin: 0; font-size: 0.95rem;">Notifications</h4>
-                        <button onclick="markAllNotificationsRead()"
-                            style="background: none; border: none; color: var(--color-primary); font-size: 0.8rem; cursor: pointer;">Mark
-                            all read</button>
-                    </div>
-                    <div id="notificationList" style="overflow-y: auto; flex: 1;">
-                        <!-- Notifications injected here via JS -->
-                        <div style="padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem;">
-                            <i data-lucide="check-circle"
-                                style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                            <br>You're all caught up!
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="position: relative;">
+                    <button class="btn-outline" id="notificationBtn" aria-label="Notifications"
+                        style="padding: 0.5rem;" onclick="toggleNotifications()">
+                        <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                        <span id="notificationBadge"
+                            style="display: none; position: absolute; top: -5px; right: -5px; background: #EF4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">0</span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown"
+                        style="display: none; position: absolute; top: 100%; right: 0; width: 320px; max-height: 400px; z-index: 100; margin-top: 10px; padding: 0; overflow: hidden; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.2s; box-shadow: 0 10px 25px rgba(0,0,0,0.1); background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px;">
+                        <div
+                            style="padding: 1rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; background: var(--bg-offwhite);">
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700;">Notifications</h4>
+                            <button onclick="markAllNotificationsRead()"
+                                style="background: none; border: none; color: #D97706; font-size: 0.8rem; cursor: pointer; font-weight: 600;">Mark
+                                all read</button>
+                        </div>
+                        <div id="notificationList" style="overflow-y: auto; flex: 1; max-height: 300px;">
+                            <!-- Notifications injected here via JS -->
+                            <div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+                                <i data-lucide="check-circle"
+                                    style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5; color: #10B981;"></i>
+                                <br>You're all caught up!
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <form action="/api/v1/auth/logout" method="POST" style="margin:0;">
-                <button class="btn btn-outline" type="submit" aria-label="Log Out"
-                    style="padding: 0.5rem; border: none;"><i data-lucide="log-out"></i></button>
-            </form>
+                <form action="/api/v1/auth/logout" method="POST" style="margin:0;">
+                    <button class="btn-outline" type="submit" aria-label="Log Out"
+                        style="padding: 0.5rem;"><i data-lucide="log-out" style="width: 20px; height: 20px;"></i></button>
+                </form>
             </div>
         </header>
 
@@ -264,12 +316,19 @@
         function toggleNotifications() {
             isNotifOpen = !isNotifOpen;
             if(isNotifOpen) {
-                notifDropdown.style.opacity = '1';
-                notifDropdown.style.pointerEvents = 'auto';
+                notifDropdown.style.display = 'flex';
+                // slight delay for transition
+                setTimeout(() => {
+                    notifDropdown.style.opacity = '1';
+                    notifDropdown.style.pointerEvents = 'auto';
+                }, 10);
                 fetchNotifications(); // Refresh on open
             } else {
                 notifDropdown.style.opacity = '0';
                 notifDropdown.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    notifDropdown.style.display = 'none';
+                }, 200);
             }
         }
 
@@ -297,13 +356,13 @@
 
                     // Render List
                     if(data.data.length === 0) {
-                        notifList.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--muted); font-size: 0.85rem;"><i data-lucide="check-circle" style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5;"></i><br>You're all caught up!</div>`;
+                        notifList.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-secondary); font-size: 0.85rem;"><i data-lucide="check-circle" style="width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.5; color: #10B981;"></i><br>You're all caught up!</div>`;
                     } else {
                         notifList.innerHTML = data.data.map(n => `
-                            <div onclick="markNotificationRead('${n.id}', '${n.link || '#'}')" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; background: ${n.isRead ? 'transparent' : 'rgba(245, 197, 24, 0.05)'}; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='${n.isRead ? 'transparent' : 'rgba(245, 197, 24, 0.05)'}'">
-                                <div style="font-size: 0.85rem; font-weight: ${n.isRead ? 'normal' : 'bold'}; color: ${n.isRead ? 'var(--color-gray-light)' : 'var(--color-white)'}; margin-bottom: 0.25rem;">${n.title}</div>
-                                <div style="font-size: 0.75rem; color: var(--muted); line-height: 1.4;">${n.message}</div>
-                                <div style="font-size: 0.65rem; color: var(--color-gray-mid); margin-top: 0.5rem;">${new Date(n.createdAt).toLocaleDateString()}</div>
+                            <div onclick="markNotificationRead('${n.id}', '${n.link || '#'}')" style="padding: 1rem; border-bottom: 1px solid var(--border-light); cursor: pointer; background: ${n.isRead ? 'transparent' : 'var(--bg-offwhite)'}; transition: background 0.2s;" onmouseover="this.style.background='var(--bg-offwhite)'" onmouseout="this.style.background='${n.isRead ? 'transparent' : 'var(--bg-offwhite)'}'">
+                                <div style="font-size: 0.85rem; font-weight: ${n.isRead ? '500' : '700'}; color: var(--text-main); margin-bottom: 0.25rem;">${n.title}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">${n.message}</div>
+                                <div style="font-size: 0.65rem; color: #94A3B8; margin-top: 0.5rem; font-weight: 500;">${new Date(n.createdAt).toLocaleDateString()}</div>
                             </div>
                         `).join('');
                     }

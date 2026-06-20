@@ -9,14 +9,21 @@
     </title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
+        :root {
+            --yellow: #FFC107;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --border-light: #E2E8F0;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -25,10 +32,7 @@
 
         body {
             min-height: 100vh;
-            background-color: #F8FAFC;
-            background-image:
-                radial-gradient(ellipse at 20% 50%, rgba(245, 197, 24, 0.15), transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(245, 197, 24, 0.1), transparent 40%);
+            background-color: var(--bg-offwhite);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -40,12 +44,13 @@
         .auth-wrapper {
             display: flex;
             width: 100%;
-            max-width: 960px;
-            min-height: 620px;
-            border-radius: 20px;
+            max-width: 1000px;
+            min-height: 650px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0,0,0,0.02);
             position: relative;
+            background: var(--bg-white);
         }
 
         /* Back to home link */
@@ -56,29 +61,29 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            color: rgba(0, 0, 0, 0.5);
-            font-size: 0.9rem;
-            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
             transition: color 0.2s;
             z-index: 100;
-        }
-
-        .back-home:hover {
-            color: #F5C518;
             text-decoration: none;
         }
 
+        .back-home:hover {
+            color: #D97706;
+        }
+
         .back-home svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
         }
 
         /* Left Brand Panel */
         .auth-brand {
             flex: 1;
-            background: linear-gradient(135deg, #111111 0%, #0D0D0D 100%);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 3rem;
+            background: var(--bg-offwhite);
+            border-right: 1px solid var(--border-light);
+            padding: 4rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -86,80 +91,65 @@
             overflow: hidden;
         }
 
-        .auth-brand::before {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(245, 197, 24, 0.12) 0%, transparent 70%);
-            bottom: -100px;
-            right: -100px;
-            pointer-events: none;
-        }
-
         .brand-logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--text-main);
         }
 
-        .brand-logo svg {
+        .brand-logo .logo-icon {
             width: 36px;
             height: 36px;
-            color: #F5C518;
-        }
-
-        .brand-logo .wordmark {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            color: #FFFFFF;
-        }
-
-        .brand-logo .wordmark span {
-            color: #F5C518;
+            background: var(--yellow-gradient);
+            border-radius: 8px;
         }
 
         .brand-headline {
-            font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Inter', sans-serif;
             font-size: clamp(2.5rem, 4vw, 3.5rem);
-            line-height: 1;
-            letter-spacing: 1px;
-            color: #FFFFFF;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            color: var(--text-main);
             margin-bottom: 1rem;
         }
 
         .brand-sub {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.45);
-            line-height: 1.7;
-            max-width: 300px;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 320px;
         }
 
         .brand-stats {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
         }
 
         .brand-stat-num {
-            font-family: 'Bebas Neue', sans-serif;
+            font-weight: 800;
             font-size: 2rem;
-            color: #F5C518;
+            color: var(--text-main);
             display: block;
         }
 
         .brand-stat-label {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
+            font-weight: 700;
         }
 
         /* Right Form Panel */
         .auth-form-panel {
             flex: 1;
-            background: #FFFFFF;
-            padding: 3rem;
+            background: var(--bg-white);
+            padding: 4rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -167,43 +157,44 @@
         }
 
         .form-title {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #0F172A;
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
             margin-bottom: 0.5rem;
         }
 
         .form-subtitle {
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 2rem;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
         }
 
         .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-label {
             display: block;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #475569;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             margin-bottom: 0.5rem;
         }
 
         .form-control {
             width: 100%;
-            padding: 0.85rem 1rem;
-            background: #F8FAFC;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            background: var(--bg-offwhite);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
-            color: #0F172A;
+            font-size: 1rem;
+            color: var(--text-main);
             transition: all 0.2s;
+            outline: none;
         }
 
         .form-control::placeholder {
@@ -211,41 +202,39 @@
         }
 
         .form-control:focus {
-            outline: none;
-            border-color: #F5C518;
-            background: rgba(245, 197, 24, 0.04);
-            box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
+            border-color: #D97706;
+            background: var(--bg-white);
+            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
         }
 
         .btn-submit {
             width: 100%;
-            padding: 0.9rem;
-            background: linear-gradient(135deg, #F5C518 0%, #D4AA00 100%);
-            color: #000000;
+            padding: 1rem;
+            background: var(--yellow-gradient);
+            color: white;
             border: none;
-            border-radius: 10px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.95rem;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
             font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
             cursor: pointer;
             transition: all 0.3s;
-            margin-top: 0.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(245, 197, 24, 0.4);
+            box-shadow: 0 6px 15px rgba(255, 193, 7, 0.4);
         }
 
         .divider {
             display: flex;
             align-items: center;
             gap: 1rem;
-            margin: 1.5rem 0;
-            color: #94A3B8;
-            font-size: 0.8rem;
+            margin: 2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
         .divider::before,
@@ -253,42 +242,43 @@
             content: '';
             flex: 1;
             height: 1px;
-            background: #E2E8F0;
+            background: var(--border-light);
         }
 
         .btn-google {
             width: 100%;
-            padding: 0.85rem;
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 10px;
-            color: #0F172A;
+            padding: 1rem;
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 50px;
+            color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             transition: all 0.2s;
+            text-decoration: none;
         }
 
         .btn-google:hover {
-            background: #F8FAFC;
+            background: var(--bg-offwhite);
             border-color: #CBD5E1;
         }
 
         .form-footer {
             text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.85rem;
-            color: #475569;
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
 
         .form-footer a {
-            color: #F5C518;
-            font-weight: 600;
+            color: #D97706;
+            font-weight: 700;
             text-decoration: none;
         }
 
@@ -302,37 +292,20 @@
 
         .icon-input svg {
             position: absolute;
-            right: 12px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             color: #94A3B8;
             pointer-events: none;
         }
 
-        @media (max-width: 640px) {
-            body {
-                padding: 1rem;
-            }
-
-            .auth-wrapper {
-                flex-direction: column;
-                min-height: auto;
-            }
-
-            .auth-brand {
-                padding: 2rem;
-                min-height: 200px;
-            }
-
-            .brand-headline {
-                font-size: 2rem;
-            }
-
-            .auth-form-panel {
-                padding: 2rem;
-            }
+        @media (max-width: 800px) {
+            body { padding: 1rem; }
+            .auth-wrapper { flex-direction: column; min-height: auto; }
+            .auth-brand { padding: 2.5rem; display: none; } /* Hide on mobile to save space */
+            .auth-form-panel { padding: 2.5rem; }
         }
     </style>
 </head>
@@ -346,9 +319,9 @@
     <div class="auth-wrapper">
         <!-- Left brand panel -->
         <div class="auth-brand">
-            <div class="brand-logo">
-                <img src="/images/teach.jpg" alt="Teachures Logo" style="height: 40px; border-radius: 6px; object-fit: contain;">
-            </div>
+            <a href="/" class="brand-logo" style="display:flex; align-items:center; gap: 12px; text-decoration:none;">
+                <img src="/images/teach.jpg" alt="Teachures Logo" style="height: 48px; border-radius: 8px; object-fit: contain;">
+            </a>
 
             <div>
                 <h2 class="brand-headline">Learn Without Limits.</h2>

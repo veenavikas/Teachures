@@ -14,23 +14,34 @@
         padding: 0 2rem;
     }
     .page-title {
-        font-family: var(--font-heading, sans-serif);
-        font-size: 3rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        color: var(--text-main);
         margin-bottom: 2rem;
-        border-bottom: 2px solid var(--color-gray-mid, #ccc);
+        border-bottom: 2px solid var(--border-light);
         padding-bottom: 1rem;
     }
     .dynamic-content.prose {
-        font-family: var(--font-body, sans-serif);
+        font-family: 'Inter', sans-serif;
         line-height: 1.8;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
+        color: var(--text-secondary);
     }
     .dynamic-content.prose h2, .dynamic-content.prose h3 {
-        margin-top: 2rem;
-        font-family: var(--font-heading, sans-serif);
+        margin-top: 2.5rem;
+        font-weight: 700;
+        color: var(--text-main);
     }
+    .dynamic-content.prose h2 { font-size: 2rem; }
+    .dynamic-content.prose h3 { font-size: 1.5rem; }
+    .dynamic-content.prose p { margin-bottom: 1.25rem; }
     .dynamic-content.prose ul, .dynamic-content.prose ol {
         margin-left: 2rem;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
+    .dynamic-content.prose li { margin-bottom: 0.5rem; }
+    .dynamic-content.prose a { color: #D97706; text-decoration: none; font-weight: 600; }
+    .dynamic-content.prose a:hover { text-decoration: underline; }
 </style>

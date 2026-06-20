@@ -4,13 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%= course.title %> | Buy Course
-    </title>
+    <title><%= course.title %> | Buy Course</title>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
     <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
     <link rel="stylesheet" href="/css/layout.css">
@@ -20,8 +16,29 @@
     <script src="https://www.paypal.com/sdk/js?client-id=<%= paypalClientId %>&currency=USD"></script>
 
     <style>
+        :root {
+            --yellow: #FFC107;
+            --yellow-dim: #FFB300;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+            
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            
+            --border-light: #E2E8F0;
+            
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.05);
+            
+            --radius-md: 16px;
+        }
+
         body {
-            background-color: var(--color-black);
+            background-color: var(--bg-offwhite);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
             padding-top: 80px;
         }
 
@@ -31,26 +48,48 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 2rem;
+            padding: 0 1.5rem;
         }
 
         .summary-card {
-            background-color: var(--color-gray-dark);
-            border: 1px solid var(--color-gray-mid);
-            border-radius: 8px;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
             padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-checkout {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: var(--text-main);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Reusing main public navbar here or simple checkout header -->
-    <nav class="navbar" style="position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--color-gray-mid);">
-        <div class="nav-container">
-            <a href="/" class="brand">
-                <span class="text-white">TEACH</span><span class="text-primary">URES</span>
+    <nav style="position: fixed; top: 0; width: 100%; border-bottom: 1px solid var(--border-light); background: var(--bg-white); z-index: 100;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem;">
+            <a href="/" style="text-decoration: none; font-weight: 800; font-size: 1.5rem; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 32px; height: 32px; background: var(--yellow-gradient); border-radius: 8px;"></div>
+                TEACH<span style="color: #D97706;">URES</span>
             </a>
-            <a href="/dashboard" class="text-muted" style="text-decoration: none;">Cancel</a>
+            <a href="/dashboard" style="text-decoration: none; color: var(--text-secondary); font-weight: 600;">Cancel</a>
         </div>
     </nav>
 
@@ -58,41 +97,37 @@
 
         <!-- Left: Order Details -->
         <div>
-            <h2 style="font-family: var(--font-heading); margin-bottom: 2rem;">Checkout</h2>
+            <h2 style="font-weight: 800; font-size: 2.5rem; margin-bottom: 2rem; color: var(--text-main);">Checkout</h2>
 
             <div class="summary-card" style="margin-bottom: 2rem;">
-                <h3
-                    style="font-size: 1.1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                    Order Summary</h3>
+                <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--text-main);">
+                    Order Summary
+                </h3>
 
                 <div style="display: flex; gap: 1.5rem; margin-bottom: 1.5rem;">
-                    <div
-                        style="width: 150px; height: 100px; background-image: url('<%= course.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; border-radius: 4px;">
-                    </div>
+                    <div style="width: 150px; height: 100px; background-image: url('<%= course.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; border-radius: 8px; border: 1px solid var(--border-light);"></div>
                     <div>
-                        <h4 style="font-size: 1.25rem; margin-bottom: 0.5rem;">
+                        <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-main);">
                             <%= course.title %>
                         </h4>
-                        <p class="text-primary"
-                            style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem;">Course Access</p>
+                        <p style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem; color: #D97706;">Course Access</p>
                     </div>
                 </div>
 
-                <div style="margin-top: 1.5rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600;">Have a Promo Code?</label>
+                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);">
+                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 600; color: var(--text-main);">Have a Promo Code?</label>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="promoCodeInput" placeholder="Enter code" style="flex: 1; padding: 0.75rem; border: 1px solid var(--color-gray-mid); border-radius: 4px; background: rgba(255,255,255,0.05); color: white;">
-                        <button onclick="applyPromoCode()" class="btn btn-outline" style="padding: 0.75rem 1rem;">Apply</button>
+                        <input type="text" id="promoCodeInput" placeholder="Enter code" style="flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--border-light); border-radius: 8px; font-size: 1rem; outline: none;">
+                        <button onclick="applyPromoCode()" style="padding: 0.75rem 1.5rem; background: var(--bg-offwhite); color: var(--text-main); border: 1px solid var(--border-light); border-radius: 8px; font-weight: 600; cursor: pointer;">Apply</button>
                     </div>
-                    <p id="promoMessage" style="font-size: 0.85rem; margin-top: 0.5rem;"></p>
+                    <p id="promoMessage" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"></p>
                 </div>
 
-                <div
-                    style="display: flex; justify-content: space-between; border-top: 1px solid var(--color-gray-mid); padding-top: 1rem; margin-top: 1rem;">
-                    <span style="font-weight: 600;">Total Amount</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-light); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <span style="font-weight: 700; font-size: 1.15rem; color: var(--text-main);">Total Amount</span>
                     <div>
-                        <span id="originalPrice" style="font-family: var(--font-display); font-size: 1.2rem; color: var(--color-gray-light); text-decoration: line-through; display: none; margin-right: 0.5rem;">$<%= course.price %></span>
-                        <span id="finalPrice" style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-primary);">$<%= course.price %></span>
+                        <span id="originalPrice" style="font-weight: 600; font-size: 1.2rem; color: #94A3B8; text-decoration: line-through; display: none; margin-right: 0.5rem;">$<%= course.price %></span>
+                        <span id="finalPrice" style="font-weight: 800; font-size: 1.75rem; color: #D97706;">$<%= course.price %></span>
                     </div>
                 </div>
             </div>
@@ -101,29 +136,27 @@
         <!-- Right: Payment Provider -->
         <div>
             <div class="summary-card" id="payment-container">
-                <h3
-                    style="font-size: 1.1rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1.5rem;">
-                    Complete Payment</h3>
+                <h3 style="font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--text-main);">
+                    Complete Payment
+                </h3>
 
                 <!-- PayPal Button Container -->
                 <div id="paypal-button-container"></div>
                 
-                <div style="margin: 1.5rem 0; text-align: center; color: var(--color-gray-light); font-size: 0.9rem;">
+                <div style="margin: 1.5rem 0; text-align: center; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;">
                     &mdash; OR &mdash;
                 </div>
                 
-                <button onclick="processMockCheckout()" class="btn btn-primary" style="width: 100%; background-color: var(--color-secondary);">
+                <button onclick="processMockCheckout()" class="btn-checkout">
                     Pay (Mock Checkout)
                 </button>
             </div>
 
-            <div id="success-screen" class="summary-card" style="display: none; text-align: center;">
-                <i data-lucide="check-circle" class="text-success"
-                    style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
-                <h3 style="margin-bottom: 1rem;">Payment Successful!</h3>
-                <p class="text-muted" style="margin-bottom: 1.5rem;">You have been enrolled in the course.</p>
-                <a href="/student/courses/<%= course.slug %>/learn" class="btn btn-primary" style="width: 100%;">Start
-                    Learning</a>
+            <div id="success-screen" class="summary-card" style="display: none; text-align: center; padding: 3rem 1.5rem;">
+                <i data-lucide="check-circle" style="width: 64px; height: 64px; color: #10B981; margin-bottom: 1rem;"></i>
+                <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-main);">Payment Successful!</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">You have been enrolled in the course.</p>
+                <a href="/student/courses/<%= course.slug %>/learn" class="btn-checkout" style="background: var(--yellow-gradient); color: white;">Start Learning</a>
             </div>
         </div>
 
@@ -151,7 +184,7 @@
                 if (data.success) {
                     appliedCouponCode = code;
                     msgEl.textContent = 'Promo code applied!';
-                    msgEl.style.color = 'var(--color-success)';
+                    msgEl.style.color = '#10B981';
                     
                     const originalPrice = parseFloat('<%= course.price %>');
                     let newPrice = originalPrice;
@@ -167,19 +200,18 @@
                 } else {
                     appliedCouponCode = null;
                     msgEl.textContent = data.message;
-                    msgEl.style.color = 'var(--color-danger)';
+                    msgEl.style.color = '#EF4444';
                     document.getElementById('originalPrice').style.display = 'none';
                     document.getElementById('finalPrice').textContent = '$<%= course.price %>';
                 }
             } catch (err) {
                 msgEl.textContent = 'Error validating code';
-                msgEl.style.color = 'var(--color-danger)';
+                msgEl.style.color = '#EF4444';
             }
         }
 
         // PayPal JS SDK Integration
         paypal.Buttons({
-            // 1. App calls backend to create order
             createOrder: async function (data, actions) {
                 try {
                     const res = await fetch('/api/v1/payments/create-order', {
@@ -198,7 +230,6 @@
                     console.error(err);
                 }
             },
-            // 2. App calls backend to capture the approved transfer
             onApprove: async function (data, actions) {
                 try {
                     const res = await fetch('/api/v1/payments/capture-order', {

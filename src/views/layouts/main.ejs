@@ -26,23 +26,36 @@
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&family=JetBrains+Mono&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 
   <!-- CSS -->
   <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
   <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
 
   <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+        --yellow: #FFC107;
+        --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+        --bg-white: #FFFFFF;
+        --bg-offwhite: #F8FAFC;
+        --text-main: #0F172A;
+        --text-secondary: #475569;
+        --border-light: #E2E8F0;
+    }
+    body {
+        background-color: var(--bg-white);
+        color: var(--text-main);
+        font-family: 'Inter', sans-serif;
+    }
+  </style>
 </head>
 
 <body>
 
   <%- include('../partials/navbar') %>
 
-    <main>
+    <main style="padding-top: 80px; min-height: 80vh;">
       <%- body %>
     </main>
 

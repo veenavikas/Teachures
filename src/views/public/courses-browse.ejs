@@ -6,22 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browse Courses | Teachures</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
     <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        :root {
+            --yellow: #FFC107;
+            --yellow-dim: #FFB300;
+            --yellow-light: #FFF8E1;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+            
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            --bg-muted: #F1F5F9;
+            
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #94A3B8;
+            
+            --border-light: #E2E8F0;
+            
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            
+            --radius-md: 16px;
+            --radius-lg: 24px;
+        }
+
+        body {
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
         .page-hero {
-            padding: 5rem 0 3rem;
+            padding: 6rem 0 4rem;
             text-align: center;
         }
 
         .page-hero h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 4rem;
-            letter-spacing: 2px;
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            color: var(--text-main);
         }
 
         .search-bar {
@@ -33,17 +63,20 @@
 
         .search-bar input {
             flex: 1;
-            padding: 0.9rem 1.25rem;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 0.95rem;
+            padding: 1rem 1.25rem;
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 50px;
+            color: var(--text-main);
+            font-size: 1rem;
             outline: none;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
         }
 
         .search-bar input:focus {
-            border-color: #F5C518;
+            border-color: #D97706;
+            box-shadow: var(--shadow-md);
         }
 
         .filter-row {
@@ -55,83 +88,88 @@
         }
 
         .filter-chip {
-            padding: 0.5rem 1.25rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.6rem 1.5rem;
+            border: 1px solid var(--border-light);
             border-radius: 50px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s;
-            background: none;
+            background: var(--bg-white);
+            font-weight: 500;
         }
 
         .filter-chip:hover,
         .filter-chip.active {
-            background: #F5C518;
-            color: #000;
-            border-color: #F5C518;
+            background: var(--yellow-gradient);
+            color: white;
+            border-color: transparent;
             font-weight: 600;
+            box-shadow: 0 4px 10px rgba(255,193,7,0.3);
         }
 
         .courses-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            gap: 2rem;
             padding: 2rem 0 5rem;
         }
 
         .course-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 14px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
             overflow: hidden;
             transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
         }
 
         .course-card:hover {
             transform: translateY(-6px);
-            border-color: rgba(245, 197, 24, 0.3);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 193, 7, 0.3);
+            box-shadow: var(--shadow-md);
         }
 
         .course-thumb {
             height: 180px;
-            background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+            background: var(--bg-offwhite);
             position: relative;
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .course-thumb svg {
             width: 48px;
             height: 48px;
-            color: rgba(245, 197, 24, 0.2);
+            color: #D97706;
+            opacity: 0.5;
         }
 
         .course-badge {
             position: absolute;
             top: 12px;
             left: 12px;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 50px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .badge-free {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10B981;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: #D1FAE5;
+            color: #059669;
+            border: 1px solid #34D399;
         }
 
         .badge-paid {
-            background: rgba(245, 197, 24, 0.1);
-            color: #F5C518;
-            border: 1px solid rgba(245, 197, 24, 0.2);
+            background: var(--yellow-light);
+            color: #D97706;
+            border: 1px solid rgba(255,193,7,0.3);
         }
 
         .course-body {
@@ -140,17 +178,17 @@
 
         .course-cat {
             font-size: 0.75rem;
-            color: #F5C518;
-            font-weight: 700;
+            color: #D97706;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 0.5rem;
         }
 
         .course-title {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--text-main);
             margin-bottom: 0.75rem;
             line-height: 1.4;
         }
@@ -159,8 +197,9 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            font-size: 0.82rem;
-            color: rgba(255, 255, 255, 0.35);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .course-footer {
@@ -169,35 +208,38 @@
             align-items: center;
             margin-top: 1.25rem;
             padding-top: 1.25rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid var(--border-light);
         }
 
         .course-price {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #F5C518;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #D97706;
         }
 
         .btn-enroll {
-            padding: 0.5rem 1.25rem;
-            background: #F5C518;
-            color: #000;
-            border-radius: 8px;
-            font-size: 0.85rem;
+            padding: 0.6rem 1.5rem;
+            background: var(--yellow-gradient);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.9rem;
             font-weight: 700;
             border: none;
             cursor: pointer;
             text-decoration: none;
+            box-shadow: 0 4px 10px rgba(255,193,7,0.3);
+            transition: all 0.3s;
         }
 
         .btn-enroll:hover {
-            background: #D4AA00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255,193,7,0.4);
         }
 
         .empty-state {
             text-align: center;
             padding: 5rem 2rem;
-            color: rgba(255, 255, 255, 0.3);
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -207,13 +249,10 @@
 
         <main class="container">
             <div class="page-hero">
-                <p
-                    style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">
+                <p style="color:#D97706; font-size:0.85rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; margin-bottom:1rem;">
                     Explore</p>
-                <h1>Find Your <span
-                        style="background:linear-gradient(135deg,#F5C518,#FFD700); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Next
-                        Skill</span></h1>
-                <p style="color:rgba(255,255,255,0.4); margin-top:1rem; font-size:1.1rem;">Hand-picked courses from
+                <h1>Find Your <span style="background:var(--yellow-gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; font-family:'Playfair Display',serif;font-style:italic;">Next Skill</span></h1>
+                <p style="color:var(--text-secondary); margin-top:1rem; font-size:1.15rem; font-weight: 500;">Hand-picked courses from
                     world-class instructors.</p>
                 <div class="search-bar">
                     <input type="text" placeholder="Search courses, topics, instructors..." id="searchInput">
@@ -243,7 +282,7 @@
                         %>
                         <div class="course-card" data-cat="<%= course.category.toLowerCase() %>">
                             <div class="course-thumb"
-                                style="background:linear-gradient(135deg,#1e1e2e,#12121a); <% if(course.thumbnailUrl) { %>background-image: url('<%= course.thumbnailUrl %>'); background-size: cover;<% } %>">
+                                style="<% if(course.thumbnailUrl) { %>background-image: url('<%= course.thumbnailUrl %>'); background-size: cover; background-position: center;<% } %>">
                                 <% if(!course.thumbnailUrl) { %>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="1.5">
@@ -265,7 +304,7 @@
                                     <%= course.title %>
                                 </h3>
                                 <div class="course-meta">
-                                    <span>⭐ <%= avgRating> 0 ? avgRating.toFixed(1) : 'New' %></span>
+                                    <span style="color:#D97706;">★ <%= avgRating> 0 ? avgRating.toFixed(1) : 'New' %></span>
                                     <span>•</span><span>
                                         <%= course.totalLessons || 0 %> lessons
                                     </span>
@@ -277,7 +316,7 @@
                                 </div>
                                 <div class="course-footer">
                                     <% if(course.isFree) { %>
-                                        <span class="course-price" style="color:#10B981;">Free</span>
+                                        <span class="course-price" style="color:#059669;">Free</span>
                                         <% } else { %>
                                             <span class="course-price">$<%= course.price %></span>
                                             <% } %>
@@ -292,7 +331,7 @@
                                 <div class="empty-state" style="grid-column: 1 / -1;">
                                     <i data-lucide="book-x"
                                         style="width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.5;"></i>
-                                    <h2>No courses found</h2>
+                                    <h2 style="font-size:1.5rem;font-weight:700;color:var(--text-main);margin-bottom:0.5rem;">No courses found</h2>
                                     <p>Check back later for new content.</p>
                                 </div>
                                 <% } %>

@@ -1,46 +1,44 @@
-<h2 style="font-family: var(--font-heading); margin-bottom: 2rem;">Welcome back, <%= user?.name.split(' ')[0] || 'Learner' %>!</h2>
+<h2 style="font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2rem; color: var(--text-main); margin-bottom: 2rem; letter-spacing: -0.5px;">
+    Welcome back, <%= user?.name.split(' ')[0] || 'Learner' %>!
+</h2>
 
 <!-- Continue Learning Section -->
 <div style="margin-bottom: 3rem;">
-    <h3
-        style="font-size: 1.1rem; margin-bottom: 1rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
-        Continue Learning</h3>
+    <h3 style="font-size: 0.9rem; margin-bottom: 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">
+        Continue Learning
+    </h3>
 
     <% if (continueCourse) { %>
-        <div class="card" style="display: flex; cursor: pointer; border-left: 4px solid var(--color-primary);"
+        <div class="card" style="display: flex; cursor: pointer; border-left: 4px solid #D97706; background: var(--bg-white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 25px -5px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.05)';"
             onclick="window.location.href='/student/courses/<%= continueCourse.slug %>/learn'">
-            <div
-                style="width: 250px; background-image: url('<%= continueCourse.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; background-position: center;">
-            </div>
-            <div style="flex: 1; padding: 1.5rem;">
-                <p class="text-primary"
-                    style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase;">
+            <div style="width: 280px; background-image: url('<%= continueCourse.thumbnailUrl || '/images/default-course.jpg' %>'); background-size: cover; background-position: center;"></div>
+            <div style="flex: 1; padding: 2rem;">
+                <p style="font-size: 0.85rem; font-weight: 700; color: #D97706; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">
                     <%= continueCourse.category %>
                 </p>
-                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">
                     <%= continueCourse.title %>
                 </h3>
-                <p class="text-muted" style="font-size: 0.95rem; margin-bottom: 1.5rem;">Next up: <%=
-                        continueCourse.nextLessonTitle %>
+                <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 2rem;">
+                    Next up: <span style="font-weight: 600;"><%= continueCourse.nextLessonTitle %></span>
                 </p>
 
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <div
-                        style="flex: 1; height: 6px; background-color: var(--color-gray-mid); border-radius: 3px; overflow: hidden;">
-                        <div
-                            style="height: 100%; width: <%= continueCourse.progress %>%; background-color: var(--color-primary);">
-                        </div>
+                    <div style="flex: 1; height: 8px; background-color: var(--border-light); border-radius: 4px; overflow: hidden;">
+                        <div style="height: 100%; width: <%= continueCourse.progress %>%; background: var(--yellow-gradient);"></div>
                     </div>
-                    <span class="text-white" style="font-weight: 600; font-size: 0.9rem;">
+                    <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">
                         <%= continueCourse.progress %>%
                     </span>
                 </div>
             </div>
         </div>
         <% } else { %>
-            <div class="card" style="padding: 2rem; text-align: center; border: 1px dashed var(--color-gray-mid);">
-                <p class="text-muted">You haven't started any courses yet.</p>
-                <a href="/courses" class="btn btn-outline" style="margin-top: 1rem;">Browse Courses</a>
+            <div class="card" style="padding: 3rem; text-align: center; border: 2px dashed var(--border-light); background: var(--bg-white); border-radius: 12px;">
+                <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1.5rem;">You haven't started any courses yet.</p>
+                <a href="/courses" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--text-main); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">Browse Courses</a>
             </div>
             <% } %>
 </div>
@@ -49,53 +47,44 @@
     <!-- Enrolled Courses -->
     <div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3
-                style="font-size: 1.1rem; color: var(--color-gray-light); text-transform: uppercase; letter-spacing: 1px;">
-                My Courses</h3>
-            <a href="/student/my-courses" class="text-primary" style="font-size: 0.9rem;">View All</a>
+            <h3 style="font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">
+                My Courses
+            </h3>
+            <a href="/student/my-courses" style="color: #D97706; font-size: 0.9rem; font-weight: 600; text-decoration: none;">View All</a>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
             <% if (myCourses && myCourses.length) { %>
                 <% myCourses.forEach(course=> { %>
-                    <div class="card" style="position: relative;">
-                        <div
-                            style="height: 140px; background-image: url('<%= course.thumbnailUrl %>'); background-size: cover; background-position: center;">
-                        </div>
-                        <div style="padding: 1rem;">
-                            <h4
-                                style="font-size: 1.1rem; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <div class="card" style="position: relative; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                        <div style="height: 160px; background-image: url('<%= course.thumbnailUrl %>'); background-size: cover; background-position: center;"></div>
+                        <div style="padding: 1.5rem;">
+                            <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 <%= course.title %>
                             </h4>
-                            <p class="text-muted" style="font-size: 0.85rem;">
+                            <p style="color: var(--text-secondary); font-size: 0.85rem;">
                                 <%= course.instructorName %>
                             </p>
-                            <div
-                                style="margin-top: 1rem; height: 4px; background-color: var(--color-gray-mid); border-radius: 2px;">
-                                <div
-                                    style="height: 100%; width: <%= course.progress %>%; background-color: var(--color-primary);">
-                                </div>
+                            <div style="margin-top: 1.25rem; height: 6px; background-color: var(--border-light); border-radius: 3px; overflow: hidden;">
+                                <div style="height: 100%; width: <%= course.progress %>%; background: var(--yellow-gradient);"></div>
                             </div>
                         </div>
-                        <a href="/student/courses/<%= course.slug %>/learn"
-                            style="position: absolute; top:0; left:0; width:100%; height:100%;"></a>
+                        <a href="/student/courses/<%= course.slug %>/learn" style="position: absolute; top:0; left:0; width:100%; height:100%;"></a>
                     </div>
                     <% }) %>
-                        <% } else { %>
-                            <p class="text-muted">No courses yet.</p>
-                            <% } %>
+            <% } else { %>
+                <p style="color: var(--text-secondary);">No courses yet.</p>
+            <% } %>
         </div>
     </div>
 
     <!-- Leaderboard & Badges -->
     <div style="display: flex; flex-direction: column; gap: 2rem;">
         <!-- Badges Showcase -->
-        <div class="card" style="padding: 1.5rem;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-gray-mid);">
-                <h3 style="font-size: 1.1rem; margin: 0;">Earned Badges</h3>
-                <span class="text-primary"
-                    style="font-weight: 700; font-family: var(--font-display); font-size: 1.25rem;">
+        <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Earned Badges</h3>
+                <span style="color: #D97706; font-weight: 800; font-size: 1.25rem;">
                     <%= badges ? badges.length : 0 %>
                 </span>
             </div>
@@ -103,48 +92,47 @@
                 <% if (badges && badges.length) { %>
                     <% badges.forEach(userBadge => { %>
                         <div title="<%= userBadge.badge.name %>: <%= userBadge.badge.description %>"
-                            style="width: 50px; height: 50px; background-color: rgba(245, 197, 24, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--color-primary); flex-shrink: 0; overflow: hidden;">
-                            <i data-lucide="award" class="text-primary"></i>
+                            style="width: 48px; height: 48px; background-color: rgba(217, 119, 6, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #D97706; flex-shrink: 0;">
+                            <i data-lucide="award" style="color: #D97706; width: 24px; height: 24px;"></i>
                         </div>
-                        <% }) %>
-                            <% } else { %>
-                                <p class="text-muted" style="font-size: 0.9rem;">Complete lessons and pass quizzes to
-                                    earn badges!</p>
-                                <% } %>
+                    <% }) %>
+                <% } else { %>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Complete lessons and pass quizzes to earn badges!</p>
+                <% } %>
             </div>
         </div>
 
         <!-- Leaderboard Peek -->
-        <div class="card" style="padding: 1.5rem;">
-            <div
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-gray-mid);">
-                <h3 style="font-size: 1.1rem; margin: 0;">Top Learners</h3>
-                <a href="/student/leaderboard" class="text-primary" style="font-size: 0.9rem;">Full Board</a>
+        <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-light);">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Top Learners</h3>
+                <a href="/student/leaderboard" style="color: #D97706; font-size: 0.9rem; font-weight: 600; text-decoration: none;">Full Board</a>
             </div>
             <ul style="list-style: none; padding: 0; margin: 0;">
                 <% if (leaders && leaders.length) { %>
                     <% leaders.forEach((leader, idx)=> { %>
                         <li style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                            <div
-                                style="font-family: var(--font-display); font-size: 1.25rem; color: <%= idx === 0 ? 'var(--color-primary)' : 'var(--color-gray-light)' %>">
+                            <div style="font-weight: 800; font-size: 1.1rem; color: <%= idx === 0 ? '#D97706' : 'var(--text-secondary)' %>">
                                 #<%= idx + 1 %>
                             </div>
-                            <div
-                                style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--color-gray-mid);">
+                            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: var(--border-light); overflow: hidden;">
+                                <% if (leader.avatar) { %>
+                                    <img src="<%= leader.avatar %>" alt="avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                <% } %>
                             </div>
                             <div style="flex: 1;">
-                                <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">
+                                <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
                                     <%= leader.name %>
                                 </p>
                             </div>
-                            <div class="text-primary" style="font-family: var(--font-mono); font-weight: 700;">
-                                <%= leader.points %>
+                            <div style="color: #D97706; font-weight: 700; font-size: 0.95rem;">
+                                <%= leader.points %> pt
                             </div>
                         </li>
-                        <% }) %>
-                            <% } else { %>
-                                <li class="text-muted" style="font-size: 0.9rem;">Leaderboard will populate soon.</li>
-                                <% } %>
+                    <% }) %>
+                <% } else { %>
+                    <li style="color: var(--text-secondary); font-size: 0.9rem;">Leaderboard will populate soon.</li>
+                <% } %>
             </ul>
         </div>
     </div>

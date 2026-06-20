@@ -1,62 +1,64 @@
 <div class="kpi-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Total Users</h3>
-            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
-                    data-lucide="users" class="text-primary icon-sm"></i></div>
+            <h3 style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin:0;">Total Users</h3>
+            <div style="padding: 0.5rem; background: rgba(217, 119, 6, 0.1); border-radius: 8px;"><i
+                    data-lucide="users" style="color: #D97706; width: 20px; height: 20px;"></i></div>
         </div>
-        <div style="font-size: 2rem; font-family: var(--font-display);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); font-family: 'Inter', sans-serif;">
             <%= stats.totalUsers || 0 %>
         </div>
-        <div class="text-success" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"><i
-                data-lucide="trending-up" class="icon-sm" style="vertical-align: middle;"></i> +8% this month</div>
+        <div style="color: #10B981; font-size: 0.85rem; margin-top: 0.75rem; font-weight: 600;"><i
+                data-lucide="trending-up" style="width: 16px; height: 16px; vertical-align: text-bottom;"></i> +8% this month</div>
     </div>
 
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Platform MRR</h3>
-            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
-                    data-lucide="dollar-sign" class="text-primary icon-sm"></i></div>
+            <h3 style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin:0;">Platform MRR</h3>
+            <div style="padding: 0.5rem; background: rgba(217, 119, 6, 0.1); border-radius: 8px;"><i
+                    data-lucide="dollar-sign" style="color: #D97706; width: 20px; height: 20px;"></i></div>
         </div>
-        <div style="font-size: 2rem; font-family: var(--font-display);">$<%= stats.platformMRR || 0 %>
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); font-family: 'Inter', sans-serif;">
+            $<%= stats.platformMRR || 0 %>
         </div>
-        <div class="text-success" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;"><i
-                data-lucide="trending-up" class="icon-sm" style="vertical-align: middle;"></i> +15% this month</div>
+        <div style="color: #10B981; font-size: 0.85rem; margin-top: 0.75rem; font-weight: 600;"><i
+                data-lucide="trending-up" style="width: 16px; height: 16px; vertical-align: text-bottom;"></i> +15% this month</div>
     </div>
 
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Total Courses</h3>
-            <div style="padding: 0.5rem; background: rgba(245, 197, 24, 0.1); border-radius: 4px;"><i
-                    data-lucide="video" class="text-primary icon-sm"></i></div>
+            <h3 style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin:0;">Total Courses</h3>
+            <div style="padding: 0.5rem; background: rgba(217, 119, 6, 0.1); border-radius: 8px;"><i
+                    data-lucide="video" style="color: #D97706; width: 20px; height: 20px;"></i></div>
         </div>
-        <div style="font-size: 2rem; font-family: var(--font-display);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); font-family: 'Inter', sans-serif;">
             <%= stats.totalCourses || 0 %>
         </div>
-        <div class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">
+        <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; font-weight: 500;">
             <%= stats.newCoursesThisWeek || 0 %> new this week
         </div>
     </div>
 
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="font-size: 1rem; color: var(--color-gray-light); margin:0;">Open Tickets</h3>
-            <div style="padding: 0.5rem; background: rgba(229, 62, 62, 0.1); border-radius: 4px;"><i
-                    data-lucide="alert-circle" class="text-danger icon-sm"></i></div>
+            <h3 style="font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin:0;">Open Tickets</h3>
+            <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;"><i
+                    data-lucide="alert-circle" style="color: #EF4444; width: 20px; height: 20px;"></i></div>
         </div>
-        <div style="font-size: 2rem; font-family: var(--font-display);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); font-family: 'Inter', sans-serif;">
             <%= stats.openTickets || 0 %>
         </div>
-        <div class="text-danger" style="font-size: 0.85rem; margin-top: 0.5rem; font-weight: 500;">Requires attention
+        <div style="color: #EF4444; font-size: 0.85rem; margin-top: 0.75rem; font-weight: 600;">
+            Requires attention
         </div>
     </div>
 </div>
 
 <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
     <!-- Revenue Chart -->
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <h3
-            style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
+            style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
             Revenue (Last 30 Days)</h3>
         <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
             <canvas id="revenueChart"></canvas>
@@ -65,9 +67,9 @@
     </div>
 
     <!-- Role Distribution -->
-    <div class="card" style="padding: 1.5rem;">
+    <div class="card" style="padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <h3
-            style="font-size: 1.1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem;">
+            style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem;">
             User Roles</h3>
         <div style="height: 300px; width: 100%; display: flex; align-items: center; justify-content: center;">
             <canvas id="rolesChart"></canvas>
@@ -88,10 +90,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: rolesData.map(d => d.label),
                 datasets: [{
                     data: rolesData.map(d => d.value),
-                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 0
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#475569', font: { family: 'Inter', size: 12 } }
+                    }
+                }
+            }
         });
     }
 
@@ -105,95 +117,110 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Revenue',
                     data: revenueData,
-                    borderColor: '#10b981',
-                    tension: 0.1
+                    borderColor: '#D97706',
+                    backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#FFFFFF',
+                    pointBorderColor: '#D97706',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#94A3B8', font: { family: 'Inter' } } },
+                    y: { grid: { color: '#E2E8F0' }, ticks: { color: '#94A3B8', font: { family: 'Inter' } } }
+                }
+            }
         });
     }
 });
 </script>
 
 <!-- Recent Enrollments Table -->
-<div class="card" style="margin-top: 1.5rem; padding: 1.5rem;">
+<div class="card" style="margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
     <div
-        style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; margin: 0;">Recent Enrollments</h3>
-        <a href="/admin/revenue" class="text-primary" style="font-size: 0.9rem;">View All</a>
+        style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Recent Enrollments</h3>
+        <a href="/admin/revenue" style="color: #D97706; font-size: 0.9rem; font-weight: 600; text-decoration: none;">View All</a>
     </div>
 
     <table style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead>
-            <tr style="color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase;">
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Learner Name</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Course</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Date</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Amount</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Status</th>
+            <tr style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Learner Name</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Course</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Date</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Amount</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Status</th>
             </tr>
         </thead>
         <tbody>
             <% if (recentEnrollments && recentEnrollments.length> 0) { %>
                 <% recentEnrollments.forEach(enroll=> { %>
-                    <tr>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                    <tr style="border-bottom: 1px solid var(--border-light);">
+                        <td style="padding: 1rem 0; font-weight: 600; color: var(--text-main);">
                             <%= enroll.userName %>
                         </td>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                        <td style="padding: 1rem 0; color: var(--text-secondary);">
                             <%= enroll.courseTitle %>
                         </td>
-                        <td
-                            style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid); color: var(--color-gray-light);">
+                        <td style="padding: 1rem 0; color: var(--text-secondary);">
                             <%= enroll.date %>
                         </td>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">$<%= enroll.amount
-                                %>
+                        <td style="padding: 1rem 0; font-weight: 600; color: var(--text-main);">
+                            $<%= enroll.amount %>
                         </td>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                        <td style="padding: 1rem 0;">
                             <span
-                                style="background: rgba(56, 161, 105, 0.1); color: var(--color-success); border: 1px solid rgba(56, 161, 105, 0.2); border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: 600;">
+                                style="background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: 700;">
                                 <%= enroll.status %>
                             </span>
                         </td>
                     </tr>
                     <% }) %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="5" class="text-muted text-center" style="padding: 2rem 0;">No recent
-                                    enrollments.</td>
-                            </tr>
-                            <% } %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="padding: 3rem 0; text-align: center; color: var(--text-secondary);">No recent enrollments.</td>
+                </tr>
+            <% } %>
         </tbody>
     </table>
 </div>
 
 <!-- Global Leaderboard Table -->
-<div class="card" style="margin-top: 1.5rem; padding: 1.5rem;">
-    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--color-gray-mid); padding-bottom: 1rem; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; margin: 0;">Global Student Leaderboard</h3>
+<div class="card" style="margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-white); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Global Student Leaderboard</h3>
     </div>
 
     <table style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead>
-            <tr style="color: var(--color-gray-light); font-size: 0.85rem; text-transform: uppercase;">
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Rank</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Learner Name</th>
-                <th style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">Total Points</th>
+            <tr style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Rank</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Learner Name</th>
+                <th style="padding: 1rem 0; border-bottom: 2px solid var(--border-light);">Total Points</th>
             </tr>
         </thead>
         <tbody>
             <% if (globalLeaderboard && globalLeaderboard.length > 0) { %>
                 <% globalLeaderboard.forEach((user, idx) => { %>
-                    <tr>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid); font-weight: bold; color: var(--color-primary);">
+                    <tr style="border-bottom: 1px solid var(--border-light);">
+                        <td style="padding: 1rem 0; font-weight: 800; font-size: 1.1rem; color: #D97706;">
                             #<%= idx + 1 %>
                         </td>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
+                        <td style="padding: 1rem 0; font-weight: 600; color: var(--text-main);">
                             <%= user.name %>
                         </td>
-                        <td style="padding: 1rem 0; border-bottom: 1px solid var(--color-gray-mid);">
-                            <span style="background: rgba(245, 197, 24, 0.1); color: var(--color-primary); border-radius: 4px; padding: 4px 8px; font-weight: 600;">
+                        <td style="padding: 1rem 0;">
+                            <span style="background: rgba(217, 119, 6, 0.1); color: #D97706; border-radius: 6px; padding: 6px 12px; font-weight: 700; font-size: 0.9rem;">
                                 <%= user.totalPoints %> XP
                             </span>
                         </td>
@@ -201,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <% }) %>
             <% } else { %>
                 <tr>
-                    <td colspan="3" class="text-muted text-center" style="padding: 2rem 0;">No learners found.</td>
+                    <td colspan="3" style="padding: 3rem 0; text-align: center; color: var(--text-secondary);">No learners found.</td>
                 </tr>
             <% } %>
         </tbody>

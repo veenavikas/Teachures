@@ -6,21 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy | Teachures</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/base.css?v=lighttheme1">
     <link rel="stylesheet" href="/css/components.css?v=lighttheme1">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        :root {
+            --bg-white: #FFFFFF;
+            --bg-offwhite: #F8FAFC;
+            --text-main: #0F172A;
+            --text-secondary: #475569;
+            --border-light: #E2E8F0;
+            --yellow-gradient: linear-gradient(135deg, #FFD54F, #FF8F00);
+        }
+
+        body {
+            background-color: var(--bg-white);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
         .page-hero {
-            padding: 6rem 2rem 4rem;
+            padding: 8rem 2rem 4rem;
             text-align: center;
+            background: var(--bg-offwhite);
+            border-bottom: 1px solid var(--border-light);
         }
 
         .page-hero h1 {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: clamp(3.5rem, 7vw, 6rem);
-            letter-spacing: 2px;
-            line-height: 1;
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: var(--text-main);
+            margin-bottom: 1rem;
         }
 
         .content-section {
@@ -30,23 +49,25 @@
         }
 
         .content-section h2 {
-            font-family: 'DM Sans', sans-serif;
             font-size: 2rem;
-            color: #fff;
-            margin: 2.5rem 0 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 3rem 0 1rem;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.5rem;
         }
 
         .content-section h3 {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1.4rem;
-            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
             margin: 2rem 0 1rem;
         }
 
         .content-section p, .content-section li {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-secondary);
             line-height: 1.8;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             margin-bottom: 1.2rem;
         }
 
@@ -56,10 +77,10 @@
         }
 
         .last-updated {
-            color: #F5C518;
-            font-weight: 600;
+            color: #D97706;
+            font-weight: 700;
             margin-top: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -71,7 +92,7 @@
 
     <main class="container">
         <div class="page-hero">
-            <p style="color:#F5C518; font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">Legal</p>
+            <p style="color:#D97706; font-size:0.85rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; margin-bottom:0.75rem;">Legal</p>
             <h1>Privacy Policy</h1>
             <p class="last-updated">Last Updated: June 17, 2026</p>
         </div>

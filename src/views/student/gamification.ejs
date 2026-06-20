@@ -1,21 +1,22 @@
 <!-- Learner Gamification Dashboard -->
 <style>
     .xp-banner {
-        background: linear-gradient(135deg, rgba(245, 197, 24, 0.12), rgba(245, 197, 24, 0.04));
-        border: 1px solid rgba(245, 197, 24, 0.2);
+        background: var(--bg-white);
+        border: 1px solid var(--border-light);
         border-radius: 16px;
-        padding: 2rem;
+        padding: 2.5rem;
         display: flex;
         align-items: center;
         gap: 2rem;
         margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.02);
     }
 
     .xp-ring {
-        width: 90px;
-        height: 90px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
-        background: conic-gradient(#F5C518 <%=(user.points || 0) % 100 %>%, rgba(0,0,0,0.05) 0);
+        background: conic-gradient(#D97706 <%=(user.points || 0) % 100 %>%, var(--border-light) 0);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -26,23 +27,26 @@
     .xp-ring::after {
         content: '';
         position: absolute;
-        width: 70px;
-        height: 70px;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        background: #0E0E0E;
+        background: var(--bg-white);
     }
 
     .xp-level {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 1.8rem;
-        color: #F5C518;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: #D97706;
         z-index: 1;
     }
 
     .xp-total {
-        font-family: 'Bebas Neue', sans-serif;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
         font-size: 3rem;
-        color: #F5C518;
+        color: var(--text-main);
+        line-height: 1;
     }
 
     .section-head {
@@ -53,30 +57,32 @@
     }
 
     .section-head h3 {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: var(--color-white);
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-main);
     }
 
     .badges-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
     .badge-card {
-        background: rgba(0,0,0,0.02);
-        border: 1px solid rgba(0,0,0,0.06);
+        background: var(--bg-white);
+        border: 1px solid var(--border-light);
         border-radius: 14px;
         padding: 1.5rem 1rem;
         text-align: center;
         transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
 
     .badge-card.earned {
-        border-color: rgba(245, 197, 24, 0.3);
-        background: rgba(245, 197, 24, 0.05);
+        border-color: #D97706;
+        background: rgba(217, 119, 6, 0.05);
+        box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1);
     }
 
     .badge-card:hover {
@@ -85,25 +91,25 @@
 
     .badge-emoji {
         font-size: 2.5rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         display: block;
     }
 
     .badge-name {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         font-weight: 700;
-        color: var(--color-white);
+        color: var(--text-main);
     }
 
     .badge-desc {
-        font-size: 0.7rem;
-        color: rgba(0,0,0,0.3);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
         margin-top: 0.25rem;
     }
 
     .badge-locked {
         filter: grayscale(1);
-        opacity: 0.3;
+        opacity: 0.4;
     }
 
     .leaderboard-item {
@@ -111,66 +117,75 @@
         align-items: center;
         gap: 1rem;
         padding: 1rem 1.25rem;
-        background: rgba(0,0,0,0.02);
-        border: 1px solid rgba(0,0,0,0.04);
+        background: var(--bg-white);
+        border: 1px solid var(--border-light);
         border-radius: 12px;
         margin-bottom: 0.75rem;
         transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
 
     .leaderboard-item:hover {
-        border-color: rgba(245, 197, 24, 0.15);
+        border-color: #CBD5E1;
     }
 
     .lb-rank {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 1.3rem;
-        color: rgba(0,0,0,0.2);
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: var(--text-secondary);
         width: 30px;
     }
 
     .lb-rank.gold {
-        color: #F5C518;
+        color: #D97706;
     }
 
     .lb-rank.silver {
-        color: #A0A0A0;
+        color: #94A3B8;
     }
 
     .lb-rank.bronze {
-        color: #CD7F32;
+        color: #B45309;
     }
 
     .lb-avatar {
-        width: 40px;
-        height: 40px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #333, #111);
+        background: var(--bg-offwhite);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-main);
         flex-shrink: 0;
+        border: 1px solid var(--border-light);
     }
 
     .lb-name {
         flex: 1;
-        font-weight: 600;
-        color: var(--color-white);
-        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.95rem;
     }
 
     .lb-you {
         font-size: 0.7rem;
-        color: #F5C518;
-        margin-left: 6px;
-        font-weight: 700;
+        color: #D97706;
+        margin-left: 8px;
+        font-weight: 800;
+        background: rgba(217, 119, 6, 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
     }
 
     .lb-points {
-        font-family: 'Bebas Neue', sans-serif;
-        font-size: 1.3rem;
-        color: #F5C518;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #D97706;
     }
 </style>
 
@@ -180,40 +195,39 @@
         <span class="xp-level">LV<%= Math.floor((user.points||0)/100)+1 %></span>
     </div>
     <div style="flex:1;">
-        <p
-            style="color:rgba(0,0,0,0.4); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:0.25rem;">
-            Total XP Earned</p>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem;">
+            Total XP Earned
+        </p>
         <div style="display:flex; align-items:baseline; gap:0.75rem;">
             <span class="xp-total">
                 <%= user.points || 0 %>
             </span>
-            <span style="color:rgba(0,0,0,0.3); font-size:0.9rem;">points</span>
+            <span style="color: var(--text-secondary); font-size: 1rem; font-weight: 600;">points</span>
         </div>
-        <div style="margin-top:1rem;">
-            <div
-                style="display:flex; justify-content:space-between; font-size:0.78rem; color:rgba(0,0,0,0.35); margin-bottom:6px;">
+        <div style="margin-top:1.25rem;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom:8px;">
                 <span>Progress to Level <%= Math.floor((user.points||0)/100)+2 %></span>
                 <span>
                     <%= (user.points||0) % 100 %>/100 XP
                 </span>
             </div>
-            <div style="height:6px; background:rgba(0,0,0,0.06); border-radius:3px; overflow:hidden;">
-                <div
-                    style="height:100%; width:<%= (user.points||0) % 100 %>%; background:linear-gradient(90deg,#F5C518,#FFD700); box-shadow:0 0 10px rgba(245,197,24,0.5); border-radius:3px; transition:width 1s ease;">
+            <div style="height: 8px; background: var(--bg-offwhite); border-radius: 4px; border: 1px solid var(--border-light); overflow: hidden;">
+                <div style="height: 100%; width: <%= (user.points||0) % 100 %>%; background: var(--yellow-gradient); border-radius: 4px; transition: width 1s ease;">
                 </div>
             </div>
         </div>
     </div>
-    <div style="text-align:center; padding-left:2rem; border-left:1px solid rgba(0,0,0,0.06);">
-        <div style="font-family:'Bebas Neue',sans-serif; font-size:2.5rem; color:#F5C518;">
+    <div style="text-align:center; padding-left:2.5rem; border-left:1px solid var(--border-light);">
+        <div style="font-family: 'Inter', sans-serif; font-weight: 800; font-size: 2.5rem; color: #D97706;">
             <%= badges.filter(b=>b.earned).length || 0 %>
         </div>
-        <div style="font-size:0.75rem; color:rgba(0,0,0,0.3); text-transform:uppercase; letter-spacing:1.5px;">
-            Badges Earned</div>
+        <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;">
+            Badges Earned
+        </div>
     </div>
 </div>
 
-<div style="display:grid; grid-template-columns:1.5fr 1fr; gap:2rem;">
+<div style="display:grid; grid-template-columns:1.5fr 1fr; gap:2.5rem;">
     <!-- Left: Badges -->
     <div>
         <div class="section-head">
@@ -244,9 +258,8 @@
                             <%= b.desc %>
                         </div>
                         <% if (isEarned) { %>
-                            <div style="margin-top:0.5rem; font-size:0.65rem; color:#F5C518; font-weight:700;">EARNED ✓
-                            </div>
-                            <% } %>
+                            <div style="margin-top:0.75rem; font-size:0.75rem; color:#D97706; font-weight:800;">EARNED ✓</div>
+                        <% } %>
                     </div>
                     <% }); %>
         </div>
@@ -256,7 +269,7 @@
     <div>
         <div class="section-head">
             <h3>🏆 Leaderboard</h3>
-            <span style="font-size:0.78rem; color:rgba(0,0,0,0.3);">Top Learners</span>
+            <span style="font-size:0.85rem; font-weight: 600; color:var(--text-secondary);">Top Learners</span>
         </div>
         <% const lbData=leaders && leaders.length ? leaders : [ 
             { name:'Alex Kim', points:920, isYou:false }, 
@@ -267,7 +280,7 @@
         ]; %>
             <% lbData.slice(0,10).forEach(function(p, i) { %>
                 <div class="leaderboard-item"
-                    style="<%= p.isYou ? 'border-color:rgba(245,197,24,0.3); background:rgba(245,197,24,0.04);' : '' %>">
+                    style="<%= p.isYou ? 'border-color: #D97706; background: rgba(217, 119, 6, 0.05);' : '' %>">
                     <span class="lb-rank <%= i===0?'gold':i===1?'silver':i===2?'bronze':'' %>">
                         <%= i+1 %>
                     </span>
@@ -276,7 +289,7 @@
                     </div>
                     <span class="lb-name">
                         <%= p.name %>
-                            <%= p.isYou ? '<span class="lb-you">YOU</span>' : '' %>
+                            <%- p.isYou ? '<span class="lb-you">YOU</span>' : '' %>
                     </span>
                     <span class="lb-points">
                         <%= p.points %> XP
