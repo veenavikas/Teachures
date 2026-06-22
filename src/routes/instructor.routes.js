@@ -457,6 +457,53 @@ router.get('/assignments', async (req, res) => {
 
 
 
+router.get('/announcements', async (req, res) => {
+    try {
+        const courses = await prisma.course.findMany({
+            where: { instructorId: req.user.id },
+            select: { id: true, title: true }
+        });
+
+        const announcements = await prisma.announcement.findMany({
+            where: { course: { instructorId: req.user.id } },
+            include: { course: { select: { title: true } } },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.render('instructor/announcements', {
+            layout: 'layouts/dashboard',
+            title: 'Announcements',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            courses,
+            announcements
+        });
+    } catch (error) {
+        res.status(500).send('Server Error: ' + error.message);
+    }
+});
+
+router.get('/support', async (req, res) => {
+    try {
+        const tickets = await prisma.supportTicket.findMany({
+            where: { userId: req.user.id },
+            orderBy: { createdAt: 'desc' }
+        });
+
+        res.render('instructor/support', {
+            layout: 'layouts/dashboard',
+            title: 'Support Center',
+            path: req.originalUrl,
+            user: req.user,
+            sidebarPartial: '../partials/sidebar-instructor',
+            tickets
+        });
+    } catch (error) {
+        res.status(500).send('Server Error');
+    }
+});
+
 router.get('/qna', async (req, res) => {
     try {
         const courses = await prisma.course.findMany({

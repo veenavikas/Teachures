@@ -6,6 +6,12 @@
     <title>Teachures — Build the career you've always imagined</title>
     <meta name="description" content="World-class learning platform for creators and learners. Enroll in 400+ courses, earn verified certificates, and build your future.">
 
+    <!-- Mobile App PWA Meta Tags -->
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Teachures">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
@@ -68,8 +74,8 @@
             color: var(--text-main);
         }
 
-        .h1 { font-size: clamp(3rem, 6vw, 4.5rem); font-weight: 800; }
-        .h2 { font-size: clamp(2.5rem, 4vw, 3.5rem); font-weight: 700; }
+        .h1 { font-size: clamp(2rem, 10vw, 4.5rem); font-weight: 800; line-height: 1.1; }
+        .h2 { font-size: clamp(1.8rem, 8vw, 3.5rem); font-weight: 700; line-height: 1.2; }
         
         .text-gradient {
             background: var(--yellow-gradient);
@@ -184,9 +190,9 @@
 
         .btn-primary {
             background: var(--yellow-gradient);
-            color: #FFFFFF;
+            color: #0F172A;
             box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            font-weight: 700;
         }
 
         .btn-primary:hover {
@@ -250,6 +256,7 @@
             font-size: 0.9rem;
             color: var(--text-secondary);
             font-weight: 500;
+            flex-wrap: wrap; /* allow wrapping on small screens */
         }
         .hero-stats strong {
             color: var(--text-main);
@@ -308,20 +315,21 @@
         }
 
         .hero-floating-badge {
-            position: absolute; bottom: -30px; left: -30px;
-            padding: 1.25rem 1.75rem;
+            position: absolute; bottom: -20px; left: -10px;
+            padding: 1rem 1.25rem;
             background: white;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-light);
-            display: flex; align-items: center; gap: 1.25rem;
+            display: flex; align-items: center; gap: 1rem;
             z-index: 3;
             animation: float 6s ease-in-out infinite;
+            max-width: 90%;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            50% { transform: translateY(-10px); }
         }
         
         .hero-floating-badge-icon {
@@ -516,27 +524,257 @@
         .footer-links a { display: block; color: var(--text-secondary); text-decoration: none; font-size: 0.95rem; margin-bottom: 1rem; font-weight: 500; transition: color 0.2s; }
         .footer-links a:hover { color: #D97706; transform: translateX(4px); display: inline-block; }
         
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; }
+        
+        .mentors-header { display: flex; justify-content: space-between; align-items: flex-end; }
+        
         .footer-bottom {
             margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--border-light);
             display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.9rem;
         }
 
         @media (max-width: 992px) {
-            .hero, .enterprise-grid, .credentials-grid { grid-template-columns: 1fr; gap: 4rem; }
-            .hero-content { text-align: center; }
-            .hero-subtitle { margin: 0 auto 2.5rem; }
-            .hero-actions { justify-content: center; }
-            .hero-stats { justify-content: center; }
-            .hero-card { margin: 0 auto; }
+            .section.hero, .enterprise-grid, .credentials-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .section.hero { align-items: flex-start; padding-top: 7rem; min-height: auto; padding-bottom: 4rem; }
+            .hero-content { text-align: left; padding-top: 0; }
+            .hero-subtitle { margin: 0 0 2rem 0; font-size: 1.05rem; line-height: 1.5; color: var(--text-secondary); max-width: 100%; }
+            .hero-actions { justify-content: flex-start; flex-direction: column; width: 100%; gap: 1rem; }
+            .hero-actions .btn { width: 100%; }
+            .hero-stats { justify-content: flex-start; gap: 1rem; flex-wrap: wrap; text-align: left; margin-top: 2rem; border-top: 1px solid var(--border-light); padding-top: 1.5rem; }
+            .hero-stats > div { flex: 1 1 calc(50% - 1rem); min-width: 120px; }
+            .hero-stats strong { font-size: 1.5rem; display: block; color: var(--text-main); }
+            .hero-card { margin: 0 auto; max-width: 100%; }
             .testimonials-grid { grid-template-columns: 1fr; }
-            footer { grid-template-columns: 1fr 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .section { padding: 4rem 0; }
         }
         @media (max-width: 768px) {
+            body { 
+                /* App-like feel for mobile */
+                -webkit-tap-highlight-color: transparent; 
+                overflow-x: hidden;
+                width: 100%;
+            }
+            .container { padding: 0 1rem; overflow-x: hidden; }
+            nav { padding: 1rem; }
+            nav.scrolled { padding: 0.75rem 1rem; }
             .nav-links { display: none; }
+            .nav-actions { display: flex; align-items: center; }
+            .nav-actions .btn-primary { display: none; }
+            .nav-actions .btn-outline { padding: 0.5rem 1.25rem !important; border: 1px solid var(--border-light) !important; border-radius: 50px; font-size: 0.85rem; }
             .stat-box h3 { font-size: 2.5rem; }
-            .enterprise-stats { padding: 2rem; gap: 2rem; }
-            footer { grid-template-columns: 1fr; }
+            .enterprise-stats { padding: 1.5rem; gap: 1.5rem; grid-template-columns: 1fr 1fr; }
+            .mentors-header { flex-direction: column; align-items: center; text-align: center; gap: 1.5rem; }
+            .mentors-header p { text-align: center; margin: 0 auto; }
+            .mentors-row { gap: 1.5rem; }
+            .mentor-card { width: calc(50% - 0.75rem); }
+            .mentor-avatar { width: 80px; height: 80px; font-size: 2rem; }
+            .footer-grid { grid-template-columns: 1fr; }
             .footer-bottom { flex-direction: column; gap: 1.5rem; text-align: center; }
+            
+            /* Add Mobile App Bottom Nav for the "App Feel" */
+            .mobile-bottom-nav {
+                display: flex;
+            }
+        }
+        
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
+            z-index: 1000;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        }
+        
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: #000000;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            flex: 1;
+        }
+        
+        .mobile-nav-item.active {
+            color: #82b1ff;
+        }
+        .mobile-nav-item.active i {
+            color: #82b1ff;
+        }
+        
+        /* Prevent body scroll when nav is present */
+        @media (max-width: 768px) {
+            body { padding-bottom: 70px; }
+        }
+        /* =========================================
+           Bee Chatbot Widget Styles
+           ========================================= */
+        .bee-chat-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .bee-chat-fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: #FFC107;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(212, 170, 0, 0.4), 0 8px 10px -6px rgba(212, 170, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .bee-chat-fab:hover {
+            transform: scale(1.1);
+        }
+
+        .bee-chat-window {
+            width: 350px;
+            height: 500px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transform-origin: bottom right;
+            animation: beeChatOpen 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes beeChatOpen {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .bee-chat-header {
+            background: #FFC107;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bee-chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: #f8fafc;
+        }
+
+        .bee-message {
+            display: flex;
+            max-width: 85%;
+        }
+
+        .bee-message-bot {
+            align-self: flex-start;
+        }
+
+        .bee-message-user {
+            align-self: flex-end;
+        }
+
+        .bee-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .bee-message-bot .bee-bubble {
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bee-message-user .bee-bubble {
+            background: #0f172a;
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bee-chat-input-area {
+            padding: 1rem;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .bee-chat-input-area input {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .bee-chat-input-area input:focus {
+            border-color: #FFC107;
+        }
+
+        .bee-chat-input-area button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #FFC107;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .bee-chat-input-area button:hover {
+            opacity: 0.9;
+        }
+
+        .bee-typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #64748b;
+            border-radius: 50%;
+            display: inline-block;
+            animation: beeTyping 1.4s infinite ease-in-out both;
+        }
+
+        .bee-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .bee-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes beeTyping {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
     </style>
 </head>
@@ -552,6 +790,7 @@
             <a href="/about">About Us</a>
         </div>
         <div class="nav-actions">
+            <a href="/login" class="btn btn-outline" style="border:none; padding: 0.5rem 1rem; font-weight: 600;">Log in</a>
             <a href="/register" class="btn btn-primary">Get Started</a>
         </div>
     </nav>
@@ -559,8 +798,8 @@
     <!-- HERO SECTION -->
     <section class="section hero container">
         <div class="hero-content reveal">
-            <h1 class="h1">Build the career<br>you've always<br><span class="font-serif text-gradient">imagined.</span></h1>
-            <p class="hero-subtitle">Master in-demand skills with world-class instructors. Earn certificates, build your portfolio, and land your dream job.</p>
+            <h1 class="h1" style="word-wrap: break-word; overflow-wrap: break-word; hyphens: auto; letter-spacing: -0.03em; margin-bottom: 1rem;">Build the career you've always <span class="text-gradient" style="font-style: italic;">imagined.</span></h1>
+            <p class="hero-subtitle" style="max-width: 45ch;">Master in-demand skills, build your portfolio, and land your dream job with world-class instructors.</p>
             <div class="hero-actions">
                 <a href="/register" class="btn btn-primary">Explore Courses</a>
                 <a href="/about" class="btn btn-outline">Learn More</a>
@@ -612,7 +851,6 @@
                     <div class="domain-icon"><i data-lucide="code-2"></i></div>
                     <div>
                         <h3 class="domain-title">Software Engineering</h3>
-                        <p class="domain-count">124 Courses</p>
                     </div>
                 </a>
                 
@@ -620,7 +858,6 @@
                     <div class="domain-icon"><i data-lucide="bar-chart-3"></i></div>
                     <div>
                         <h3 class="domain-title">Data Science & Analytics</h3>
-                        <p class="domain-count">86 Courses</p>
                     </div>
                 </a>
                 
@@ -628,7 +865,6 @@
                     <div class="domain-icon"><i data-lucide="pen-tool"></i></div>
                     <div>
                         <h3 class="domain-title">UI/UX Design</h3>
-                        <p class="domain-count">52 Courses</p>
                     </div>
                 </a>
                 
@@ -636,7 +872,6 @@
                     <div class="domain-icon"><i data-lucide="megaphone"></i></div>
                     <div>
                         <h3 class="domain-title">Digital Marketing</h3>
-                        <p class="domain-count">48 Courses</p>
                     </div>
                 </a>
                 
@@ -644,7 +879,6 @@
                     <div class="domain-icon"><i data-lucide="briefcase"></i></div>
                     <div>
                         <h3 class="domain-title">Business & Management</h3>
-                        <p class="domain-count">71 Courses</p>
                     </div>
                 </a>
                 
@@ -652,7 +886,6 @@
                     <div class="domain-icon"><i data-lucide="cloud"></i></div>
                     <div>
                         <h3 class="domain-title">Cloud Computing</h3>
-                        <p class="domain-count">39 Courses</p>
                     </div>
                 </a>
             </div>
@@ -699,59 +932,7 @@
         </div>
     </section>
 
-    <!-- MENTORS SECTION -->
-    <section class="section section-offwhite">
-        <div class="container">
-            <h2 class="h2 reveal">Your expert<br><span class="font-serif text-gradient">mentors.</span></h2>
-            <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;">
-                <p style="color:var(--text-secondary);font-size:1.1rem;max-width:480px;margin-top:1rem;">Learn directly from practitioners who have built products at top technology companies globally.</p>
-                <a href="/courses" class="btn btn-outline">View all mentors</a>
-            </div>
-            
-            <div class="mentors-row reveal delay-200">
-                <div class="mentor-card">
-                    <div class="mentor-avatar">
-                        👩‍💻
-                        <div class="mentor-badge"><i data-lucide="check" style="width:16px;height:16px;"></i></div>
-                    </div>
-                    <h4 class="mentor-name">Sarah J.</h4>
-                    <p class="mentor-role">Sr. Engineer @ Google</p>
-                </div>
-                <div class="mentor-card">
-                    <div class="mentor-avatar">
-                        👨‍🔬
-                        <div class="mentor-badge"><i data-lucide="check" style="width:16px;height:16px;"></i></div>
-                    </div>
-                    <h4 class="mentor-name">David L.</h4>
-                    <p class="mentor-role">Data Scientist @ Meta</p>
-                </div>
-                <div class="mentor-card">
-                    <div class="mentor-avatar">
-                        👩‍🎨
-                        <div class="mentor-badge"><i data-lucide="check" style="width:16px;height:16px;"></i></div>
-                    </div>
-                    <h4 class="mentor-name">Elena P.</h4>
-                    <p class="mentor-role">Lead Design @ Apple</p>
-                </div>
-                <div class="mentor-card">
-                    <div class="mentor-avatar">
-                        👨‍💼
-                        <div class="mentor-badge"><i data-lucide="check" style="width:16px;height:16px;"></i></div>
-                    </div>
-                    <h4 class="mentor-name">Michael R.</h4>
-                    <p class="mentor-role">Product Dir. @ Stripe</p>
-                </div>
-                <div class="mentor-card">
-                    <div class="mentor-avatar">
-                        👩‍🏫
-                        <div class="mentor-badge"><i data-lucide="check" style="width:16px;height:16px;"></i></div>
-                    </div>
-                    <h4 class="mentor-name">Anita K.</h4>
-                    <p class="mentor-role">Cloud Arch. @ AWS</p>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- TESTIMONIALS SECTION -->
     <section class="section">
@@ -937,7 +1118,7 @@
     <!-- FOOTER -->
     <footer>
         <div class="container reveal">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem;">
+            <div class="footer-grid">
                 <div class="footer-brand">
                     <a href="/" style="display:flex;align-items:center;text-decoration:none;">
                         <img src="/images/teach.jpg" alt="Teachures Logo" style="height:40px;object-fit:contain;border-radius:4px;">
@@ -977,6 +1158,18 @@
             </div>
         </div>
     </footer>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-bottom-nav">
+        <a href="/" class="mobile-nav-item active">
+            <i data-lucide="home" style="width:24px;height:24px;"></i>
+            <span>Home</span>
+        </a>
+        <a href="/login" class="mobile-nav-item">
+            <i data-lucide="user" style="width:24px;height:24px;"></i>
+            <span>Account</span>
+        </a>
+    </nav>
 
     <script>
         // Initialize icons
@@ -1031,5 +1224,47 @@
             });
         });
     </script>
+    <!-- Bee Chatbot Widget -->
+    <div id="beeChatbot" class="bee-chat-widget">
+        <!-- Chat Bubble (FAB) -->
+        <button id="beeChatFab" class="bee-chat-fab">
+            <span style="font-size: 32px; line-height: 1;">🐝</span>
+        </button>
+
+        <!-- Chat Window -->
+        <div id="beeChatWindow" class="bee-chat-window" style="display: none;">
+            <div class="bee-chat-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        🐝
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1rem; color: white;">Bee</h4>
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.8);">AI Assistant</span>
+                    </div>
+                </div>
+                <button id="beeChatCloseBtn" style="background: none; border: none; color: white; cursor: pointer; padding: 4px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <div id="beeChatMessages" class="bee-chat-messages">
+                <!-- Messages will appear here -->
+                <div class="bee-message bee-message-bot">
+                    <div class="bee-bubble">Hi there! I'm Bee 🐝. How can I help you today?</div>
+                </div>
+            </div>
+
+            <div class="bee-chat-input-area">
+                <input type="text" id="beeChatInput" placeholder="Ask me anything..." autocomplete="off">
+                <button id="beeChatSendBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/chatbot.js"></script>
+    
 </body>
 </html>

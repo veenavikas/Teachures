@@ -24,7 +24,7 @@ const generateTokens = (user) => {
 
 exports.register = async (req, res) => {
     try {
-        const { email, password, name, role } = req.body;
+        const { email, password, name, role, skills, experience } = req.body;
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -53,7 +53,17 @@ exports.register = async (req, res) => {
         });
 
         if (user.role === 'INSTRUCTOR') {
-            await prisma.instructorProfile.create({ data: { userId: user.id } });
+            let expertiseArray = [];
+            if (skills) {
+                expertiseArray = skills.split(',').map(s => s.trim()).filter(s => s);
+            }
+            await prisma.instructorProfile.create({ 
+                data: { 
+                    userId: user.id,
+                    expertise: expertiseArray,
+                    bio: experience || null
+                } 
+            });
         }
 
         // Do not auto-login if it's an unapproved instructor

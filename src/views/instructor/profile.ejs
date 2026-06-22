@@ -35,6 +35,39 @@
             </div>
         </form>
     </div>
+
+    <!-- Password Change Section -->
+    <div class="card" style="padding: 2.5rem; background: #FFFFFF; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-top: 2rem;">
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-size: 1.5rem; color: #0F172A; font-weight: 700;">Change Password</h3>
+            <p style="color: #64748B; margin-top: 0.5rem;">Ensure your account is using a long, random password to stay secure.</p>
+        </div>
+
+        <form id="passwordForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div>
+                <label for="currentPassword" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Current Password</label>
+                <input type="password" name="currentPassword" id="currentPassword" required style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;">
+            </div>
+
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="newPassword" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">New Password</label>
+                    <input type="password" name="newPassword" id="newPassword" required minlength="8" style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;">
+                </div>
+
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="confirmPassword" style="display: block; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Confirm New Password</label>
+                    <input type="password" name="confirmPassword" id="confirmPassword" required minlength="8" style="width: 100%; padding: 0.75rem; border: 1px solid #CBD5E1; border-radius: 0.375rem; font-family: inherit;">
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 0.375rem; background: var(--color-primary); color: #0F172A; border: none; font-weight: 600; cursor: pointer;">
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -62,6 +95,35 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
             alert('Profile updated successfully!');
         } else {
             alert(result.message || 'Error updating profile');
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+    }
+});
+
+document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        return alert('New passwords do not match!');
+    }
+
+    try {
+        const response = await fetch('/api/v1/auth/profile/password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Password updated successfully!');
+            document.getElementById('passwordForm').reset();
+        } else {
+            alert(result.message || 'Error updating password');
         }
     } catch (error) {
         alert('An error occurred. Please try again.');

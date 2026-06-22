@@ -154,12 +154,18 @@ router.get('/support', async (req, res) => {
 router.post('/support', async (req, res) => {
     try {
         const { subject, description, priority } = req.body;
-        await prisma.supportTicket.create({
+        const ticket = await prisma.supportTicket.create({
             data: { userId: req.user.id, subject, description, priority: priority || 'MEDIUM' }
         });
-        res.redirect('/student/support');
+        
+        // Add initial message
+        await prisma.ticketMessage.create({
+            data: { ticketId: ticket.id, senderId: req.user.id, message: description }
+        });
+        
+        res.json({ success: true, message: 'Ticket created successfully' });
     } catch (error) {
-        res.status(500).send('Server Error: ' + error.message);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 
@@ -481,6 +487,14 @@ router.post('/courses/:courseId/progress', async (req, res) => {
         if (lessonId) {
             // Award 10 points for completing a lesson
             await awardPoints(req.user.id, 10);
+            
+            // Check for First Step badge
+            const completedLessons = await prisma.lessonProgress.count({
+                where: { userId: req.user.id, isCompleted: true }
+            });
+            if (completedLessons === 1) {
+                await checkAndAwardBadge(req.user.id, 'lesson_1');
+            }
         }
 
         res.json({ success: true, percentComplete: percent });

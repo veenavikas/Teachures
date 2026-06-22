@@ -1,0 +1,96 @@
+<div class="grid-2" style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+    <div class="card" style="padding: 2rem;">
+        <h2 style="font-family: var(--font-heading); margin-bottom: 2rem; color: var(--text-main);">Course Announcements</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+            Send an announcement to all students enrolled in a specific course. They will receive an email notification and see it on their course dashboard.
+        </p>
+
+        <form id="announcementForm" style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 600px;">
+            <div class="form-group">
+                <label class="form-label">Select Course</label>
+                <select id="courseId" class="form-control" required style="background: white; color: black; appearance: auto;">
+                    <option value="" disabled selected>-- Choose a course --</option>
+                    <% courses.forEach(course => { %>
+                        <option value="<%= course.id %>"><%= course.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Subject Line</label>
+                <input type="text" id="announcementTitle" class="form-control" placeholder="e.g. Welcome to Week 2!" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea id="announcementContent" class="form-control" rows="5" placeholder="Write your announcement..." required></textarea>
+            </div>
+
+            <button type="submit" id="sendBtn" class="btn btn-primary" style="width: 100%;">
+                <i data-lucide="send" style="margin-right: 8px;"></i> Send Announcement
+            </button>
+        </form>
+    </div>
+
+    <div class="card" style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">Announcement History</h3>
+        
+        <% if (announcements && announcements.length > 0) { %>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <% announcements.forEach(ann => { %>
+                    <div style="border: 1px solid var(--border-light); border-radius: 8px; padding: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="font-size: 1.1rem; color: var(--text-main); margin-bottom: 0.25rem;"><%= ann.title %></h4>
+                                <span class="badge" style="background: var(--color-gray-light); color: white; font-size: 0.75rem;"><%= ann.course.title %></span>
+                            </div>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">
+                                <%= new Date(ann.createdAt).toLocaleDateString() %>
+                            </span>
+                        </div>
+                        <p style="color: var(--text-secondary); white-space: pre-wrap; line-height: 1.6;"><%= ann.content %></p>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p class="text-muted text-center" style="padding: 2rem;">No announcements sent yet.</p>
+        <% } %>
+    </div>
+</div>
+
+<script>
+document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const courseId = document.getElementById('courseId').value;
+    const title = document.getElementById('announcementTitle').value;
+    const content = document.getElementById('announcementContent').value;
+    const sendBtn = document.getElementById('sendBtn');
+
+    if (!courseId) return alert('Please select a course first.');
+    if (!confirm('Are you sure you want to email this announcement to all enrolled students?')) return;
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = 'Sending...';
+
+    try {
+        const res = await fetch(`/api/v1/courses/${courseId}/announcements`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            alert('Announcement broadcasted successfully!');
+            window.location.reload();
+        } else {
+            alert(data.message || 'Failed to send announcement');
+        }
+    } catch (err) {
+        alert('An error occurred. Please try again.');
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i data-lucide="send" style="margin-right: 8px;"></i> Send Announcement';
+    }
+});
+</script>

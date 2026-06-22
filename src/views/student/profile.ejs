@@ -30,6 +30,23 @@
     </form>
 </div>
 
+<div class="card" style="padding: 2rem; max-width: 600px; margin: 2rem auto;">
+    <h3 style="font-family: var(--font-heading); margin-bottom: 1.5rem;">Change Password</h3>
+    <form id="passwordForm">
+        <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--color-gray-light);">Current Password</label>
+            <input type="password" id="currentPassword" style="width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); color: var(--color-white); padding: 0.75rem; border-radius: 8px;" required>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--color-gray-light);">New Password</label>
+            <input type="password" id="newPassword" style="width: 100%; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); color: var(--color-white); padding: 0.75rem; border-radius: 8px;" required>
+        </div>
+
+        <button type="submit" class="btn btn-outline" id="pwdSaveBtn">Update Password</button>
+        <p id="pwdMessage" style="margin-top: 1rem;"></p>
+    </form>
+</div>
+
 <script>
     const avatarInput = document.getElementById('avatarInput');
     const avatarPreview = document.getElementById('avatarPreview');
@@ -80,6 +97,41 @@
         } finally {
             btn.disabled = false;
             btn.innerText = 'Save Changes';
+        }
+    });
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('pwdSaveBtn');
+        const msg = document.getElementById('pwdMessage');
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+
+        btn.disabled = true;
+        btn.innerText = 'Updating...';
+        msg.textContent = '';
+
+        try {
+            const res = await fetch('/api/v1/auth/profile/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+            const data = await res.json();
+            if (data.success) {
+                msg.textContent = 'Password updated successfully!';
+                msg.style.color = 'var(--color-success)';
+                document.getElementById('passwordForm').reset();
+            } else {
+                msg.textContent = data.message;
+                msg.style.color = 'var(--color-danger)';
+            }
+        } catch (err) {
+            msg.textContent = 'Connection error';
+            msg.style.color = 'var(--color-danger)';
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Update Password';
         }
     });
 </script>

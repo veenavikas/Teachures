@@ -4,6 +4,9 @@ const prisma = require('../config/database');
 
 // All public pages are standalone HTML — disable ejs-layouts wrapping
 router.get('/', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.render('public/index', { layout: false });
 });
 

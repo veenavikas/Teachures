@@ -7,12 +7,12 @@ const groq = new Groq({
 
 exports.askTutor = async (req, res) => {
     try {
-        const { question, courseId, lessonId } = req.body;
+        const { question, history = [], courseId, lessonId } = req.body;
         if (!question) {
             return res.status(400).json({ success: false, message: 'Question is required' });
         }
 
-        let context = 'You are a helpful and encouraging AI teaching assistant for the Teachures LMS.';
+        let context = 'Your name is Bee. You are a helpful, friendly, and encouraging AI assistant for the Teachures website. You guide users around the website, answer questions, and help them with their learning and dashboard.';
 
         // If course info is provided, fetch some context
         if (courseId) {
@@ -29,14 +29,27 @@ exports.askTutor = async (req, res) => {
             }
         }
 
+        // Construct message array starting with system prompt, followed by history, then the new question
+        const messages = [
+            { role: 'system', content: context }
+        ];
+
+        // Append valid history messages
+        if (Array.isArray(history)) {
+            history.forEach(msg => {
+                if (msg.role && msg.content) {
+                    messages.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content });
+                }
+            });
+        }
+
+        messages.push({ role: 'user', content: question });
+
         const chatCompletion = await groq.chat.completions.create({
-            messages: [
-                { role: 'system', content: context },
-                { role: 'user', content: question }
-            ],
-            model: 'llama3-8b-8192',
+            messages: messages,
+            model: 'llama-3.1-8b-instant',
             temperature: 0.7,
-            max_tokens: 512
+            max_tokens: 1024
         });
 
         const reply = chatCompletion.choices[0]?.message?.content || 'I am sorry, I am currently unable to answer that.';
@@ -86,7 +99,7 @@ The JSON must follow this exact schema:
                 { role: 'system', content: systemMessage },
                 { role: 'user', content: `Create a comprehensive curriculum for a course about: ${prompt}` }
             ],
-            model: 'llama3-8b-8192',
+            model: 'llama-3.1-8b-instant',
             temperature: 0.7,
             response_format: { type: 'json_object' }
         });

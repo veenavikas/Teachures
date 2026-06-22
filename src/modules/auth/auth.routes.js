@@ -110,5 +110,6 @@ const upload = multer({ storage: storage });
 // Profile
 router.get('/profile', requireAuth, profileController.getProfile);
 router.post('/profile', requireAuth, upload.single('avatar'), profileController.updateProfile);
+router.post('/profile/password', requireAuth, profileController.updatePassword);
 
 module.exports = router;

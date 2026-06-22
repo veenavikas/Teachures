@@ -40,7 +40,19 @@
         </div>
     </div>
 
-    <button type="submit" class="btn-submit">Create Account →</button>
+    <div id="instructor-fields" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--bg-offwhite); border: 1px solid var(--border-light); border-radius: 12px;">
+        <h4 style="margin-bottom: 1rem; color: var(--text-main); font-size: 1.1rem;">Instructor Profile</h4>
+        <div class="form-group">
+            <label class="form-label">Skills (comma separated)</label>
+            <input type="text" name="skills" id="skills-input" class="form-control" placeholder="e.g. React, Data Science, UI/UX">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Experience & Background</label>
+            <textarea name="experience" id="experience-input" class="form-control" rows="3" placeholder="Tell us about your teaching or industry experience..."></textarea>
+        </div>
+    </div>
+
+    <button type="submit" class="btn-submit" style="margin-top: 1.5rem;">Create Account →</button>
 </form>
 
 <div class="divider">or continue with</div>
@@ -72,6 +84,20 @@
         labelStudent.style.background = roleStudent.checked ? 'rgba(217,119,6,0.05)' : '#F8FAFC';
         labelInstructor.style.borderColor = roleInstructor.checked ? '#D97706' : '#E2E8F0';
         labelInstructor.style.background = roleInstructor.checked ? 'rgba(217,119,6,0.05)' : '#F8FAFC';
+        
+        const instructorFields = document.getElementById('instructor-fields');
+        const skillsInput = document.getElementById('skills-input');
+        const experienceInput = document.getElementById('experience-input');
+        
+        if (roleInstructor.checked) {
+            instructorFields.style.display = 'block';
+            skillsInput.required = true;
+            experienceInput.required = true;
+        } else {
+            instructorFields.style.display = 'none';
+            skillsInput.required = false;
+            experienceInput.required = false;
+        }
     }
 
     labelStudent.addEventListener('click', () => { roleStudent.checked = true; updateSelection(); });

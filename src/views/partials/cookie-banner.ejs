@@ -289,11 +289,9 @@
         </div>
     </div>
     <div class="cookie-actions">
-        <button class="btn-cookie btn-cookie-link" onclick="openCookieModal()">Manage Preferences</button>
-        <button class="btn-cookie btn-cookie-secondary"
-            onclick="saveConsent({essential:true, analytics:false, marketing:false})">Reject Non-Essential</button>
-        <button class="btn-cookie btn-cookie-primary"
-            onclick="saveConsent({essential:true, analytics:true, marketing:true})">Accept All</button>
+        <button type="button" class="btn-cookie btn-cookie-link" id="btnCookieManage">Manage Preferences</button>
+        <button type="button" class="btn-cookie btn-cookie-secondary" id="btnCookieReject">Reject Non-Essential</button>
+        <button type="button" class="btn-cookie btn-cookie-primary" id="btnCookieAccept">Accept All</button>
     </div>
 </div>
 
@@ -301,7 +299,7 @@
     <div class="cookie-modal">
         <div class="cm-header">
             <h2>Cookie Preferences</h2>
-            <button onclick="closeCookieModal()" aria-label="Close preferences modal"
+            <button id="btnCloseCookieModal" aria-label="Close preferences modal"
                 style="background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; font-size:1.5rem;">×</button>
         </div>
         <div class="cm-body">
@@ -346,8 +344,8 @@
             </div>
         </div>
         <div class="cm-footer">
-            <button class="btn-cookie btn-cookie-secondary" onclick="closeCookieModal()">Cancel</button>
-            <button class="btn-cookie btn-cookie-primary" onclick="saveCustomConsent()">Save Preferences</button>
+            <button type="button" class="btn-cookie btn-cookie-secondary" id="btnCookieCancel">Cancel</button>
+            <button type="button" class="btn-cookie btn-cookie-primary" id="btnCookieSaveCustom">Save Preferences</button>
         </div>
     </div>
 </div>
@@ -359,36 +357,58 @@
         if (!consentCookie) {
             // Slight delay so it slides up smoothly
             setTimeout(() => {
-                document.getElementById('cookieBanner').classList.add('show');
+                const banner = document.getElementById('cookieBanner');
+                if (banner) banner.classList.add('show');
             }, 500);
         }
+
+        // Attach event listeners safely
+        document.getElementById('btnCookieManage')?.addEventListener('click', openCookieModal);
+        document.getElementById('btnCookieReject')?.addEventListener('click', (e) => {
+            saveConsent(e, {essential:true, analytics:false, marketing:false});
+        });
+        document.getElementById('btnCookieAccept')?.addEventListener('click', (e) => {
+            saveConsent(e, {essential:true, analytics:true, marketing:true});
+        });
+        document.getElementById('btnCookieCancel')?.addEventListener('click', closeCookieModal);
+        document.getElementById('btnCookieSaveCustom')?.addEventListener('click', saveCustomConsent);
+        
+        // Close modal button
+        document.getElementById('btnCloseCookieModal')?.addEventListener('click', closeCookieModal);
     });
 
-    function openCookieModal() {
+    function openCookieModal(e) {
+        if (e) e.preventDefault();
         document.getElementById('cookieModal').classList.add('show');
     }
 
-    function closeCookieModal() {
+    function closeCookieModal(e) {
+        if (e) e.preventDefault();
         document.getElementById('cookieModal').classList.remove('show');
     }
 
-    function saveCustomConsent() {
+    function saveCustomConsent(e) {
+        if (e) e.preventDefault();
         const prefs = {
             essential: true,
             analytics: document.getElementById('toggleAnalytics').checked,
             marketing: document.getElementById('toggleMarketing').checked
         };
-        saveConsent(prefs);
+        saveConsent(e, prefs);
     }
 
-    async function saveConsent(preferences) {
+    async function saveConsent(e, preferences) {
+        if (e) e.preventDefault();
         // Set local cookie valid for 1 year
         const oneYear = 365 * 24 * 60 * 60;
         document.cookie = `teachures_consent=${encodeURIComponent(JSON.stringify(preferences))}; max-age=${oneYear}; path=/`;
 
         // Hide UI immediately
-        document.getElementById('cookieBanner').classList.remove('show');
-        closeCookieModal();
+        const banner = document.getElementById('cookieBanner');
+        if (banner) banner.classList.remove('show');
+        
+        const modal = document.getElementById('cookieModal');
+        if (modal) modal.classList.remove('show');
 
         // Async save to backend DB for logged-in users (audit log)
         try {
