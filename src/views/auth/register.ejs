@@ -98,6 +98,11 @@
             skillsInput.required = false;
             experienceInput.required = false;
         }
+
+        const googleBtn = document.querySelector('.btn-google');
+        if (googleBtn) {
+            googleBtn.href = `/api/v1/auth/google?role=${roleInstructor.checked ? 'INSTRUCTOR' : 'STUDENT'}`;
+        }
     }
 
     labelStudent.addEventListener('click', () => { roleStudent.checked = true; updateSelection(); });

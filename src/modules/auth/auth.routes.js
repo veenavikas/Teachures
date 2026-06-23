@@ -16,10 +16,11 @@ router.post('/2fa/verify', requireAuth, authController.verify2FASetup);
 
 // Supabase OAuth Initiation
 router.get('/google', async (req, res) => {
+    const role = req.query.role || 'STUDENT';
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: `${process.env.APP_URL}/api/v1/auth/supabase/callback`
+            redirectTo: `${process.env.APP_URL}/api/v1/auth/supabase/callback?role=${role}`
         }
     });
 
@@ -33,6 +34,8 @@ router.get('/google', async (req, res) => {
 // Supabase OAuth Callback
 router.get('/supabase/callback', async (req, res) => {
     const code = req.query.code;
+    const requestedRole = req.query.role || 'STUDENT';
+
     if (!code) return res.redirect('/login?error=missing_code');
 
     try {
@@ -62,25 +65,44 @@ router.get('/supabase/callback', async (req, res) => {
                     oauthProvider: provider,
                     oauthId: supabaseUser.id,
                     avatar,
-                    role: 'STUDENT',
+                    role: requestedRole,
                     isVerified: true
                 }
             });
+
+            if (user.role === 'INSTRUCTOR') {
+                await prisma.instructorProfile.create({ 
+                    data: { 
+                        userId: user.id,
+                        expertise: [],
+                        bio: null
+                    } 
+                });
+            }
         }
 
         // Generate local JWTs
         const jwt = require('jsonwebtoken');
-        const accessToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+        const accessToken = jwt.sign({ id: user.id, role: user.role, tenantId: user.tenantId }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
         const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15 * 60 * 1000
+        });
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        // Redirect to dashboard with token
-        res.redirect(`${process.env.APP_URL}/auth/success?token=${accessToken}`);
+        // Redirect to dashboard based on role
+        const dashboard = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
+        res.redirect(dashboard);
 
     } catch (error) {
         console.error('Supabase OAuth Error:', error.message);
