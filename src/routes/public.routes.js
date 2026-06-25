@@ -2,12 +2,30 @@ const express = require('express');
 const router = express.Router();
 const prisma = require('../config/database');
 
-// All public pages are standalone HTML — disable ejs-layouts wrapping
-router.get('/', (req, res) => {
+const renderOrFallback = async (slug, req, res, fallbackTemplate, fallbackContext = {}) => {
+    try {
+        const page = await prisma.page.findUnique({ where: { slug } });
+        if (page && !page.isDraft) {
+            return res.render('public/dynamic-page', { 
+                layout: 'layouts/main', 
+                page, 
+                seoTitle: page.seoTitle || page.title, 
+                seoDesc: page.seoDesc 
+            });
+        }
+    } catch(e) {
+        console.error(`Error loading dynamic page ${slug}:`, e);
+    }
+    // Fallback to static EJS template
+    res.render(fallbackTemplate, { layout: false, ...fallbackContext });
+};
+
+// All public pages are standalone HTML — disable ejs-layouts wrapping unless overridden by CMS
+router.get('/', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    res.render('public/index', { layout: false });
+    await renderOrFallback('home', req, res, 'public/index');
 });
 
 router.get('/courses', async (req, res) => {
@@ -27,16 +45,16 @@ router.get('/courses', async (req, res) => {
     }
 });
 
-router.get('/about', (req, res) => {
-    res.render('public/about', { layout: false });
+router.get('/about', async (req, res) => {
+    await renderOrFallback('about', req, res, 'public/about');
 });
 
-router.get('/privacy-policy', (req, res) => {
-    res.render('public/privacy', { layout: false });
+router.get('/privacy-policy', async (req, res) => {
+    await renderOrFallback('privacy-policy', req, res, 'public/privacy');
 });
 
-router.get('/terms', (req, res) => {
-    res.render('public/terms', { layout: false });
+router.get('/terms', async (req, res) => {
+    await renderOrFallback('terms', req, res, 'public/terms');
 });
 
 router.get('/login', (req, res) => {
