@@ -270,18 +270,22 @@ exports.createLesson = async (req, res) => {
         const { sectionId } = req.params;
         const { title, order, type, content, isPreview, dripDays, liveUrl, liveStartTime, assignmentDescription, assignmentDeadline } = req.body;
         let videoUrl = null;
+        let finalType = type || 'VIDEO';
 
         if (req.file) {
             // Local file URL path starting from root, so express.static can serve it
             const folder = req.file.mimetype.startsWith('video/') ? 'videos' : 'images';
             videoUrl = `/uploads/${folder}/${req.file.filename}`;
+            if (folder === 'videos') {
+                finalType = 'VIDEO';
+            }
         }
 
         const lesson = await prisma.lesson.create({
             data: {
                 title,
                 order: parseInt(order) || 0,
-                type: type || 'VIDEO',
+                type: finalType,
                 content,
                 videoUrl,
                 attachments: req.body.attachments ? JSON.parse(req.body.attachments) : null,
@@ -333,6 +337,9 @@ exports.updateLesson = async (req, res) => {
         if (req.file) {
             const folder = req.file.mimetype.startsWith('video/') ? 'videos' : 'images';
             updateData.videoUrl = `/uploads/${folder}/${req.file.filename}`;
+            if (folder === 'videos') {
+                updateData.type = 'VIDEO';
+            }
         }
 
         const lesson = await prisma.lesson.update({
@@ -370,5 +377,57 @@ exports.deleteLesson = async (req, res) => {
         res.json({ success: true, message: 'Lesson deleted' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.bulkCreateCurriculum = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { sections } = req.body;
+
+        if (!sections || !Array.isArray(sections)) {
+            return res.status(400).json({ success: false, message: 'Sections array is required' });
+        }
+
+        const course = await prisma.course.findUnique({
+            where: { id },
+            include: { sections: true }
+        });
+
+        if (!course || (course.instructorId !== req.user.id && req.user.role !== 'ADMINISTRATOR')) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        let currentSectionOrder = course.sections.length;
+
+        for (const sec of sections) {
+            const createdSection = await prisma.section.create({
+                data: {
+                    courseId: id,
+                    title: sec.title,
+                    order: currentSectionOrder++
+                }
+            });
+
+            if (sec.lessons && Array.isArray(sec.lessons)) {
+                let currentLessonOrder = 0;
+                for (const les of sec.lessons) {
+                    await prisma.lesson.create({
+                        data: {
+                            sectionId: createdSection.id,
+                            title: les.title,
+                            content: les.description || '',
+                            type: 'ARTICLE',
+                            order: currentLessonOrder++
+                        }
+                    });
+                }
+            }
+        }
+
+        res.json({ success: true, message: 'Curriculum applied successfully' });
+    } catch (error) {
+        console.error('Bulk Create Curriculum Error:', error);
+        res.status(500).json({ success: false, message: 'Failed to apply curriculum' });
     }
 };

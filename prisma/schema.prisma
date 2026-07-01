@@ -31,9 +31,13 @@ model User {
   email           String       @unique
   passwordHash    String?
   name            String
+  phone           String?
+  address         String?
   avatar          String?
   role            Role         @default(SUBSCRIBER)
   isVerified      Boolean      @default(false)
+  otpCode         String?
+  otpExpires      DateTime?
   twoFactorEnabled Boolean     @default(false)
   twoFactorSecret String?
   oauthProvider   String?

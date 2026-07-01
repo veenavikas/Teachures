@@ -29,10 +29,16 @@ exports.uploadFileLocal = async (fileBuffer, originalName, mimeType, folder = 'u
 /**
  * Generate a Local URL (Replacing S3 Signed URLs)
  */
-exports.generateSignedUrl = async (key) => {
-    // For local storage, the key is already a relative URL like /uploads/videos/xxx.mp4
-    // We just return it. No presigning needed.
-    return key;
+exports.generateSignedUrl = async (key, expiresIn = 7200) => {
+    const expires = Math.floor(Date.now() / 1000) + expiresIn;
+    const secret = process.env.SESSION_SECRET || 'fallback-secret-teachures-dev';
+    const payload = `${key}:${expires}`;
+    
+    const signature = crypto.createHmac('sha256', secret)
+                            .update(payload)
+                            .digest('hex');
+                            
+    return `/student/videos/stream?file=${encodeURIComponent(key)}&expires=${expires}&signature=${signature}`;
 };
 
 /**

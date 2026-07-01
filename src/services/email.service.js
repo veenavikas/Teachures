@@ -69,3 +69,8 @@ exports.sendVerifyEmail = async (to, name, verifyToken) => {
     const context = { name, verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}` };
     return await sendHtmlEmail(to, 'Verify Your Email Address', 'verify-email', context);
 };
+
+exports.sendOtpEmail = async (to, name, otpCode) => {
+    const context = { name, otpCode };
+    return await sendHtmlEmail(to, 'Your Verification Code', 'otp-code', context);
+};

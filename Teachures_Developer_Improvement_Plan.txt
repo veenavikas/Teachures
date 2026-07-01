@@ -1,0 +1,294 @@
+Teachures Developer Improvement Plan
+
+Prepared for
+Teachures development team
+Prepared on
+June 24, 2026
+Website tested
+https://teachures.com
+Source inputs
+BRD plus QA sessions for student, tutor, admin, course creation, and video upload flows
+Security note
+Passwords, admin secrets, and sensitive credentials are intentionally excluded.
+
+Plain-English summary
+The platform has a usable foundation, but it is not ready for production training delivery yet. The most urgent blockers are: payment success does not enroll students, required OTP/MFA registration controls are missing, password recovery and key routes are broken, mobile navigation fails, and video upload/playback/security cannot be completed because tutor video upload did not persist.
+
+Recommended Delivery Order
+Priority
+Fix group
+Why this comes first
+Developer acceptance target
+P0
+Student enrollment and checkout
+All learning, progress, video, quiz, and certificate flows depend on a valid enrollment record.
+After a successful free or paid checkout, the student appears in My Learning and can open the course lesson page.
+P0
+Auth and registration compliance
+The BRD requires phone/address, OTP verification, and optional MFA. Current signup grants access too early.
+Student signup verifies phone OTP before dashboard access and supports MFA setup/login challenge.
+P0
+Video upload persistence
+The main project purpose is secure training video delivery. Tutor upload currently fails to persist.
+Tutor can upload MP4/video lesson, reload editor, and still see the lesson as VIDEO with playable media.
+P1
+Broken routes and navigation
+Broken routes damage trust and block routine student tasks.
+/forgot-password, /dashboard, /student/leaderboard, and mobile menu all work.
+P1
+Catalog and dashboard data accuracy
+Students should not see fake or contradictory learning states.
+Search/filter results are accurate; dashboard cards match real enrollments only.
+P1
+Video security controls
+Once upload and playback work, content protection must match the BRD.
+Student playback uses signed/encrypted streaming, visible dynamic watermark, no direct public file URL, and session controls.
+P2
+Instructor/admin polish and analytics
+These are important but less blocking than learning access and video delivery.
+Instructor pages use one dashboard shell; analytics values match real account data.
+
+P0 Fix 1 - Checkout Must Create Enrollment
+Observed failure:
+$0 mock checkout shows Payment Successful, but the student still sees 0 enrolled courses.
+Learning URL still returns Not enrolled after payment success.
+Checkout is visible while unauthenticated, which creates confusing access-control behavior.
+Recommended implementation:
+Require authenticated student session before final checkout action.
+On payment success, perform an atomic backend operation: verify payment/free checkout, create enrollment, mark course access active, generate receipt/invoice, and return a JSON success payload.
+Make the operation idempotent so repeated callback/button clicks do not create duplicate enrollments.
+Redirect the student to /student/my-courses or the course learn URL only after enrollment exists.
+Log payment/enrollment failures with a correlation ID visible to support/admin.
+Acceptance test
+Expected result
+Student completes $0 checkout for Mock Test Course.
+Payment success creates enrollment; course appears in My Learning.
+Student clicks Start Learning after checkout.
+Course lesson page opens instead of Not enrolled.
+Student refreshes My Learning.
+Enrollment remains visible after refresh/logout/login.
+Unauthenticated user opens checkout.
+User is redirected to login before pay/enroll controls are actionable.
+
+P0 Fix 2 - Registration, OTP, and MFA
+Observed failure:
+Student registration only asked for name, email, and password.
+No phone number, address, OTP, or MFA step appeared.
+Dashboard access was granted immediately after signup.
+Recommended implementation:
+Update student registration to collect required BRD fields: name, email, phone number, address, password, and terms/privacy consent.
+Send OTP to phone and block dashboard access until OTP is verified.
+Add optional MFA enrollment after first login and support OTP challenge on login when MFA is enabled.
+Add rate limits, resend cooldown, OTP expiry, and safe error messages.
+Store verified phone state separately from user profile data.
+Acceptance test
+Expected result
+Register without phone/address.
+Form blocks submission with field-level validation.
+Register with valid details.
+OTP step appears before dashboard access.
+Enter invalid OTP.
+Access remains blocked and error is shown.
+Enter valid OTP.
+Account becomes verified and student dashboard opens.
+Enable MFA.
+Next login requires second factor.
+
+P0 Fix 3 - Tutor Video Upload and Curriculum API
+Observed failure:
+Tutor could create a course and open the lesson editor.
+Generated lesson Demo Video Security Playback remained ARTICLE after attempted upload/save.
+After Save Lesson, curriculum area showed Error loading curriculum.
+Console indicated the sections endpoint returned HTML instead of JSON, likely the login page after session expiry.
+Reload redirected tutor to /login, and the video update did not persist after relogin.
+curriculum.js also logs ReferenceError: courseId is not defined for bank questions and cohorts.
+Recommended implementation:
+Keep tutor session valid during multipart upload; if session expires, return 401 JSON and display a clear re-login message without corrupting the editor state.
+Make the lesson update endpoint persist type=VIDEO, video metadata, storage URL/key, file MIME type, file size, duration if available, and processing status.
+Return JSON for all API paths used by curriculum.js, including errors. Never return full login HTML to fetch() calls.
+Fix JavaScript globals by using one course identifier consistently, such as window.COURSE_ID, instead of undefined courseId.
+Add upload progress, max file size/type validation, and server-side validation for video/* files.
+Add a post-save verification refresh that fetches the lesson and displays a success toast only after the lesson is stored as VIDEO.
+Acceptance test
+Expected result
+Tutor uploads a small MP4 and clicks Save Lesson.
+Modal closes with success; lesson row icon/type becomes VIDEO.
+Tutor refreshes editor.
+Lesson remains VIDEO and attached video metadata is still present.
+Tutor session expires during upload.
+Frontend receives 401 JSON and asks for login; no misleading success state appears.
+curriculum.js loads editor.
+No ReferenceError appears for courseId; sections, question bank, and cohorts load or show empty states.
+
+P1 Fixes - Routes, Mobile Navigation, Catalog, and Dashboard
+Area
+Observed failure
+Recommended fix
+Acceptance criteria
+Forgot password
+/forgot-password returns Cannot GET.
+Build password reset request and token reset pages.
+Forgot Password opens, sends reset email/OTP, and handles expired tokens safely.
+Checkout cancel
+Cancel points to /dashboard, which is broken.
+Route to /student/dashboard or prior course detail depending on auth state.
+Cancel always lands on a valid page.
+Leaderboard
+/student/leaderboard returns Cannot GET.
+Implement route or update link to existing gamification page.
+Full Board link loads a leaderboard page.
+Mobile navigation
+Menu button renders 0 x 0; nav links are hidden.
+Fix responsive header/menu button size, aria labels, and open/close state.
+Courses, About, Login, and Register are reachable on mobile.
+Catalog search
+No-result search still shows Mock Test Course.
+Filter courses on query and show empty state.
+Nonsense search shows no results.
+Catalog filters
+Category chips activate but do not filter.
+Wire filters to backend/frontend category data.
+Design filter hides non-design courses or shows empty state.
+Student dashboard
+Dashboard cards conflict with My Learning state.
+Drive dashboard course cards from enrollment records only.
+Dashboard and My Learning show the same enrollment count.
+
+P1 Fix - Video Security and Non-Recordability
+Important technical reality
+A normal browser application cannot fully prevent OS-level screen recording by itself. The realistic production approach is DRM or encrypted streaming, signed short-lived media URLs, session controls, and dynamic visible watermarking with trainee identity. These controls do not make piracy impossible, but they reduce casual downloading and make leaks traceable.
+
+Requirement
+Recommended implementation
+Acceptance test
+No direct download
+Do not expose public MP4 URLs. Use signed short-lived URLs or HLS/DASH with protected segments.
+Developer tools/network should not reveal a reusable public video URL.
+Encrypted streaming
+Use HLS with AES-128 or a DRM provider where feasible.
+Media requests use segmented/encrypted stream; direct file download fails without auth.
+Dynamic watermark
+Overlay moving watermark with student name, email, and optionally phone/user ID.
+During playback, watermark is visible and changes position periodically.
+Browser controls
+Use controlsList=nodownload, disablePictureInPicture where appropriate, and block obvious context-menu download actions.
+No visible download button; right-click does not expose a saveable direct file.
+Session tracking
+Limit active sessions per user or detect concurrent playback.
+Second session invalidates first or prompts user/admin depending on policy.
+Progress tracking
+Record watch progress server-side and resume playback.
+Student leaves mid-lesson and returns to the saved timestamp.
+
+P2 Fixes - Instructor/Admin Consistency
+Instructor Earnings and Privacy pages should use the same instructor dashboard shell/sidebar as the rest of the instructor portal.
+Instructor analytics should not show demo revenue values that conflict with $0 earnings.
+Admin should have clear user approval, account deactivation, password reset, activity reports, payment reports, and content moderation workflows.
+AI curriculum generation should show a preview before saving and respect scope instructions such as one section / one lesson.
+Add audit logs for admin approval, course publish, lesson upload, payment success, and account deletion actions.
+Suggested Developer Backlog
+Backlog ID
+Owner area
+Task
+Priority
+Done when
+DEV-001
+Backend / Payments
+Create enrollment record on successful checkout.
+P0
+Learning access works after checkout.
+DEV-002
+Frontend / Auth
+Require login before checkout final action.
+P0
+Unauthenticated checkout redirects to login.
+DEV-003
+Auth
+Add phone/address fields plus OTP verification.
+P0
+Unverified users cannot access dashboard.
+DEV-004
+Auth
+Add optional MFA setup and login challenge.
+P0
+MFA users must pass second factor.
+DEV-005
+Backend / Content
+Fix multipart video lesson update endpoint.
+P0
+Video lesson persists after reload.
+DEV-006
+Frontend / Curriculum
+Replace Add Section prompt() with modal.
+P0
+Section creation works in all browsers.
+DEV-007
+Frontend / Curriculum
+Fix undefined courseId usage.
+P0
+No courseId ReferenceError in console.
+DEV-008
+Routing
+Implement /forgot-password.
+P1
+Password reset flow works.
+DEV-009
+Routing
+Fix /dashboard and /student/leaderboard links.
+P1
+No Cannot GET pages from UI links.
+DEV-010
+Frontend / Mobile
+Fix mobile header menu.
+P1
+Nav is usable at mobile viewport.
+DEV-011
+Frontend / Catalog
+Implement real search and category filtering.
+P1
+No-result and category results are correct.
+DEV-012
+Backend / Video Security
+Implement signed/encrypted playback and watermarking.
+P1
+Student video has watermark and no reusable public URL.
+DEV-013
+QA / DevOps
+Create seeded regression course with video, quiz, and certificate.
+P1
+QA can run full end-to-end regression repeatedly.
+
+Regression Test Checklist After Fixes
+Register new student with required fields; verify OTP blocks dashboard until completed.
+Log in with invalid credentials and confirm safe error handling.
+Use Forgot Password and complete a reset with a valid token.
+Enroll in a free course; verify My Learning, dashboard, and learn page all show access.
+Run checkout cancel and failed-payment paths.
+Create and approve a new tutor from admin.
+Create a course, add section, upload video lesson, refresh editor, and verify persistence.
+Publish course and enroll student.
+Play video as student; inspect watermark, no download button, network media URLs, and progress save/resume.
+Complete quiz/progress gate and verify certificate issuance.
+Test public pages, catalog search/filter, and mobile menu at phone width.
+Confirm admin/user analytics match real database values.
+Evidence Screenshots Included
+Admin approval succeeded for the new tutor.
+
+Tutor dashboard content appeared while URL still showed /login.
+
+AI curriculum generated the requested QA lesson plus extra content.
+
+Video upload field visible; automation upload was blocked.
+
+After Save Lesson, curriculum displayed Error loading curriculum.
+
+Reload after upload attempt redirected to login.
+
+After relogin, lesson remained ARTICLE, proving upload did not persist.
+
+Developer Notes
+Use JSON-only API responses for frontend fetch() endpoints, including unauthenticated and validation-failure paths.
+Add automated tests for payment-to-enrollment and video upload persistence before retesting manually.
+Keep QA test accounts and seeded courses clearly marked so production users do not see test content.
+Do not treat controlsList=nodownload as DRM; it is a user-interface hint only.
+Add server-side authorization checks to every course, lesson, video, quiz, certificate, and admin endpoint.

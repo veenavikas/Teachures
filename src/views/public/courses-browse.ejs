@@ -254,19 +254,20 @@
                 <h1>Find Your <span style="background:var(--yellow-gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; font-family:'Playfair Display',serif;font-style:italic;">Next Skill</span></h1>
                 <p style="color:var(--text-secondary); margin-top:1rem; font-size:1.15rem; font-weight: 500;">Hand-picked courses from
                     world-class instructors.</p>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search courses, topics, instructors..." id="searchInput">
-                    <button class="btn-enroll" onclick="filterCourses()">Search</button>
-                </div>
+                <form class="search-bar" method="GET" action="/courses">
+                    <input type="hidden" name="category" value="<%= currentCategory %>">
+                    <input type="text" name="q" placeholder="Search courses, topics, instructors..." id="searchInput" value="<%= searchQuery %>">
+                    <button type="submit" class="btn-enroll">Search</button>
+                </form>
             </div>
 
             <div class="filter-row">
-                <button class="filter-chip active" onclick="setFilter(this,'all')">All Courses</button>
-                <button class="filter-chip" onclick="setFilter(this,'development')">Development</button>
-                <button class="filter-chip" onclick="setFilter(this,'design')">Design</button>
-                <button class="filter-chip" onclick="setFilter(this,'business')">Business</button>
-                <button class="filter-chip" onclick="setFilter(this,'data')">Data Science</button>
-                <button class="filter-chip" onclick="setFilter(this,'marketing')">Marketing</button>
+                <a href="/courses?category=all&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'all' ? 'active' : '' %>">All Courses</a>
+                <a href="/courses?category=development&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'development' ? 'active' : '' %>">Development</a>
+                <a href="/courses?category=design&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'design' ? 'active' : '' %>">Design</a>
+                <a href="/courses?category=business&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'business' ? 'active' : '' %>">Business</a>
+                <a href="/courses?category=data&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'data' ? 'active' : '' %>">Data Science</a>
+                <a href="/courses?category=marketing&q=<%= searchQuery %>" style="text-decoration:none;" class="filter-chip <%= currentCategory === 'marketing' ? 'active' : '' %>">Marketing</a>
             </div>
 
             <div class="courses-grid" id="coursesGrid">
@@ -340,15 +341,6 @@
 
         <%- include('../partials/footer') %>
             <script>lucide.createIcons();</script>
-            <script>
-                function setFilter(el, cat) {
-                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                    el.classList.add('active');
-                    document.querySelectorAll('.course-card').forEach(card => {
-                        card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'block' : 'none';
-                    });
-                }
-            </script>
 </body>
 
 </html>

@@ -270,9 +270,17 @@
                             <% } %>
                         </div>
                     <% } else { %>
-                        [Video.js Player Zone for S3 Signed URLs]
                         <% if (preSignedVideoUrl) { %>
-                           <!-- Inject Video -->
+                           <video id="courseVideoPlayer" controls style="width: 100%; max-height: 70vh; background: #000; display: block;" controlsList="nodownload">
+                               <source src="<%= preSignedVideoUrl %>" type="video/mp4">
+                               Your browser does not support HTML video.
+                           </video>
+                        <% } else { %>
+                           <div style="text-align: center; color: var(--color-gray-mid); padding: 4rem;">
+                               <i data-lucide="video-off" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+                               <h3>No Video Available</h3>
+                               <p>This lesson does not contain a video.</p>
+                           </div>
                         <% } %>
                     <% } %>
                 </div>

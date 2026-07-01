@@ -1,4 +1,7 @@
 const express = require('express');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 const prisma = require('../config/database');
 const { requireAuth, requireRole } = require('../middleware/auth.middleware');
@@ -8,19 +11,102 @@ const { checkAndAwardBadge } = require('../modules/gamification/badges.controlle
 
 router.use(requireAuth, requireRole('STUDENT'));
 
+// Secure Video Streaming Endpoint
+router.get('/videos/stream', async (req, res) => {
+    try {
+        const { file, expires, signature } = req.query;
+        if (!file || !expires || !signature) {
+            return res.status(400).send('Missing parameters');
+        }
+
+        // Check expiration
+        if (Math.floor(Date.now() / 1000) > parseInt(expires)) {
+            return res.status(403).send('Link expired');
+        }
+
+        // Verify signature
+        const secret = process.env.SESSION_SECRET || 'fallback-secret-teachures-dev';
+        const expectedSignature = crypto.createHmac('sha256', secret)
+                                        .update(`${file}:${expires}`)
+                                        .digest('hex');
+                                        
+        if (signature !== expectedSignature) {
+            return res.status(403).send('Invalid signature');
+        }
+
+        // Construct absolute path
+        const absolutePath = path.join(__dirname, '../public', file);
+        if (!fs.existsSync(absolutePath)) {
+            return res.status(404).send('File not found');
+        }
+
+        const stat = fs.statSync(absolutePath);
+        const fileSize = stat.size;
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+            if (start >= fileSize) {
+                res.status(416).send('Requested range not satisfiable\n' + start + ' >= ' + fileSize);
+                return;
+            }
+
+            const chunksize = (end - start) + 1;
+            const fileStream = fs.createReadStream(absolutePath, { start, end });
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'video/mp4',
+            };
+
+            res.writeHead(206, head);
+            fileStream.pipe(res);
+        } else {
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': 'video/mp4',
+            };
+            res.writeHead(200, head);
+            fs.createReadStream(absolutePath).pipe(res);
+        }
+    } catch (err) {
+        console.error('Video stream error:', err);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 // Student Dashboard
 router.get('/dashboard', async (req, res) => {
     try {
-        const myCourses = await prisma.course.findMany({
+        const enrollments = await prisma.enrollment.findMany({
+            where: { userId: req.user.id },
             take: 4,
-            orderBy: { createdAt: 'desc' }
-        }).then(courses => courses.map(c => ({
-            title: c.title,
-            slug: c.slug,
-            thumbnailUrl: c.thumbnailUrl || '/images/default-course.jpg',
-            instructorName: 'Jane Doe',
-            progress: Math.floor(Math.random() * 100)
-        })));
+            orderBy: { enrolledAt: 'desc' },
+            include: {
+                course: {
+                    include: { instructor: { select: { name: true } } }
+                }
+            }
+        });
+
+        const progressRecords = await prisma.courseProgress.findMany({
+            where: { userId: req.user.id }
+        });
+
+        const myCourses = enrollments.map(e => {
+            const p = progressRecords.find(pr => pr.courseId === e.courseId);
+            return {
+                title: e.course.title,
+                slug: e.course.slug,
+                thumbnailUrl: e.course.thumbnailUrl || '/images/default-course.jpg',
+                instructorName: e.course.instructor?.name || 'Unknown Instructor',
+                progress: p ? p.percentComplete : 0
+            };
+        });
 
         const badges = await prisma.userBadge.findMany({
             where: { userId: req.user.id },

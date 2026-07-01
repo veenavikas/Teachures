@@ -46,7 +46,7 @@
                     style="color: #D97706; width: 20px; height: 20px;"></i></div>
         </div>
         <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-main); font-family: 'Inter', sans-serif;">
-            <%= stats.avgRating ? stats.avgRating.toFixed(1) : 'N/A' %>
+            <%= stats.avgRating ? stats.avgRating : 'N/A' %>
         </div>
         <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; font-weight: 500;">Based on <%= stats.totalReviews || 0 %> reviews</div>
     </div>

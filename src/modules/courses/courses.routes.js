@@ -22,6 +22,7 @@ router.put('/:id', requireRole('INSTRUCTOR', 'ADMINISTRATOR'), isCourseOwner, co
 router.delete('/:id', requireRole('INSTRUCTOR', 'ADMINISTRATOR'), isCourseOwner, coursesController.deleteCourse);
 router.post('/:id/publish', requireRole('INSTRUCTOR'), isCourseOwner, coursesController.publishCourse);
 router.post('/:id/prerequisites', requireRole('INSTRUCTOR', 'ADMINISTRATOR'), isCourseOwner, coursesController.updatePrerequisites);
+router.post('/:id/bulk-curriculum', requireRole('INSTRUCTOR', 'ADMINISTRATOR'), isCourseOwner, coursesController.bulkCreateCurriculum);
 
 const announcementsController = require('./announcements.controller');
 router.post('/:id/announcements', requireRole('INSTRUCTOR', 'ADMINISTRATOR'), isCourseOwner, announcementsController.createAnnouncement);

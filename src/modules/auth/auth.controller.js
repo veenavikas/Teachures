@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../../config/database');
-const { sendWelcomeEmail } = require('../../services/email.service');
+const { sendWelcomeEmail, sendOtpEmail } = require('../../services/email.service');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 
@@ -24,7 +24,7 @@ const generateTokens = (user) => {
 
 exports.register = async (req, res) => {
     try {
-        const { email, password, name, role, skills, experience } = req.body;
+        const { email, password, name, role, skills, experience, phone, address } = req.body;
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -40,17 +40,26 @@ exports.register = async (req, res) => {
 
         const verifyToken = crypto.randomBytes(32).toString('hex');
         const verifyEmailExpires = new Date(Date.now() + 86400000); // 24 hours
+        
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 15 * 60000); // 15 mins
 
         const user = await prisma.user.create({
             data: {
                 email,
                 passwordHash,
                 name,
+                phone,
+                address,
                 role: role === 'INSTRUCTOR' ? 'INSTRUCTOR' : 'STUDENT',
                 verifyEmailToken: verifyToken,
-                verifyEmailExpires
+                verifyEmailExpires,
+                otpCode,
+                otpExpires
             }
         });
+        
+        console.log(`[OTP] Generated OTP for ${email}: ${otpCode}`);
 
         if (user.role === 'INSTRUCTOR') {
             let expertiseArray = [];
@@ -79,36 +88,22 @@ exports.register = async (req, res) => {
             });
         }
 
-        const tokens = generateTokens(user);
-
-        // Set both tokens as cookies
-        res.cookie('accessToken', tokens.accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 15 * 60 * 1000 // 15 minutes
-        });
-        res.cookie('refreshToken', tokens.refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-        });
+        // Set a temporary auth token for the OTP step
+        const tempAuthToken = jwt.sign({ id: user.id, intent: 'OTP' }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+        res.cookie('tempAuthToken', tempAuthToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
 
         sendWelcomeEmail(user.email, user.name).catch(err => console.error('Welcome email failed:', err));
-        sendVerifyEmail(user.email, user.name, verifyToken).catch(err => console.error('Verify email failed:', err));
+        sendOtpEmail(user.email, user.name, otpCode).catch(err => console.error('OTP email failed:', err));
 
-        // For browser form submissions, redirect to dashboard
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
-            const dashboard = user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
-            return res.redirect(dashboard);
+            return res.redirect(`/verify-otp`);
         }
 
         res.status(201).json({
             success: true,
-            message: 'Registration successful',
-            data: { user: { id: user.id, name: user.name, email: user.email, role: user.role }, accessToken: tokens.accessToken }
+            message: 'Registration successful. OTP sent to email.',
+            requiresOTP: true
         });
 
     } catch (error) {
@@ -147,28 +142,34 @@ exports.login = async (req, res) => {
             }
         }
 
+        // Unverified User (DEV-003)
+        if (!user.isVerified) {
+            const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpExpires = new Date(Date.now() + 15 * 60000);
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { otpCode, otpExpires }
+            });
+            console.log(`[OTP] Generated OTP for ${email}: ${otpCode}`);
+            
+            const tempAuthToken = jwt.sign({ id: user.id, intent: 'OTP' }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            res.cookie('tempAuthToken', tempAuthToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
+
+            if (req.accepts('html') && !req.headers['x-requested-with']) {
+                return res.redirect(`/verify-otp`);
+            }
+            return res.status(403).json({ success: false, message: 'Account not verified. Please verify OTP.', requiresOTP: true });
+        }
+
         // 2FA Verification during Login
         if (user.twoFactorEnabled) {
-            const { twoFactorCode } = req.body;
-            if (!twoFactorCode) {
-                if (req.accepts('html') && !req.headers['x-requested-with']) {
-                    return res.redirect(`/login-2fa?email=${encodeURIComponent(user.email)}`);
-                }
-                return res.status(200).json({ success: true, requires2FA: true, email: user.email });
+            const tempAuthToken = jwt.sign({ id: user.id, intent: 'MFA' }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            res.cookie('tempAuthToken', tempAuthToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
+            
+            if (req.accepts('html') && !req.headers['x-requested-with']) {
+                return res.redirect(`/mfa-challenge`);
             }
-
-            const verified = speakeasy.totp.verify({
-                secret: user.twoFactorSecret,
-                encoding: 'base32',
-                token: twoFactorCode
-            });
-
-            if (!verified) {
-                if (req.accepts('html') && !req.headers['x-requested-with']) {
-                    return res.redirect(`/login-2fa?email=${encodeURIComponent(user.email)}&error=invalid_code`);
-                }
-                return res.status(401).json({ success: false, message: 'Invalid 2FA code' });
-            }
+            return res.status(200).json({ success: true, requires2FA: true });
         }
 
         const tokens = generateTokens(user);
@@ -190,7 +191,7 @@ exports.login = async (req, res) => {
         // For browser form submissions, redirect to the correct dashboard
         const isApiCall = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'];
         if (!isApiCall) {
-            const next = req.query.next || null;
+            const next = req.query.returnTo || req.query.next || null;
             const dashboard = next || (user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard');
             return res.redirect(dashboard);
         }
@@ -306,8 +307,10 @@ exports.forgotPassword = async (req, res) => {
         const { email } = req.body;
         const user = await prisma.user.findUnique({ where: { email } });
         
+        const isHtml = req.accepts('html') && !req.headers['x-requested-with'];
+        
         if (!user) {
-            // Return success even if user not found to prevent email enumeration
+            if (isHtml) return res.redirect('/forgot-password?success=true');
             return res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
         }
 
@@ -319,18 +322,21 @@ exports.forgotPassword = async (req, res) => {
             data: { resetPasswordToken: resetToken, resetPasswordExpires }
         });
 
-        await sendForgotPasswordEmail(user.email, user.name, resetToken);
+        await sendForgotPasswordEmail(user.email, user.name, resetToken).catch(e => console.error(e));
 
+        if (isHtml) return res.redirect('/forgot-password?success=true');
         res.json({ success: true, message: 'If that email exists, a reset link has been sent.' });
     } catch (error) {
         console.error('Forgot password error:', error);
+        if (req.accepts('html') && !req.headers['x-requested-with']) return res.redirect('/forgot-password?error=server_error');
         res.status(500).json({ success: false, message: 'Error processing request.' });
     }
 };
 
 exports.resetPassword = async (req, res) => {
     try {
-        const { token, newPassword } = req.body;
+        const { token, password, newPassword } = req.body;
+        const targetPassword = password || newPassword;
 
         const user = await prisma.user.findFirst({
             where: {
@@ -339,12 +345,15 @@ exports.resetPassword = async (req, res) => {
             }
         });
 
+        const isHtml = req.accepts('html') && !req.headers['x-requested-with'];
+
         if (!user) {
+            if (isHtml) return res.redirect(`/reset-password?token=${token}&error=invalid_token`);
             return res.status(400).json({ success: false, message: 'Invalid or expired reset token.' });
         }
 
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(newPassword, salt);
+        const passwordHash = await bcrypt.hash(targetPassword, salt);
 
         await prisma.user.update({
             where: { id: user.id },
@@ -355,11 +364,11 @@ exports.resetPassword = async (req, res) => {
             }
         });
 
-        await sendResetSuccessEmail(user.email, user.name);
-
-        res.json({ success: true, message: 'Password has been successfully reset.' });
+        if (isHtml) return res.redirect('/login?success=password_reset');
+        res.json({ success: true, message: 'Password successfully reset.' });
     } catch (error) {
         console.error('Reset password error:', error);
+        if (req.accepts('html') && !req.headers['x-requested-with']) return res.redirect(`/reset-password?token=${req.body.token}&error=server_error`);
         res.status(500).json({ success: false, message: 'Error resetting password.' });
     }
 };
@@ -392,6 +401,97 @@ exports.verifyEmail = async (req, res) => {
     } catch (error) {
         console.error('Verify email error:', error);
         res.status(500).json({ success: false, message: 'Error verifying email.' });
+    }
+};
+
+exports.verifyOTP = async (req, res) => {
+    try {
+        const tempToken = req.cookies.tempAuthToken;
+        if (!tempToken) return res.status(401).json({ success: false, message: 'Session expired' });
+        
+        const decoded = jwt.verify(tempToken, process.env.JWT_ACCESS_SECRET);
+        if (decoded.intent !== 'OTP') return res.status(400).json({ success: false, message: 'Invalid token intent' });
+
+        const { otpCode } = req.body;
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        
+        if (!user || user.otpCode !== otpCode || user.otpExpires < new Date()) {
+            if (req.accepts('html') && !req.headers['x-requested-with']) {
+                return res.redirect(`/verify-otp?error=invalid_code`);
+            }
+            return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+        }
+        
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { isVerified: true, otpCode: null, otpExpires: null }
+        });
+        
+        // After verifying OTP, check if they have 2FA enabled
+        if (user.twoFactorEnabled) {
+            const mfaToken = jwt.sign({ id: user.id, intent: 'MFA' }, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            res.cookie('tempAuthToken', mfaToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
+            if (req.accepts('html') && !req.headers['x-requested-with']) {
+                return res.redirect(`/mfa-challenge`);
+            }
+            return res.status(200).json({ success: true, requires2FA: true });
+        }
+        
+        res.clearCookie('tempAuthToken');
+        const tokens = generateTokens(user);
+        res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
+        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        
+        if (req.accepts('html') && !req.headers['x-requested-with']) {
+            const dashboard = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
+            return res.redirect(dashboard);
+        }
+        return res.status(200).json({ success: true, message: 'OTP verified successfully', data: { user: { id: user.id, name: user.name, role: user.role, email: user.email }, accessToken: tokens.accessToken } });
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+exports.verifyMFA = async (req, res) => {
+    try {
+        const tempToken = req.cookies.tempAuthToken;
+        if (!tempToken) return res.status(401).json({ success: false, message: 'Session expired' });
+        
+        const decoded = jwt.verify(tempToken, process.env.JWT_ACCESS_SECRET);
+        if (decoded.intent !== 'MFA') return res.status(400).json({ success: false, message: 'Invalid token intent' });
+
+        const { twoFactorCode } = req.body;
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        
+        const verified = speakeasy.totp.verify({
+            secret: user.twoFactorSecret,
+            encoding: 'base32',
+            token: twoFactorCode
+        });
+
+        if (!verified) {
+            if (req.accepts('html') && !req.headers['x-requested-with']) {
+                return res.redirect(`/mfa-challenge?error=invalid_code`);
+            }
+            return res.status(401).json({ success: false, message: 'Invalid 2FA code' });
+        }
+        
+        res.clearCookie('tempAuthToken');
+        const tokens = generateTokens(user);
+        res.cookie('accessToken', tokens.accessToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 15 * 60 * 1000 });
+        res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        
+        if (req.accepts('html') && !req.headers['x-requested-with']) {
+            const dashboard = user.role === 'INSTRUCTOR' ? '/instructor/dashboard' : user.role === 'ADMINISTRATOR' ? '/admin/dashboard' : '/student/dashboard';
+            return res.redirect(dashboard);
+        }
+        return res.status(200).json({ success: true, message: 'MFA verified successfully', data: { user: { id: user.id, name: user.name, role: user.role, email: user.email }, accessToken: tokens.accessToken } });
+    } catch (error) {
+        console.error('Verify MFA error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 };
 

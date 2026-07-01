@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const prisma = require('../config/database');
-
+const { requireAuth } = require('../middleware/auth.middleware');
 const renderOrFallback = async (slug, req, res, fallbackTemplate, fallbackContext = {}) => {
     try {
         const page = await prisma.page.findUnique({ where: { slug } });
@@ -30,8 +30,23 @@ router.get('/', async (req, res) => {
 
 router.get('/courses', async (req, res) => {
     try {
+        const { q, category } = req.query;
+        let where = { isPublished: true };
+
+        if (category && category !== 'all') {
+            where.category = { equals: category, mode: 'insensitive' };
+        }
+
+        if (q) {
+            where.OR = [
+                { title: { contains: q, mode: 'insensitive' } },
+                { description: { contains: q, mode: 'insensitive' } },
+                { instructorName: { contains: q, mode: 'insensitive' } }
+            ];
+        }
+
         const courses = await prisma.course.findMany({
-            where: { isPublished: true },
+            where,
             orderBy: { createdAt: 'desc' },
             include: {
                 ratings: {
@@ -39,7 +54,7 @@ router.get('/courses', async (req, res) => {
                 }
             }
         });
-        res.render('public/courses-browse', { layout: false, courses });
+        res.render('public/courses-browse', { layout: false, courses, searchQuery: q || '', currentCategory: category || 'all' });
     } catch (error) {
         res.status(500).send('Server Error loading courses');
     }
@@ -65,8 +80,27 @@ router.get('/register', (req, res) => {
     res.render('auth/register', { layout: 'layouts/auth', title: 'Register' });
 });
 
-router.get('/login-2fa', (req, res) => {
-    res.render('auth/login-2fa', { layout: 'layouts/auth', title: '2FA Verification', email: req.query.email });
+router.get('/verify-otp', (req, res) => {
+    res.render('public/verify-otp', { layout: false, error: req.query.error });
+});
+
+router.get('/mfa-challenge', (req, res) => {
+    res.render('public/mfa-challenge', { layout: false, error: req.query.error });
+});
+
+router.get('/forgot-password', (req, res) => {
+    res.render('public/forgot-password', { layout: false, error: req.query.error, success: req.query.success });
+});
+
+router.get('/reset-password', (req, res) => {
+    res.render('public/reset-password', { layout: false, token: req.query.token, error: req.query.error });
+});
+
+router.get('/dashboard', requireAuth, (req, res) => {
+    const role = req.user.role;
+    if (role === 'INSTRUCTOR') return res.redirect('/instructor/dashboard');
+    if (role === 'ADMINISTRATOR') return res.redirect('/admin/dashboard');
+    return res.redirect('/student/dashboard');
 });
 
 router.get('/courses/:slug', async (req, res) => {
@@ -120,7 +154,7 @@ router.get('/courses/:slug', async (req, res) => {
     }
 });
 
-router.get('/courses/:slug/checkout', async (req, res) => {
+router.get('/courses/:slug/checkout', requireAuth, async (req, res) => {
     try {
         const course = await prisma.course.findUnique({ 
             where: { slug: req.params.slug },

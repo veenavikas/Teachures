@@ -154,18 +154,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Handle Add Section
-    document.getElementById('addSectionBtn').addEventListener('click', async () => {
-        const title = prompt('Enter new section title:');
-        if (!title) return;
+    document.getElementById('addSectionBtn').addEventListener('click', () => {
+        let modal = document.getElementById('customSectionModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'customSectionModal';
+            modal.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:9999;';
+            modal.innerHTML = `
+                <div style="background:var(--color-black, #111); border:1px solid var(--color-gray-mid, #333); padding:2rem; border-radius:8px; width:400px; max-width:90%;">
+                    <h3 style="color:#fff; margin-top:0;">Add New Section</h3>
+                    <input type="text" id="customSectionTitle" class="form-control" placeholder="Section Title" style="width:100%; margin:1rem 0;" />
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button id="cancelSectionBtn" class="btn btn-outline" style="color:#fff;">Cancel</button>
+                        <button id="saveSectionBtn" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
 
-        try {
-            await fetch(`/api/v1/courses/${window.COURSE_ID}/sections`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, order: 99 })
+            document.getElementById('cancelSectionBtn').addEventListener('click', () => {
+                modal.style.display = 'none';
+                document.getElementById('customSectionTitle').value = '';
             });
-            loadCurriculum();
-        } catch (err) { }
+
+            document.getElementById('saveSectionBtn').addEventListener('click', async () => {
+                const title = document.getElementById('customSectionTitle').value.trim();
+                if (!title) return;
+                try {
+                    await fetch(`/api/v1/courses/${window.COURSE_ID}/sections`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, order: 99 })
+                    });
+                    modal.style.display = 'none';
+                    document.getElementById('customSectionTitle').value = '';
+                    loadCurriculum();
+                } catch (err) { console.error(err); }
+            });
+        }
+        modal.style.display = 'flex';
+        document.getElementById('customSectionTitle').focus();
     });
 
     // Quiz Builder Logic
@@ -227,6 +255,76 @@ document.addEventListener('DOMContentLoaded', async () => {
         questionsContainer.appendChild(qDiv);
     });
 
+    const aiGenerateQuizBtn = document.getElementById('aiGenerateQuizBtn');
+    if (aiGenerateQuizBtn) {
+        aiGenerateQuizBtn.addEventListener('click', async () => {
+            const descriptionContent = document.getElementById('lessonDescription') ? document.getElementById('lessonDescription').value : '';
+            const lessonId = document.getElementById('modalLessonId') ? document.getElementById('modalLessonId').value : null;
+
+            if (!descriptionContent && !lessonId) {
+                return alert('Please enter a lesson description first, or save the lesson to generate an AI quiz.');
+            }
+
+            const originalText = aiGenerateQuizBtn.innerHTML;
+            aiGenerateQuizBtn.disabled = true;
+            aiGenerateQuizBtn.innerHTML = '<i data-lucide="loader-2" class="spin" style="margin-right:8px; display:inline-block; width:16px; height:16px;"></i> Generating...';
+            lucide.createIcons();
+
+            try {
+                const res = await fetch(`/api/v1/ai/generate-quiz`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lessonId, content: descriptionContent })
+                });
+
+                const data = await res.json();
+                if (data.success && data.questions) {
+                    data.questions.forEach(q => {
+                        questionCount++;
+                        const qDiv = document.createElement('div');
+                        qDiv.className = 'question-block';
+                        qDiv.style = 'margin-bottom: 1rem; padding: 1rem; background: var(--color-black); border: 1px solid var(--color-gray-mid); border-radius: 4px;';
+                        
+                        let optionsHtml = '';
+                        q.options.forEach((opt, idx) => {
+                            optionsHtml += `
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                    <input type="radio" name="correct_${questionCount}" value="${idx}" ${idx === q.correctOptionIndex ? 'checked' : ''} required>
+                                    <input type="text" class="form-control opt-text" value="${opt.replace(/"/g, '&quot;')}" required>
+                                </div>
+                            `;
+                        });
+                        // Add explanation if we have one
+                        const explanationText = q.explanation ? `<div><small style="color:var(--color-primary);">AI Note: ${q.explanation.replace(/"/g, '&quot;')}</small></div>` : '';
+
+                        qDiv.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <strong>Question ${questionCount}</strong>
+                                <button type="button" class="text-danger" style="background:none; border:none; cursor:pointer;" onclick="this.parentElement.parentElement.remove()">Remove</button>
+                            </div>
+                            <input type="text" class="form-control q-text" value="${q.text.replace(/"/g, '&quot;')}" required style="margin-bottom: 0.5rem;">
+                            <div class="options-container">
+                                ${optionsHtml}
+                            </div>
+                            ${explanationText}
+                        `;
+                        questionsContainer.appendChild(qDiv);
+                    });
+                    alert('AI Quiz generated successfully! You can review and edit the questions above.');
+                } else {
+                    alert(data.message || 'Failed to generate quiz.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred during AI quiz generation.');
+            } finally {
+                aiGenerateQuizBtn.disabled = false;
+                aiGenerateQuizBtn.innerHTML = originalText;
+                lucide.createIcons();
+            }
+        });
+    }
+
     // Handle Lesson Submission
     document.getElementById('lessonForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -275,23 +373,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             let actualLessonId = lessonId;
+            let res;
 
             if (lessonId) {
                 // Update
-                await fetch(`/api/v1/courses/lessons/${lessonId}`, {
+                res = await fetch(`/api/v1/courses/lessons/${lessonId}`, {
                     method: 'PUT',
+                    headers: { 'Accept': 'application/json' },
                     body: formData
                 });
             } else {
                 // Create
-                const res = await fetch(`/api/v1/courses/sections/${sectionId}/lessons`, {
+                res = await fetch(`/api/v1/courses/sections/${sectionId}/lessons`, {
                     method: 'POST',
+                    headers: { 'Accept': 'application/json' },
                     body: formData
                 });
-                const data = await res.json();
-                if(data.success) {
-                    actualLessonId = data.data.id;
-                }
+            }
+
+            if (res.status === 401) {
+                alert('Session expired. Please log in again to save your changes.');
+                return;
+            }
+
+            const data = await res.json();
+            if (!data.success) {
+                alert('Failed to save lesson: ' + (data.message || 'Unknown error'));
+                return;
+            }
+            
+            if (!lessonId) {
+                actualLessonId = data.data.id;
             }
 
             // If it's a quiz, save quiz data
@@ -355,7 +467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Question Bank Logic
     async function loadBankQuestions() {
         try {
-            const res = await fetch(`/api/v1/courses/${courseId}/questions`);
+            const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/questions`);
             const data = await res.json();
             if(data.success) {
                 const list = document.getElementById('bankQuestionsList');
@@ -407,7 +519,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             try {
-                const res = await fetch(`/api/v1/courses/${courseId}/questions`, {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/questions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text, points, options })
@@ -428,7 +540,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteBankQuestion = async function(questionId) {
         if(!confirm('Are you sure you want to delete this question from the bank?')) return;
         try {
-            await fetch(`/api/v1/courses/${courseId}/questions/${questionId}`, { method: 'DELETE' });
+            await fetch(`/api/v1/courses/${window.COURSE_ID}/questions/${questionId}`, { method: 'DELETE' });
             loadBankQuestions();
         } catch(err) {
             console.error(err);
@@ -440,7 +552,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadCohorts() {
         try {
-            const res = await fetch(`/api/v1/courses/${courseId}/cohorts`);
+            const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/cohorts`);
             const data = await res.json();
             if(data.success) {
                 const list = document.getElementById('cohortsList');
@@ -482,7 +594,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const endDate = document.getElementById('cohortEndDate').value;
             
             try {
-                const res = await fetch(`/api/v1/courses/${courseId}/cohorts`, {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/cohorts`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, startDate, endDate })
@@ -503,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteCohort = async function(cohortId) {
         if(!confirm('Are you sure you want to delete this cohort?')) return;
         try {
-            await fetch(`/api/v1/courses/${courseId}/cohorts/${cohortId}`, { method: 'DELETE' });
+            await fetch(`/api/v1/courses/${window.COURSE_ID}/cohorts/${cohortId}`, { method: 'DELETE' });
             loadCohorts();
         } catch(err) {
             console.error(err);

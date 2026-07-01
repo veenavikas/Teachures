@@ -113,38 +113,72 @@ The JSON must follow this exact schema:
             throw new Error('Invalid JSON structure returned by AI');
         }
 
-        // Determine starting order for sections
-        let currentSectionOrder = course.sections.length;
-
-        // Save to Database
-        for (const sec of parsedData.sections) {
-            const createdSection = await prisma.section.create({
-                data: {
-                    courseId,
-                    title: sec.title,
-                    order: currentSectionOrder++
-                }
-            });
-
-            if (sec.lessons && Array.isArray(sec.lessons)) {
-                let currentLessonOrder = 0;
-                for (const les of sec.lessons) {
-                    await prisma.lesson.create({
-                        data: {
-                            sectionId: createdSection.id,
-                            title: les.title,
-                            content: les.description, // using description as initial content
-                            type: 'ARTICLE', // Default to article for AI generated text
-                            order: currentLessonOrder++
-                        }
-                    });
-                }
-            }
-        }
-
-        res.json({ success: true, message: 'Curriculum generated successfully' });
+        // Return the structure to the frontend for preview instead of saving to DB immediately
+        res.json({ success: true, message: 'Curriculum generated successfully', sections: parsedData.sections });
     } catch (error) {
         console.error('Groq AI Curriculum Error:', error);
+        res.status(500).json({ success: false, message: error.message || 'AI request failed' });
+    }
+};
+
+exports.generateQuiz = async (req, res) => {
+    try {
+        const { lessonId, content: providedContent } = req.body;
+        
+        let content = providedContent;
+
+        if (lessonId) {
+            const lesson = await prisma.lesson.findUnique({
+                where: { id: lessonId },
+                include: { section: { include: { course: true } } }
+            });
+
+            if (!lesson || (lesson.section.course.instructorId !== req.user.id && req.user.role !== 'ADMINISTRATOR')) {
+                return res.status(403).json({ success: false, message: 'Unauthorized' });
+            }
+            content = lesson.content || lesson.title;
+        }
+
+        if (!content) {
+            return res.status(400).json({ success: false, message: 'Lesson content is required to generate a quiz' });
+        }
+
+        const systemMessage = `You are an expert instructional designer. Generate a 5-question multiple-choice quiz based on the provided lesson content.
+You must respond strictly in JSON format. Do not include markdown blocks or any other text.
+The JSON must follow this exact schema:
+{
+  "questions": [
+    {
+      "text": "The question text",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctOptionIndex": 0,
+      "explanation": "Brief explanation of why the answer is correct."
+    }
+  ]
+}`;
+
+        const chatCompletion = await groq.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemMessage },
+                { role: 'user', content: `Lesson Content:\n\n${content}` }
+            ],
+            model: 'llama-3.1-8b-instant',
+            temperature: 0.7,
+            response_format: { type: 'json_object' }
+        });
+
+        const replyContent = chatCompletion.choices[0]?.message?.content;
+        if (!replyContent) throw new Error('No content from Groq');
+
+        const parsedData = JSON.parse(replyContent);
+        
+        if (!parsedData.questions || !Array.isArray(parsedData.questions)) {
+            throw new Error('Invalid JSON structure returned by AI');
+        }
+
+        res.json({ success: true, questions: parsedData.questions });
+    } catch (error) {
+        console.error('Groq AI Quiz Error:', error);
         res.status(500).json({ success: false, message: error.message || 'AI request failed' });
     }
 };

@@ -105,9 +105,14 @@ router.post('/capture-order', requireAuth, async (req, res) => {
             }
 
             // 3. Init Course Progress
-            await prisma.courseProgress.create({
-                data: { userId, courseId }
+            const existingProgress = await prisma.courseProgress.findUnique({
+                where: { userId_courseId: { userId, courseId } }
             });
+            if (!existingProgress) {
+                await prisma.courseProgress.create({
+                    data: { userId, courseId }
+                });
+            }
 
             // 4. Send Receipt Email & Push Notification
             try {
@@ -188,9 +193,14 @@ router.post('/mock-checkout', requireAuth, async (req, res) => {
             });
         }
 
-        await prisma.courseProgress.create({
-            data: { userId: req.user.id, courseId }
+        const existingProgress = await prisma.courseProgress.findUnique({
+            where: { userId_courseId: { userId: req.user.id, courseId } }
         });
+        if (!existingProgress) {
+            await prisma.courseProgress.create({
+                data: { userId: req.user.id, courseId }
+            });
+        }
 
         res.json({ success: true, message: 'Mock payment successful' });
     } catch (err) {

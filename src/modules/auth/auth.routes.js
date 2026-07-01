@@ -13,6 +13,8 @@ router.post('/logout', authController.logout);
 // 2FA Endpoints
 router.post('/2fa/setup', requireAuth, authController.setup2FA);
 router.post('/2fa/verify', requireAuth, authController.verify2FASetup);
+router.post('/verify-otp', authController.verifyOTP);
+router.post('/verify-mfa', authController.verifyMFA);
 
 // Supabase OAuth Initiation
 router.get('/google', async (req, res) => {

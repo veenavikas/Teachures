@@ -209,6 +209,29 @@
     </div>
 </div>
 
+<!-- AI Curriculum Preview Modal -->
+<div id="aiPreviewModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 600px; padding: 2rem; position: relative; max-height: 80vh; display: flex; flex-direction: column;">
+        <button onclick="document.getElementById('aiPreviewModal').style.display = 'none';"
+            style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-white); cursor: pointer;">
+            <i data-lucide="x"></i>
+        </button>
+
+        <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="eye" style="color: var(--color-primary);"></i> Curriculum Preview
+        </h3>
+        
+        <div id="aiPreviewContent" style="flex: 1; overflow-y: auto; margin-bottom: 1rem; background: var(--bg-main); padding: 1rem; border-radius: 8px;">
+            <!-- Rendered via JS -->
+        </div>
+
+        <button id="aiApplyBtn" class="btn btn-primary" style="width: 100%;">
+            Save & Apply Curriculum
+        </button>
+    </div>
+</div>
+
 <!-- Modal for Lesson Editing -->
 <div id="lessonModal"
     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
@@ -275,7 +298,12 @@
 
                 <h4 style="margin-bottom: 1rem;">Manual Questions</h4>
                 <div id="questionsContainer"></div>
-                <button type="button" id="addQuestionBtn" class="btn btn-outline" style="width: 100%; margin-top: 1rem;">+ Add Manual Question</button>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" id="addQuestionBtn" class="btn btn-outline" style="flex: 1;">+ Add Manual Question</button>
+                    <button type="button" id="aiGenerateQuizBtn" class="btn btn-primary" style="flex: 1;">
+                        <i data-lucide="sparkles" style="width: 16px; height: 16px; margin-right: 8px; display: inline-block;"></i> Auto-Generate AI Quiz
+                    </button>
+                </div>
             </div>
 
             <!-- Live Session Zone -->
@@ -490,9 +518,8 @@
                 
                 const data = await res.json();
                 if(data.success) {
-                    alert('Curriculum generated successfully!');
                     aiCurriculumModal.style.display = 'none';
-                    window.location.reload(); // Reload the UI to show new sections
+                    showPreviewModal(data.sections);
                 } else {
                     alert(data.message || 'Failed to generate curriculum.');
                 }
@@ -502,6 +529,57 @@
             } finally {
                 aiGenerateBtn.disabled = false;
                 aiGenerateBtn.innerHTML = 'Generate Curriculum';
+            }
+        });
+        
+        let pendingCurriculum = [];
+        function showPreviewModal(sections) {
+            pendingCurriculum = sections;
+            const container = document.getElementById('aiPreviewContent');
+            container.innerHTML = '';
+            
+            sections.forEach((sec, sIdx) => {
+                let html = `<div style="margin-bottom: 1rem; border: 1px solid var(--border-color); padding: 1rem; border-radius: 6px;">
+                    <input type="text" class="form-control" value="${sec.title}" onchange="pendingCurriculum[${sIdx}].title = this.value" style="margin-bottom: 0.5rem; font-weight: bold;">`;
+                
+                if (sec.lessons) {
+                    sec.lessons.forEach((les, lIdx) => {
+                        html += `<div style="margin-left: 1rem; margin-bottom: 0.5rem; display: flex; gap: 8px; align-items: center;">
+                            <i data-lucide="file-text" style="width:16px;height:16px;color:var(--color-gray-light);"></i>
+                            <input type="text" class="form-control" value="${les.title}" onchange="pendingCurriculum[${sIdx}].lessons[${lIdx}].title = this.value" style="flex:1;">
+                        </div>`;
+                    });
+                }
+                html += `</div>`;
+                container.innerHTML += html;
+            });
+            
+            lucide.createIcons();
+            document.getElementById('aiPreviewModal').style.display = 'flex';
+        }
+        
+        document.getElementById('aiApplyBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('aiApplyBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Saving...';
+            
+            try {
+                const res = await fetch(`/api/v1/courses/${window.COURSE_ID}/bulk-curriculum`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sections: pendingCurriculum })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert('Error applying curriculum');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Save & Apply Curriculum';
             }
         });
     }

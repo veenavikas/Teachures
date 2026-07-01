@@ -35,7 +35,16 @@ const requireAuth = async (req, res, next) => {
 
         const redirectToLogin = (reason = '') => {
             res.clearCookie('accessToken');
-            if (req.accepts('html')) return res.redirect('/login' + (reason ? '?error=' + reason : ''));
+            if (req.originalUrl && req.originalUrl.startsWith('/api')) {
+                return res.status(401).json({ success: false, message: 'Authentication required' });
+            }
+            if (req.accepts('html')) {
+                const returnTo = req.originalUrl || '/student/dashboard';
+                const qs = new URLSearchParams();
+                if (reason) qs.append('error', reason);
+                qs.append('returnTo', returnTo);
+                return res.redirect('/login?' + qs.toString());
+            }
             return res.status(401).json({ success: false, message: 'Authentication required' });
         };
 
